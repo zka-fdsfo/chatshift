@@ -81,7 +81,9 @@ export const endpoints = {
       "/shift/getAllActiveShiftAvailableForPickup/ForACarer",
     get_payroll_setting: (id: string) => `/payroll/forEmployee/${id}`,
     update_payroll_setting: (id: string) =>
-      `/payroll/payrollSettings/${id}/update`
+      `/payroll/payrollSettings/${id}/update`,
+    tracking_route_map: (employeeId: number,shiftId: number) => `/tracking/${employeeId}/${shiftId}/active-route`,
+    summary_route_map: (employeeId: number,shiftId: number) => `/location/trip-summary/${employeeId}/${shiftId}`,
   },
   client: {
     // get_all: "/client/by-company/active",

@@ -81,6 +81,8 @@ import { toast } from "sonner";
 import JobApplicant from "./jobapplicant";
 import NoteIcon from "@mui/icons-material/Note"; // Import NoteIcon
 import ShiftNotesIndividualShift from "pages/shift-notes-individualshift";
+import TrackingEmployee from "pages/staff/tracking";
+import Tracking from "pages/staff/tracking";
 
 interface DrawerInterface extends DrawerProps {
   open?: boolean;
@@ -745,12 +747,7 @@ export default function AddShift({
     rebook(shiftId);
   };
 
-  // useEffect(() => {
-  //   console.log(
-  //     "-------------: Shift Details in Add-shift page is as below :-------------",
-  //     shift
-  //   );
-  // }, []);
+
 
   // ---------------------------- Time Sheet Undo Start Here ----------------------------
   const { mutate: undoTimesheetMutation, isPending: ispendingUndo } =
@@ -772,6 +769,20 @@ export default function AddShift({
     }
   };
   // ---------------------------- Time Sheet Undo End Here ----------------------------
+
+
+  // useEffect(()=>{
+  //   if(shift)
+  //   {
+  //     console.log("---------:shift data for tracking : ---------", 
+  //        shift.id
+  //     );
+
+  //     console.log("---------:Employee ID tracking : ---------", 
+  //       shift.employee.id
+  //    );
+  //   }
+  // },[shift])
 
   return (
     <>
@@ -1164,22 +1175,13 @@ export default function AddShift({
                   <InstructionSection view={view} edit={edit} shift={shift} />
                   {/* <TimeLocation view={view} edit={edit} shift={shift} /> */}
                  
-                  {view &&
-                   <>
-                        {/* <Button
-                          variant="contained"
-                          startIcon={<NoteIcon />} // Change to NoteIcon
-                          onClick={() => {
-                            handleCreateShiftNotes(shift?.id as number); // Pass the ID here
-                          } }
-                          sx={{
-                            backgroundColor: "#00a65a",
-                            "&:hover": { backgroundColor: "#008d45" }
-                          }} 
-                        >
-                          Create Shift Notes
-                        </Button> */}
-                        <ShiftRelatedNotes shift={shift} /></>}
+                  {shift?.id && (
+                           <>
+                           <Tracking employeeId={shift.employee.id} shiftId={shift.id} clockIn={shift.isEmployeeClockedIn}  clockOut={shift.isEmployeeClockedOut}  />
+                           </>
+                        )}
+
+                  {view && <ShiftRelatedNotes shift={shift} />}
                 </>
               )}
             </FormProvider>

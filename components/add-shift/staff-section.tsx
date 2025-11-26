@@ -74,7 +74,7 @@ export default function StaffSection({
   const [preselectedNames, setPreselectedNames] = useState("");
   const [selectedCarerId, setSelectedCarerId] = useState("");
   const [open, setOpen] = React.useState(true);
-
+  const [openList, setOpenList] = React.useState(false);
   const staffDisplayName = shift?.employee.displayName;
   useEffect(() => {
     if (staffDisplayName) {
@@ -284,74 +284,16 @@ export default function StaffSection({
                 <Grid container alignItems="center">
                   <Grid container spacing={2}>
                     <Grid item lg={4} md={6} sm={12} xs={12}>
-                      <Typography>Choose Carer</Typography>
+                      <Typography>Choose Carer </Typography>
                     </Grid>
                     <Grid item lg={8} md={6} sm={12} xs={12}>
                       <Controller
                         control={control}
                         name="employeeIds"
                         render={({ field, fieldState: { error, invalid } }) => {
-                          return (
-                            // <Box>
-                            //   <Select
-                            //     fullWidth
-                            //     size="small"
-                            //     {...field}
-                            //     value={field.value || []} 
-                            //     onChange={(e) => {
-                            //       const _value = e.target.value;
-                            //       field.onChange(_value); 
-                            //       const selectedNames = data
-                            //         ?.filter((client: any) =>
-                            //           _value.includes(client.id)
-                            //         )
-                            //         .map((client: any) => client.name)
-                            //         .join(", ");
-                            //       setSelectedDisplayNames(selectedNames);
-
-                            //       const selectedId = data
-                            //         ?.filter((client: any) =>
-                            //           _value.includes(client.id)
-                            //         )
-                            //         .map((client: any) => client.id)
-                            //         .join(", ");
-                            //       if (selectedId) {
-                            //         setSelectedCarerId(selectedId);
-                            //       }
-
-                            //       setOpen(selectedNames.length);
-                            //     }}
-                            //     displayEmpty
-                            //     renderValue={
-                            //       field.value?.length !== 0
-                            //         ? undefined
-                            //         : () => "Select Carer"
-                            //     }
-                            //     multiple
-                            //   >
-                            //     {isLoading ? (
-                            //       <MenuItem disabled>Loading...</MenuItem>
-                            //     ) : isPickupJob ? (
-                            //       <MenuItem disabled>
-                            //         No carers available for pickup jobs
-                            //       </MenuItem>
-                            //     ) : (
-                            //       data?.slice(2).map((_data: IStaff) => (
-                            //         <MenuItem value={_data.id} key={_data.id}>
-                            //           {_data.name}
-                            //         </MenuItem>
-                            //       ))
-                            //     )}
-                            //   </Select>
-                            //   {invalid && (
-                            //     <FormHelperText>
-                            //       {error?.message}
-                            //     </FormHelperText>
-                            //   )}
-                            // </Box>
-
+                          return (                          
                             <Box>
-  <Select
+  {/* <Select
     fullWidth
     size="small"
     {...field}
@@ -401,7 +343,94 @@ export default function StaffSection({
         </MenuItem>
       ))
     )}
-  </Select>
+  </Select> */}
+
+<Select
+  fullWidth
+  size="small"
+  {...field}
+  open={openList}      
+  onOpen={() => setOpenList(true)}
+  onClose={() => setOpenList(false)}
+  value={Array.isArray(field.value) ? field.value : []}
+  multiple
+  displayEmpty
+  onChange={(e) => {
+    const _value = e.target.value;
+    field.onChange(_value);
+
+    // Map selected clients
+    const selectedClients = data?.filter((client: any) =>
+      _value.includes(client.id)
+    );
+
+    const selectedNames = selectedClients
+      ?.map((client: any) => client.name)
+      .join(", ");
+    setSelectedDisplayNames(selectedNames);
+
+    const selectedId = selectedClients
+      ?.map((client: any) => client.id)
+      .join(", ");
+    if (selectedId) setSelectedCarerId(selectedId);
+
+    // ❗ DO NOT auto-open/close based on selection
+  }}
+  renderValue={
+    field.value?.length
+      ? (selected) =>
+          data
+            ?.filter((client: any) => selected.includes(client.id))
+            .map((client: any) => client.name)
+            .join(", ")
+      : () => "Select Carer"
+  }
+>
+  {isLoading ? (
+    <MenuItem disabled>Loading...</MenuItem>
+  ) : isPickupJob ? (
+    <MenuItem disabled>No carers available for pickup jobs</MenuItem>
+  ) : (
+    data?.slice(2).map((_data: IStaff) => (
+      <MenuItem value={_data.id} key={_data.id}>
+        <Checkbox checked={field.value?.includes(_data.id)} size="small" />
+        {_data.name}
+      </MenuItem>
+    ))
+  )}
+
+  {/* Divider */}
+  <MenuItem divider />
+
+  {/* ⭐ Beautiful Close Button */}
+  <MenuItem
+    onClick={(e) => {
+      e.stopPropagation();
+      setOpenList(false);
+    }}
+    sx={{
+      justifyContent: "center",
+      mt: 1,
+    }}
+  >
+    <Box
+      sx={{
+        px: 2,
+        py: 1,
+        width: "100%",
+        textAlign: "center",
+        borderRadius: 2,
+        fontWeight: "bold",
+        bgcolor: "primary.main",
+        color: "white",
+        "&:hover": { bgcolor: "primary.dark" },
+      }}
+    >
+      Close
+    </Box>
+  </MenuItem>
+</Select>
+
 
   {invalid && <FormHelperText>{error?.message}</FormHelperText>}
                             </Box>

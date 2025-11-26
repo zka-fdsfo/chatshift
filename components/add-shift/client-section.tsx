@@ -150,6 +150,8 @@ import CloseIcon from "@mui/icons-material/Close";
   }));
    // ------------ Child to parent access end here -------------
 
+   const [openList, setOpenList] = useState(false);
+
   return (
     <>
       <StyledPaper>
@@ -201,7 +203,7 @@ import CloseIcon from "@mui/icons-material/Close";
                             paddingLeft: "10px",
                           }}
                         >
-                          Choose Participant  
+                          Choose Participant 
                         </Typography>
                         <Typography
                           component="span"
@@ -222,7 +224,8 @@ import CloseIcon from "@mui/icons-material/Close";
                   name="clientIds"
                   render={({ field, fieldState: { error, invalid } }) => (
                     <Box>
-                    <Select
+                      
+                    {/* <Select
                       fullWidth
                       size="small"
                       {...field}
@@ -287,8 +290,90 @@ import CloseIcon from "@mui/icons-material/Close";
                           </MenuItem>
                         ))
                       )}
-                    </Select>   
+                    </Select>    */}
 
+                    <Select
+                          fullWidth
+                          size="small"
+                          multiple
+                          open={openList}
+                          onOpen={() => setOpenList(true)}
+                          onClose={() => setOpenList(false)}
+                          value={Array.isArray(field.value) ? field.value : []}
+                          onChange={(e) => {
+                            const _value = e.target.value;
+                            const selectedArray = Array.isArray(_value) ? _value : [_value];
+
+                            // Update RHF
+                            field.onChange(selectedArray);
+
+                            // Display names
+                            const names = data
+                              ?.filter((client: any) => selectedArray.includes(client.id))
+                              .map((client: any) => client.displayName)
+                              .join(", ");
+                            setSelectedDisplayNames(names);
+
+                            // Addresses
+                            const address =
+                              selectedArray.length > 0
+                                ? data
+                                    ?.filter((client: any) => selectedArray.includes(client.id))
+                                    .map((client: any) => client.address)
+                                    .join(", ")
+                                : "";
+                            setSelectedClientAddress(address);
+                          }}
+                          renderValue={(selected) => {
+                            if (!selected || selected.length === 0) return "Select Participant";
+
+                            return data
+                              ?.filter((client: any) => selected.includes(client.id))
+                              .map((client: any) => client.displayName)
+                              .join(", ");
+                          }}
+                        >
+                          {data?.map((client: any) => (
+                            <MenuItem key={client.id} value={client.id}>
+                              <Checkbox checked={field.value.includes(client.id)} />
+                              <ListItemText primary={client.displayName} />
+                            </MenuItem>
+                          ))}
+
+                          {/* Divider */}
+                          <MenuItem divider />
+
+                          {/* ⭐ WORKING CLOSE OPTION */}
+                          <MenuItem
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenList(false);
+                      }}
+                      sx={{
+                        justifyContent: "center",
+                        mt: 1,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          px: 2,
+                          py: 1,
+                          width: "100%",
+                          textAlign: "center",
+                          borderRadius: 2,
+                          fontWeight: "bold",
+                          bgcolor: "primary.main",
+                          color: "white",
+                          "&:hover": {
+                            bgcolor: "primary.dark",
+                          },
+                        }}
+                      >
+                        Close
+                      </Box>
+                    </MenuItem>
+                    </Select>
+                    
                     {invalid && <FormHelperText>{error?.message}</FormHelperText>}
                   </Box>
                   )}
