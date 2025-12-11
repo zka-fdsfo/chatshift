@@ -14,7 +14,7 @@ import Notes from "@/components/staff-notes/notes";
 import Settings from "@/components/staff-settings/settings";
 import {
   complianceData,
-  staffAllDocuments
+  staffAllDocuments    
 } from "@/interface/common.interface";
 import { ISettings, IStaff } from "@/interface/staff.interfaces";
 import assets from "@/json/assets";
