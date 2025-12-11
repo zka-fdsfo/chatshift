@@ -1,6 +1,6 @@
 'use client';
 
-import { GoogleMap, LoadScriptNext, Polyline, Marker } from '@react-google-maps/api';
+import { GoogleMap, LoadScriptNext, Marker, Polyline } from '@react-google-maps/api';
 import React, { useEffect, useState } from 'react';
 
 type RoutePoint = {
@@ -14,16 +14,26 @@ type RoutePoint = {
 export default function RouteMap({ route }: { route: RoutePoint[] }) {
   const [googleObj, setGoogleObj] = useState<any>(null);
 
-  if (!route || !Array.isArray(route) || route.length === 0) {
-    return <p>No route data available</p>;
-  }
-
   useEffect(() => {
     console.log("------------- Route:", route);
   }, [route]);
 
+  if (!route || !Array.isArray(route) || route.length === 0) {
+    return <p>No route data available</p>;
+  }
+
   const start = route[0];
   const end = route[route.length - 1];
+
+  const fitBounds = (map: any) => {
+    if (!googleObj || !route?.length) return;
+
+    const bounds = new googleObj.maps.LatLngBounds();
+
+    route.forEach((point) => bounds.extend(point));
+
+    map.fitBounds(bounds);
+  };
 
   return (
     <LoadScriptNext
@@ -34,36 +44,47 @@ export default function RouteMap({ route }: { route: RoutePoint[] }) {
       <GoogleMap
         mapContainerStyle={{ width: "100%", height: "500px" }}
         center={start}
-        zoom={13}
+        zoom={13} 
+        onLoad={(map) => {
+          if (googleObj) fitBounds(map);
+        }}
       >
 
-        {/* START marker as green map pointer */}
-        <Marker
-          position={start}
-          label={{
-            text: "S",
-            color: "white",
-            fontSize: "14px",
-            fontWeight: "bold",
-          }}
-          icon={{
-            url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
-          }}
-        />
+        {/* START Marker */}
+        {googleObj && (
+          <Marker
+            position={start}
+            label={{
+              text: "S",
+              color: "white",
+              fontSize: "14px",
+              fontWeight: "bold",
+            }}
+            icon={{
+              url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+              scaledSize: new googleObj.maps.Size(40, 40),
+              labelOrigin: new googleObj.maps.Point(20, 14),
+            }}
+          />
+        )}
 
-        {/* END marker as red map pointer */}
-        <Marker
-          position={end}
-          label={{
-            text: "E",
-            color: "white",
-            fontSize: "14px",
-            fontWeight: "bold",
-          }}
-          icon={{
-            url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
-          }}
-        />
+        {/* END Marker */}
+        {googleObj && (
+          <Marker
+            position={end}
+            label={{
+              text: "E",
+              color: "white",
+              fontSize: "14px",
+              fontWeight: "bold",
+            }}
+            icon={{
+              url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+              scaledSize: new googleObj.maps.Size(40, 40),
+              labelOrigin: new googleObj.maps.Point(20, 14),
+            }}
+          />
+        )}
 
         {/* Route Polyline */}
         {googleObj && googleObj.maps && (
