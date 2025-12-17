@@ -52,7 +52,7 @@ import CloseIcon from "@mui/icons-material/Close";
 //   edit?: boolean;
 //   shift?: Shift;
 // }) {
-  export default forwardRef(function ClientSection(
+  export default forwardRef(function ClientSectionView(
     {
       view,
       edit,
@@ -95,14 +95,14 @@ import CloseIcon from "@mui/icons-material/Close";
   //   queryFn: () => getPriceBooks((router.query.page as string) || "1")
   // });
 
-  const { data: price, isLoading: isloading } = useQuery({
-    queryKey: ["price-books", router.query.page],
-    queryFn: () => getPriceBooksListAll((router.query.page as string) || "1")
-  });
+  // const { data: price, isLoading: isloading } = useQuery({
+  //   queryKey: ["price-books", router.query.page],
+  //   queryFn: () => getPriceBooksListAll((router.query.page as string) || "1")
+  // });
     
-  useEffect(() => {
-    console.log("-------------- Price Book ^^^^^^^^^^^ --------------", price);
-  }, [price]);
+  // useEffect(() => {
+  //   console.log("-------------- Price Book ^^^^^^^^^^^ --------------", price);
+  // }, [price]);
 
   const handleRemoveName = (namesToRemove: string) => {
     // Remove the names from selectedDisplayNames
@@ -473,7 +473,7 @@ import CloseIcon from "@mui/icons-material/Close";
                       </Box>
                     </Grid>
 
-                    <Grid item lg={8} md={6} sm={12} xs={12}>
+                    {/* <Grid item lg={8} md={6} sm={12} xs={12}>
                       <Controller
                         control={control}
                         name={`clientPriceBooks[${index}].priceBookIds`}
@@ -522,7 +522,7 @@ import CloseIcon from "@mui/icons-material/Close";
                           </Box>
                         )}
                       />
-                    </Grid>
+                    </Grid> */}
                   </Grid>
                 </Grid>
               </CardContent>

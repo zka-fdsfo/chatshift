@@ -209,7 +209,7 @@ export const getAllShiftNotes = async ({
 
 export const getAllShiftNotesWithShift = async ({
   id,
-  startDate,
+  startDate,  
   endDate
 }: {
   id?: string;
@@ -859,4 +859,16 @@ export const sendForConsent = async (documentId: string, employeeId: string) => 
   }
 };
 
+export const resendInviteParticipant = async (body: { email: string }) => {
+  const res = await axiosInstance.post(
+    endpoints.client.resend_invite_participant,
+    body
+  );
+  return res.data;
+};
 
+
+export const getLastSigninClient = async (id: string) => {
+  const res = await axiosInstance.get(endpoints.client.last_signin_client(id));
+  return res.data;
+};

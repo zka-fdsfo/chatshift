@@ -177,6 +177,9 @@ export const endpoints = {
       `/documents/consent/upload/client/${clientId}`,
     send_for_consent: (documentId: string,employeeId: string) =>
       `/documents/consent/${documentId}/sendForConsent/${employeeId}`,
+    resend_invite_participant: "/auth/verification-link",
+    last_signin_client: (clientId: string) =>
+      `auth/last-signIn/${clientId}/client`,
   },
   teams: {
     get_all: "/teams/allTeams",
@@ -215,7 +218,7 @@ export const endpoints = {
       `/shift/applications/${applicationId}`,
     get_applied_shift_list: (shiftId: number) => `/shift/${shiftId}/applicants`,
     swap_shift: "/shift/bulk-swap",
-    notes: {
+    notes: {   
       get_all_shift_notes: `/shiftNote/getAllShiftNotes`,
       get_all_shift_notes_with_shift: `/shiftNote/getAllNotesWithShift`,
       get_all_notes: (id?: string) => `/shiftNote/getAllForClient/${id}`,

@@ -83,6 +83,9 @@ import NoteIcon from "@mui/icons-material/Note"; // Import NoteIcon
 import ShiftNotesIndividualShift from "pages/shift-notes-individualshift";
 import TrackingEmployee from "pages/staff/tracking";
 import Tracking from "pages/staff/tracking";
+import ClientSectionView from "./client-section-view";
+import StaffSectionView from "./staff-section-view";
+import TimeLocationView from "./time-location-view";
 
 interface DrawerInterface extends DrawerProps {
   open?: boolean;
@@ -521,7 +524,7 @@ clientPriceBooks: yup.array().of(
   })
 );
 
-export default function AddShift({
+export default function AddShiftView({
   // onSelectId,
   view,
   edit,
@@ -1134,18 +1137,19 @@ export default function AddShift({
                 <Typography></Typography>
               ) : (
                 <>
-                  <ClientSection setSelectedClientAddress={setSelectedClientAddress} view={!!view} edit={!!edit} shift={shift!}  />
-                  <StaffSection
+                  {/* <ClientSection setSelectedClientAddress={setSelectedClientAddress} view={!!view} edit={!!edit} shift={shift!}  /> */}
+                  <ClientSectionView setSelectedClientAddress={setSelectedClientAddress} view={!!view} edit={!!edit} shift={shift!}  />
+                  <StaffSectionView
                     view={view}
                     edit={edit}
                     shift={shift}
                     advanceShift={advanceShift}
                   />
-                  <TimeLocation selectedClientAddress={selectedClientAddress} view={view} edit={edit} shift={shift} />
+                  <TimeLocationView selectedClientAddress={selectedClientAddress} view={view} edit={edit} shift={shift} />
                   {!view && <TaskSection edit={edit} />}
                   <InstructionSection view={view} edit={edit} shift={shift} />
                   {/* <TimeLocation view={view} edit={edit} shift={shift} /> */}
-                  {view && <ShiftRelatedNotes shift={shift} />}
+                  {/* {view && <ShiftRelatedNotes shift={shift} />} */}
                 </>
               )}
             </FormProvider>
@@ -1155,14 +1159,14 @@ export default function AddShift({
                 <JobApplicant view={view} edit={edit} shift={shift} />
               ) : (
                 <>
-                  <ClientSection setSelectedClientAddress={setSelectedClientAddress} view={!!view} edit={!!edit} shift={shift!} ref={clientSectionRef}/>
-                  <StaffSection
+                  <ClientSectionView setSelectedClientAddress={setSelectedClientAddress} view={!!view} edit={!!edit} shift={shift!} ref={clientSectionRef}/>
+                  <StaffSectionView
                     view={view}
                     edit={edit}
                     shift={shift}
                     advanceShift={advanceShift}
                   />
-                  <TimeLocation selectedClientAddress={selectedClientAddress} view={view} edit={edit} shift={shift} />
+                  <TimeLocationView selectedClientAddress={selectedClientAddress} view={view} edit={edit} shift={shift} />
                   {!view && <TaskSection edit={edit} />}
                   <InstructionSection view={view} edit={edit} shift={shift} />
                   {/* <TimeLocation view={view} edit={edit} shift={shift} /> */}
@@ -1173,7 +1177,7 @@ export default function AddShift({
                            </>
                         )}
 
-                  {view && <ShiftRelatedNotes shift={shift} />}
+                  {/* {view && <ShiftRelatedNotes shift={shift} />} */}
                 </>
               )}
             </FormProvider>

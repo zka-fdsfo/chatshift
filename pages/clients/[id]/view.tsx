@@ -4,7 +4,9 @@ import {
   getClientContacts,
   getClientDocuments,
   getClientFunds,
-  getClientSettings
+  getClientSettings,
+  getLastSigninClient,
+  resendInviteParticipant
 } from "@/api/functions/client.api";
 import {
   getNotes,
@@ -108,6 +110,10 @@ export default function Index() {
       {
         queryKey: ["client-additional-information", id],
         queryFn: () => getClientAdditionalInformation(id as string)
+      },
+      {
+        queryKey: ["last-login", id],
+        queryFn: () => getLastSigninClient(id as string)
       }
     ],
     combine: (results) => {
@@ -118,15 +124,21 @@ export default function Index() {
         documents: results[3].data,
         funds: results[4].data,
         additionalInformation: results[5].data,
+        last_login: results[6].data,
         isLoading:
           results[0].isLoading ||
           results[1].isLoading ||
           results[2].isLoading ||
           results[3].isLoading ||
           results[4].isLoading ||
-          results[5].isLoading
+          results[5].isLoading ||
+          results[6].isLoading
       };
     }
+  });
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: resendInviteParticipant
   });
 
   useEffect(() => {
@@ -365,6 +377,45 @@ export default function Index() {
 
         <Grid item md={4} sm={12} xs={12}>
           <Grid container spacing={4}>
+          <Grid item lg={12} md={12} sm={12} xs={12}>
+              <StyledPaper>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  gap={1}
+                >
+                  <Typography variant="h5">Login</Typography>
+                  <Typography variant="body2">
+                    {data.last_login["Last Login"] ? (
+                      moment().diff(data.last_login["Last Login"], "hours") <
+                      23 ? (
+                        moment(data.last_login["Last Login"]).fromNow()
+                      ) : (
+                        moment(data.last_login["Last Login"]).calendar(null, {
+                          sameDay: (now) =>
+                            `[Today], ${moment(now?.toString()).fromNow()}`,
+                          nextDay: "[Tomorrow]",
+                          nextWeek: "dddd",
+                          lastDay: "[Yesterday], hh:mm a",
+                          lastWeek: "[Last] dddd, hh:mm a",
+                          sameElse: "DD/MM/YYYY hh:mm:a"
+                        })
+                      )
+                    ) : (
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="error"
+                        onClick={() => mutate({ email: data.client.email })}
+                      >
+                        Resend Invitation
+                      </Button>
+                    )}
+                  </Typography>
+                </Stack>
+              </StyledPaper>
+            </Grid>
             {data?.contacts.primaryContacts.length ? (
               <Grid item lg={12} md={12} sm={12} xs={12}>
                 <ClientContacts contact={data?.contacts.primaryContacts[0]} />

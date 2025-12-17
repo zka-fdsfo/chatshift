@@ -45,6 +45,7 @@ import { applyShift } from "@/api/functions/shift.api";
 import { queryClient } from "pages/_app";
 import { toast } from "sonner";
 import AddNoteModal from "../add-shift/addNoteModal";
+import AddShiftView from "../add-shift/add-shift-view";
 // import { Grid } from "antd";
 
 const ShiftBox = styled(Box)<{ selected: boolean }>`
@@ -439,7 +440,19 @@ export default function Shift({
         </ShiftBox>
       )}
 
-      <AddShift
+      {/* <AddShift
+        view={viewModal}
+        edit={editModal}
+        onClose={() => {
+          setViewModal(false);
+          setEditModal(false);
+        }}
+        setViewModal={setViewModal}
+        setEditModal={setEditModal}
+        shift={shift}
+      /> */}
+
+      <AddShiftView
         view={viewModal}
         edit={editModal}
         onClose={() => {
