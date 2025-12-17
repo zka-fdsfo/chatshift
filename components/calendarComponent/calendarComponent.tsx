@@ -11,32 +11,36 @@ import {
 } from "@mui/material";
 import { Box } from "@mui/system";
 import moment, { Moment } from "moment";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ShiftBox } from "../Timesheet/TimeSheetTable";
-import { getRole } from "@/lib/functions/_helpers.lib";
 import { ShiftBoxParticipant } from "../Timesheet/TimeSheetTableParticipant";
 
 const StyledContainer = styled(Box)`
   table {
     border: 1px solid #ddd;
+
     thead {
       th {
         border-bottom-color: #ddd;
         width: 150px;
+
         &:not(:last-child) {
           border-right: 1px solid #ddd;
         }
       }
     }
   }
+
   tbody {
     td {
       height: 150px;
       vertical-align: top;
       border-bottom-color: #ddd;
+
       &:not(:last-child) {
         border-right: 1px solid #ddd;
       }
+
       p {
         font-size: 14px;
       }
@@ -53,18 +57,32 @@ export default function CalendarComponent({
 }) {
   const [role, setRole] = useState("");
 
-  const startOfMonth = moment(date).startOf("month");
-  const endOfMonth = moment(date).endOf("month");
-  const firstWeek = startOfMonth.weeks();
-  const endWeek = endOfMonth.weeks();
-  const numberOfWeeksInMonth = endWeek - firstWeek + 1;
+  /* ------------------------------------------------
+     SAFE calendar range (works for December + years)
+  ------------------------------------------------- */
+  const startOfCalendar = useMemo(
+    () => moment(date).startOf("month").startOf("week"),
+    [date]
+  );
 
+  const endOfCalendar = useMemo(
+    () => moment(date).endOf("month").endOf("week"),
+    [date]
+  );
+
+  const totalWeeks = useMemo(
+    () => endOfCalendar.diff(startOfCalendar, "weeks") + 1,
+    [startOfCalendar, endOfCalendar]
+  );
+
+  /* ------------------------------------------------
+     Get user role (client / staff)
+  ------------------------------------------------- */
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const storedRole = sessionStorage.getItem("user_role") || "";
-      setRole(storedRole);
+      setRole(sessionStorage.getItem("user_role") || "");
     }
-  }, [typeof window]);
+  }, []);
 
   return (
     <StyledContainer>
@@ -81,29 +99,33 @@ export default function CalendarComponent({
               <TableCell>Saturday</TableCell>
             </TableRow>
           </TableHead>
+
           <TableBody>
-            {Array.from({ length: numberOfWeeksInMonth }).map((_, index) => {
-              const startOfWeek = startOfMonth
+            {Array.from({ length: totalWeeks }).map((_, weekIndex) => {
+              const startOfWeek = startOfCalendar
                 .clone()
-                .add(index, "week")
-                .startOf("week");
+                .add(weekIndex, "week");
+
               return (
-                <TableRow key={index}>
-                  {Array.from({ length: 7 }).map((_, idx) => {
-                    const day = startOfWeek.clone().add(idx, "days");
-                    const day_unix = parseInt(day.startOf("day").format("x"));
+                <TableRow key={weekIndex}>
+                  {Array.from({ length: 7 }).map((_, dayIndex) => {
+                    const day = startOfWeek.clone().add(dayIndex, "days");
+                    const dayUnix = day.startOf("day").valueOf();
+
                     const filteredShifts = shifts?.filter(
-                      (_shift) =>
-                        parseInt(
-                          moment(_shift.startDate).startOf("day").format("x")
-                        ) === day_unix
+                      (shift) =>
+                        moment(shift.startDate)
+                          .startOf("day")
+                          .valueOf() === dayUnix
                     );
+
                     return (
-                      <TableCell key={day.unix()}>
+                      <TableCell key={day.format("YYYY-MM-DD")}>
+                        {/* Day Number */}
                         <Typography
                           sx={{
                             color:
-                              day.format("MM") === moment(date).format("MM")
+                              day.month() === moment(date).month()
                                 ? "#333"
                                 : "#ccc"
                           }}
@@ -111,13 +133,17 @@ export default function CalendarComponent({
                           {day.format("DD")}
                         </Typography>
 
+                        {/* Shifts */}
                         {role === "ROLE_CLIENT" ? (
                           <ShiftBoxParticipant
                             shifts={filteredShifts}
                             isMonthly
                           />
                         ) : (
-                          <ShiftBox shifts={filteredShifts} isMonthly />
+                          <ShiftBox
+                            shifts={filteredShifts}
+                            isMonthly
+                          />
                         )}
                       </TableCell>
                     );
