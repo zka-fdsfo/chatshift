@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { getAdminDashboard } from '@/api/functions/admin.api';
-import { Card, CircularProgress, Container, Grid, MenuItem, Select, Typography } from '@mui/material';
+import { Card, CircularProgress, Container, Grid, MenuItem, Paper, Select, Typography } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
 import { Box, Stack } from '@mui/system';
 import AdminDashboardGraph from './AdminDashboardBarGraph';
@@ -36,15 +36,35 @@ const Cockpit = () => {
       <Grid item xs={12} md={12} lg={12} display={"flex"} gap={2.5} flexWrap={"wrap"} mb={5}>
         {data && data?.kpis && data?.kpis?.length > 0 &&
           data?.kpis?.map((item: any, i: any) => (
-            <Card key={i} sx={{ p: 3, width: "30%", backgroundColor: "var(--colorB4DFDD)" }}>
+            <Paper
+            key={i}
+            elevation={2}   // paper depth (0–24)
+            sx={{
+              p: 3,
+              width: "30%",
+              backgroundColor: "#F7FAFC",
+            }}
+          >
               <Typography variant='h6' mb={2} sx={{ color: "black" }}>{item?.label}</Typography>
               <Stack display={"flex"} flexDirection={"row"} alignItems={"center"} justifyContent={"space-between"}>
                 <Box sx={{ width: 40, height: 40, borderRadius: 50, background: "rgba(0,0, 0, 0.05)", textAlign: "center", alignContent: "center" }}>
-                  <Typography variant='h5' sx={{ color: "black" }}>{item?.current}</Typography>
+                  <Typography variant='h5' sx={{ color: "#1D2A33" }}>{item?.current}</Typography>
                 </Box>
-                {item?.trend !== 2 && <Typography sx={{ color: item?.trend === 0 ? "green" : "red", fontSize: 12, fontWeight: 500 }}> ↑ {item?.trend === 0 ? "increase" : "decrease"} {item?.percentChange}%</Typography>}
+                {item?.trend !== 2 && (
+  <Typography
+    sx={{
+      color: "#5A7A8C",
+      fontSize: 12,
+      fontWeight: 500
+    }}
+  >
+    ↑ {item?.trend === 0 ? "increase" : "decrease"}{" "}
+    {Math.round(item?.percentChange)}%
+  </Typography>
+)}
+
               </Stack>
-            </Card>
+            </Paper>
           ))}
       </Grid>
 

@@ -17,6 +17,8 @@ import Scrollbar from "@/ui/scrollbar";
 import navConfig from "../config-navigation";
 import SidebarItem from "./SidebarItem";
 import useUser from "@/hooks/react-query/useUser";
+import NewLogo from "@/components/logo/new-logo";
+import { Paper } from "@mui/material";
 
 interface SidebarProps {
   openNav: boolean;
@@ -40,13 +42,14 @@ export default function Sidebar({ openNav, onCloseNav }: SidebarProps) {
     <Box
       sx={{
         my: 3,
-        mx: 2.5,
+        mx: 2,
         py: 2,
         px: 2.5,
         display: "flex",
         borderRadius: 1.5,
         alignItems: "center",
-        bgcolor: (theme) => alpha(theme.palette.grey[500], 0.12)
+        bgcolor:'#1D2A33'
+        // bgcolor: (theme) => alpha(theme.palette.grey[500], 0.12)
       }}
     >
       <Avatar src={user?.data?.data?.photoDownloadURL} alt="photoURL">
@@ -54,14 +57,14 @@ export default function Sidebar({ openNav, onCloseNav }: SidebarProps) {
       </Avatar>
 
       <Box sx={{ ml: 2 }}>
-        <Typography variant="subtitle2" sx={{ color: "#000000" }}>
+        <Typography variant="subtitle2" sx={{ color: "#ffffff" }}>
           {user?.data?.data?.name}
         </Typography>
 
         {/* <Typography variant="body2" sx={{ color: "text.secondary" }}>
           {roleParser(user?.data?.data?.role?.[0].name || "")}
         </Typography> */}
-        <Typography variant="body2" sx={{ color: "#747474" }}>
+        <Typography variant="body2" sx={{ color: "#F7FAFC" }}>
           {roleParser(user?.data?.data?.role?.[0].name || "")}
         </Typography>
       </Box>
@@ -83,12 +86,14 @@ export default function Sidebar({ openNav, onCloseNav }: SidebarProps) {
         "&.simplebar-content": {
           height: 1,
           display: "flex",
-          flexDirection: "column"
+          flexDirection: "column",
+         
         }
       }}
       ref={ref}
     >
-      <Logo sx={{ mt: 3, ml: 4 }} />
+      <NewLogo sx={{ mt: 3, ml: 4 }} />
+
 
       {renderAccount}
 
@@ -106,17 +111,30 @@ export default function Sidebar({ openNav, onCloseNav }: SidebarProps) {
       }}
     >
       {upLg ? (
-        <Box
-          sx={{
-            color: "#ffffff",
-            height: 1,
-            position: "fixed",
-            width: NAV.WIDTH,
-            borderRight: (theme) => `dashed 1px ${theme.palette.divider}`
-          }}
-        >
+        // <Box
+        //   sx={{
+        //     color: "#ffffff",
+        //     height: 1,
+        //     position: "fixed",
+        //     width: NAV.WIDTH,
+        //     // borderRight: (theme) => `dashed 1px ${theme.palette.divider}`
+        //     borderRight: (theme) => `dashed 1px #5A7A8C`
+        //   }}
+        // >
+
+        <Paper
+  elevation={5}
+  sx={{
+    color: "#ffffff",
+    height: "100%",
+    position: "fixed",
+    width: NAV.WIDTH,
+    backgroundColor: "#F7FAFC", // paper background
+    borderRadius: 0,            // flat sidebar look
+  }}
+>
           {renderContent}
-        </Box>
+        </Paper>
       ) : (
         <Drawer
           open={openNav}

@@ -152,7 +152,7 @@ body {
   top: 0;
   left: auto;
   right: 0;
-  // background-color: #124c5cb3;
+  // background-color: #5A7A8C;
   background-color: #eeeff7;
   color: #000000;
   box-shadow: none;
@@ -197,8 +197,40 @@ body {
   .css-1lndy45-MuiToolbar-root {
     padding-left: 40px;
     padding-right: 40px;
-    background: #f9fafb;
+    // background: #f9fafb;
+    background: #F7FAFC;
   }
 }
 
 
+.simplebar-content-wrapper {
+  direction: inherit;
+  box-sizing: border-box !important;
+  position: relative;
+  display: block;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  background: #F7FAFC;
+}
+
+
+.css-xedk27-MuiTableCell-root {
+  line-height: 1.5714285714285714;
+  color: #212B36;
+  font-size: 0.875rem;
+  font-family: Inter, sans-serif;
+  font-weight: 400;
+  display: table-cell;
+  vertical-align: inherit;
+  border-bottom: 1px solid rgba(241, 243, 244, 1);
+  text-align: left;
+  padding: 16px;
+  position: relative;
+  min-height: 100px;
+  background-color: #D8EFFE !important;
+}

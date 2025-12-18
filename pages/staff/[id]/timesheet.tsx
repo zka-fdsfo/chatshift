@@ -575,7 +575,7 @@ export default function Index() {
                                 aria-label="approve"
                                 startIcon={<CheckIcon />}
                                 sx={{
-                                  backgroundColor: "#124c5c #124c5cb3b3",
+                                  backgroundColor: "#124c5c #5A7A8Cb3",
                                   color: "white",
                                   "&:hover": {
                                     backgroundColor: "#155cb2"

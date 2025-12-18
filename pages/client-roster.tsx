@@ -20,6 +20,9 @@ import DescriptionIcon from '@mui/icons-material/Description';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 import { getCookie, setCookieClient } from "@/lib/functions/storage.lib";
 import ClientSignDocumentPending from "./clients/client-document-pending";
+import RostrHeader from "@/layout/dashboard/header/rostrheader";
+import RostrFooter from "@/layout/dashboard/footer/rostrfooter";
+import NewLogo from "@/components/logo/new-logo";
 
 interface HeaderProps {
   onOpenNav: () => void;
@@ -153,48 +156,50 @@ export default function StaffRoster({ onOpenNav }: HeaderProps) {
 
   return (
     <>
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          width: "100%", // make sure the parent is full-width
-          padding: "8px 16px" // optional spacing
-        }}
-      >
-        {/* Left side: Logout + renderContent */}
-        <Box sx={{ display: "flex", alignItems: "center" }}>
-          {/* <MenuItem
-            disableRipple
-            disableTouchRipple
-            onClick={() => {
-              dispatch(logout());
-              setOpen(null);
-              router.push("/auth/client-signin");
-            }}
-            sx={{
-              backgroundColor: "#00a9a9",
-              color: "#ffffff",
-              margin: "6px",
-              padding: "6px 12px",
-              borderRadius: "3px",
-              display: "flex",
-              alignItems: "center"
-            }}
-          >
-            <LogoutIcon sx={{ marginRight: "8px" }} />
-            Logout
-          </MenuItem> */}
-          {/* Adjacent content */}
-          {renderLogout}
-          {renderContent}
-          {renderDocument}
-        </Box>
+    {/* <RostrHeader></RostrHeader> */}
 
+    <Box
+  sx={{
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
+    px: 2,
+  }}
+>
+  {/* ================= LEFT : LOGO ================= */}
+  <Box sx={{ display: "flex", alignItems: "center" }}>
+    <NewLogo />
+  </Box>
 
-        {/* Right side: Calendar */}
-        <CalendarToolbar date={date} setDate={setDate} />
-      </Box>
+  {/* ================= CENTER : CALENDAR ================= */}
+  <Box
+    sx={{
+      pt:2,
+      flex: 1,
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+    }}
+  >
+    <CalendarToolbar date={date} setDate={setDate} />
+  </Box>
+
+  {/* ================= RIGHT : ACTIONS ================= */}
+  <Box
+    sx={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "flex-end",
+      gap: 1,
+    }}
+  >
+   
+    {renderContent}
+    {renderDocument}
+    {renderLogout}
+  </Box>
+</Box>
+
       <Box sx={{ padding: 2 }}>
         <CalendarComponent date={date} shifts={data} />
       </Box>
@@ -202,6 +207,7 @@ export default function StaffRoster({ onOpenNav }: HeaderProps) {
       {userData?.id !== "" && (
         <ClientSignDocumentPending clientId={userData?.id} open={isModalPending} onClose={handleCloseModalPending}></ClientSignDocumentPending>
       )}
+      {/* <RostrFooter></RostrFooter> */}
     </>
   );
 }

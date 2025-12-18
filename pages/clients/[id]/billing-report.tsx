@@ -949,7 +949,7 @@ const BillingReport = () => {
                                 <EditIcon
                                   style={{
                                     fontSize: 20,
-                                    color: "#124c5cb3"
+                                    color: "#5A7A8C"
                                   }}
                                 />
                               </IconButton>

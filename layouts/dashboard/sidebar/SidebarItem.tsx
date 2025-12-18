@@ -27,13 +27,23 @@ function SidebarItem({ item }: SidebarItemProps) {
   const [open, setOpen] = useState(active);
   const router = useRouter();
 
+  // const active_sx = {
+  //   color: "primary.main",
+  //   fontWeight: "fontWeightSemiBold",
+  //   bgcolor: (theme: Theme) => alpha(theme.palette.primary.main, 0.08),
+  //   "&:hover": {
+  //     bgcolor: (theme: Theme) => alpha(theme.palette.primary.main, 0.16)
+  //   }
+  // };
+
   const active_sx = {
     color: "primary.main",
     fontWeight: "fontWeightSemiBold",
-    bgcolor: (theme: Theme) => alpha(theme.palette.primary.main, 0.08),
+    border: "1px solid #5A7A8C",
+    borderRadius: 1, // optional
     "&:hover": {
-      bgcolor: (theme: Theme) => alpha(theme.palette.primary.main, 0.16)
-    }
+      border: "1px solid #5A7A8C",
+    },
   };
 
   const sx = {
@@ -61,7 +71,8 @@ function SidebarItem({ item }: SidebarItemProps) {
           ...sx,
           ...(active && active_sx),
           color: "#5a5a5a",
-          background: "#eeeff7"
+          // background: "#eeeff7"
+           background: "#D8EFFE"
         }}
         onClick={() => handleClick(item)}
       >
