@@ -47,4 +47,7 @@ const NewLogo = forwardRef<HTMLAnchorElement, NewLogoProps>(
   }
 );
 
+// ✅ ADD THIS LINE
+NewLogo.displayName = "NewLogo";
+
 export default NewLogo;
