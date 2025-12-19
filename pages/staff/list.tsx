@@ -1,6 +1,6 @@
 import { Box, styled } from "@mui/system";
-import { Paper, Typography } from "@mui/material";
-import React, { useRef } from "react";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Paper, Typography } from "@mui/material";
+import React, { useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import DashboardLayout from "@/layout/dashboard/DashboardLayout";
 import { getStaffList } from "@/api/functions/staff.api";
@@ -10,6 +10,9 @@ import SimpleBar from "simplebar-react";
 import DataTable from "@/components/Table/DataTable";
 import UserTableRow from "pages/staff/staff-table-row";
 import Loader from "@/ui/Loader/Loder";
+import AddNewStaff from "./addnewstaff";
+import CloseIcon from "@mui/icons-material/Close";
+import IconButton from "@mui/material/IconButton";
 
 const StyledUserPage = styled(Box)`
   padding: 20px 10px;
@@ -30,6 +33,19 @@ const StyledUserPage = styled(Box)`
 `;
 
 export default function Index() {
+  const [openModal, setModal] = useState(false);
+	   
+	   
+	const handleModal = () => {
+    setModal(true);
+    };
+  
+	   
+	  const handleCloseModal = () => {
+    setModal(false);
+  };
+
+
   const { data = [], isLoading } = useQuery({
     queryKey: ["user_list"],
     queryFn: getStaffList
@@ -69,29 +85,43 @@ export default function Index() {
   return (
     <DashboardLayout isLoading={isLoading}>
       <StyledUserPage>
-        <Typography variant="h4">Staff List</Typography>
-        {/* <SimpleBar scrollableNodeProps={{ ref: ref }}> */}
-        {/* <Paper>
-          <DataGridTable
-            rows={rows}
-            columns={columns}
-            checkboxSelection
-            loading={isLoading}
-          />
-        </Paper> */}
-        {/* <DataTable
-          columns={columns}
-          RowComponent={UserTableRow}
-          // data={data?.slice(1).map((_data: IStaff, index: number) => ({
-          data={data?.slice(2).map((_data: IStaff, index: number) => ({
-            ..._data,
-            role: _data.rolesName?.[0]
-              .replace("ROLE_", "")
-              .replaceAll("_", " ")
-              .toLowerCase(),
-            index
-          }))}
-        /> */}
+      <Box
+  sx={{
+    display: "flex",
+    alignItems: "baseline",
+    justifyContent: "space-between",
+    mb: 3
+  }}
+>
+  <Typography
+    variant="h4"
+    sx={{
+      color: "#1D2A33",
+      lineHeight: 1 // 🔑 removes extra vertical space
+    }}
+  >
+    Staff List
+  </Typography>
+
+  <Button
+    variant="contained"
+    sx={{
+      bgcolor: "#67D085",
+      color: "#F7FAFC",
+      fontWeight: 600,
+      height: 40,
+      "&:hover": {
+        bgcolor: "#67D085"
+      }
+    }}
+    onClick={handleModal}
+  >
+    Add New Staff
+  </Button>
+</Box>
+
+
+    
         <DataTable
   columns={columns}
   RowComponent={UserTableRow}
@@ -112,6 +142,44 @@ export default function Index() {
 
         {/* </SimpleBar> */}
       </StyledUserPage>
+
+{/* =========== Modal Start Here =========== */}
+<Dialog
+  open={openModal}
+  onClose={handleCloseModal}
+  fullWidth
+  maxWidth="md"
+>
+  <DialogTitle
+    sx={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      pr: 1
+    }}
+  >
+    Add New Staff
+
+    <IconButton
+      onClick={handleCloseModal}
+      size="small"
+      sx={{
+        color: "#5A7A8C"
+      }}
+    >
+      <CloseIcon />
+    </IconButton>
+  </DialogTitle>
+
+  <Divider />
+
+  <DialogContent>
+    <AddNewStaff closeModal={handleCloseModal} />
+  </DialogContent>
+</Dialog>
+
     </DashboardLayout>
   );
 }
+
+

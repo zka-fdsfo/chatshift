@@ -519,7 +519,7 @@ export default function TimeSheetTable({
         {/* -------- Daily View -------- */}
         {type === "daily"
           ? times.map((_time) => {
-              const shifts_based_on_time = shifts.find(
+              const shifts_based_on_time = shifts?.find(
                 (_shift) =>
                   moment(_shift.startDate).format("DD/MM/YYYY") ===
                     day.format("DD/MM/YYYY") &&
@@ -528,7 +528,7 @@ export default function TimeSheetTable({
                   _carer.id === _shift.employee.id
               );
 
-              const pastDayOverflowingShift = shifts.find(
+              const pastDayOverflowingShift = shifts?.find(
                 (_shift) =>
                   moment(_shift.shiftEndDate).format("DD/MM/YYYY") ===
                     day.format("DD/MM/YYYY") &&
@@ -537,7 +537,7 @@ export default function TimeSheetTable({
                   _carer.id === _shift.employee.id
               );
 
-              const exactShift = shifts.find(
+              const exactShift = shifts?.find(
                 (_shift) =>
                   moment(_shift.startDate).format("DD/MM/YYYY") ===
                     day.format("DD/MM/YYYY") &&
@@ -701,7 +701,7 @@ export default function TimeSheetTable({
         </TableCell>
         {type === "daily"
           ? times.map((_time) => {
-              const shifts_based_on_time = shifts.find((_shift) => {
+              const shifts_based_on_time = shifts?.find((_shift) => {
                 return (
                   _time >= _shift.startTime[0] &&
                   (_shift.isShiftEndsNextDay || _time < _shift.endTime[0]) &&
@@ -709,14 +709,14 @@ export default function TimeSheetTable({
                 );
               });
 
-              const pastDayOverflowingShift = shifts.find(
+              const pastDayOverflowingShift = shifts?.find(
                 (_shift) =>
                   _shift.isShiftEndsNextDay &&
                   _time < _shift.endTime[0] &&
                   _client.id === _shift.client.id
               );
 
-              const exactShift = shifts.find(
+              const exactShift = shifts?.find(
                 (_shift) =>
                   _shift.startTime[0] === _time &&
                   _client.id === _shift.client.id

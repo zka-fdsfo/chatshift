@@ -70,9 +70,9 @@ function SidebarItem({ item }: SidebarItemProps) {
         sx={{
           ...sx,
           ...(active && active_sx),
-          color: "#5a5a5a",
+          color: "#1D2A33", // Main Menu icon and text color
           // background: "#eeeff7"
-           background: "#D8EFFE"
+           background: "#D8EFFE"  // Main Menu background Color
         }}
         onClick={() => handleClick(item)}
       >
@@ -112,13 +112,13 @@ function SidebarItem({ item }: SidebarItemProps) {
                     ...sx,
                     pl: 4,
                     ...(link_active && active_sx),
-                    color: "#5a5a5a"
+                    color: "#5A7A8C" // Submenu text color
                   }}
                   key={_item.path}
                 >
                   <Box
                     component="span"
-                    sx={{ width: 24, height: 24, mr: 2, color: "#5a5a5a" }}
+                    sx={{ width: 24, height: 24, mr: 2, color: "#5A7A8C" }}  // Submenu Icon color
                   >
                     {_item.icon && createElement(_item.icon)}
                   </Box>
