@@ -52,9 +52,21 @@ export default function Sidebar({ openNav, onCloseNav }: SidebarProps) {
         // bgcolor: (theme) => alpha(theme.palette.grey[500], 0.12)
       }}
     >
-      <Avatar src={user?.data?.data?.photoDownloadURL} alt="photoURL">
+      {/* <Avatar src={user?.data?.data?.photoDownloadURL} alt="photoURL">
         {user?.data?.data?.name?.charAt(0)}
-      </Avatar>
+      </Avatar> */}
+
+          <Avatar
+            src={user?.data?.data?.photoDownloadURL}
+            alt="photoURL"
+            sx={{
+              bgcolor: "#F7FAFC",
+              color: "#1D2A33",
+              fontWeight: 600
+            }}
+          >
+            {user?.data?.data?.name?.charAt(0)}
+          </Avatar>
 
       <Box sx={{ ml: 2 }}>
         <Typography variant="subtitle2" sx={{ color: "#ffffff" }}>
