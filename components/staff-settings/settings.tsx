@@ -49,7 +49,7 @@ const schema = yup.object().shape({
   // isReadAndWriteStaffPrivateNotes: yup.boolean(),
   isAccess: yup.boolean(),
   // isAccountOwner: yup.boolean()
-});
+});  
 
 export default function Settings({ settings }: { settings: ISettings }) {
   const [edit, setEdit] = useState(false);
@@ -181,7 +181,7 @@ export default function Settings({ settings }: { settings: ISettings }) {
               />
             )}
           </Grid>
-          <Grid item lg={5} md={6} sm={12} xs={12}>
+          {/* <Grid item lg={5} md={6} sm={12} xs={12}>
             <Typography variant="body1">Access To All Participants</Typography>
           </Grid>
           <Grid item lg={5} md={6} sm={12} xs={12}>
@@ -189,7 +189,39 @@ export default function Settings({ settings }: { settings: ISettings }) {
               icon={`eva:${settings?.hasAccessToAllClients ? "checkmark" : "close"
                 }-fill`}
             ></Iconify>
+          </Grid> */}
+                <Grid item lg={5} md={6} sm={12} xs={12}>
+            <Typography variant="body1">Access To All Participants</Typography>
           </Grid>
+          <Grid item lg={7} md={6} sm={12} xs={12}>
+            {edit ? (
+              <Controller
+                name="hasAccessToAllClients"
+                control={control}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={<Checkbox />}
+                    label=""
+                    {...field}
+                    checked={field.value}
+                  />
+                )}
+              />
+            ) : (
+              <Iconify
+                icon={`eva:${
+                  settings.hasAccessToAllClients ? "checkmark" : "close"
+                }-fill`}
+              ></Iconify>
+            )}
+          </Grid>
+
+
+
+
+
+
+
           {/* <Grid item lg={7} md={6} sm={12} xs={12}>
             <Typography>{settings?.hasAccessToAllClients}</Typography>
           </Grid> */}

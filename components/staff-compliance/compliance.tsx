@@ -236,6 +236,7 @@ export default function Compliance({
   };
 
   const handleOpenDocumentEditModal = (data: any) => {
+    console.log("------- Selected Document -------",data);
     setDocumentId(data.documentId);
     setSubcategoryId(data.documentSubCategoryId);
     setFile(data.fileName ? data.fileName[0] : null);
@@ -298,13 +299,14 @@ export default function Compliance({
   });
 
   // ---------------- To Add the Document Start Here ----------------
-  const { mutate } = useMutation({
+  const { mutate,isPending:isPendingCompliance } = useMutation({
     mutationFn: addCompliance,
     onSuccess: () => {
+      setLoading(false); // Stop loading on success
+      handleCloseComplianceModal
+      handleClose();
       queryClient.invalidateQueries({ queryKey: ["staffalldocuments"] });
       // console.log("Compliance Data saved successfully");
-      setLoading(false); // Stop loading on success
-      handleClose();
     },
     onError: (error) => {
       console.error("Error saving Compliance Data:", error);
@@ -375,7 +377,6 @@ export default function Compliance({
           isExpiryMandatory: expiryDateEnabled,
           expiryDate: convertedDate ?? new Date()
         });
-
         setOpenComplianceModal(false);
         setOpenComplianceModalDirect(false);
         setOpenListModal(true);
@@ -395,7 +396,6 @@ export default function Compliance({
           isExpiryMandatory: expiryDateEnabled,
           expiryDate: convertedDate ?? new Date()
         });
-
         setOpenComplianceModal(false);
         setOpenComplianceModalDirect(false);
         setOpenListModal(true);
@@ -414,7 +414,7 @@ export default function Compliance({
   // ---------------- To Add the Document End Here ----------------
 
   // ---------------- To Update the Document Start Here ----------------
-  const { mutate: updateDocument } = useMutation({
+  const { mutate: updateDocument, isPending:isPendingUpdate } = useMutation({
     mutationFn: updateCompliance,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["staffalldocuments"] });
@@ -450,6 +450,7 @@ export default function Compliance({
   }
 
   const handleUpdate = () => {
+    console.log("============ Employee Id, Subcategory Id, and Document Id: ===========",{employeeId,subcategoryId,documentId})
     if (employeeId && subcategoryId && file && documentId) {
       setLoading(true); // Start loading
       const formattedExpiryDate = expiryDate
@@ -504,6 +505,8 @@ export default function Compliance({
       setOpenComplianceModal(false);
       setOpenComplianceModalDirect(false);
       setOpenListModal(true);
+      
+      
     } else {
       console.log("Missing data in Edit", {
         employeeId,
@@ -513,8 +516,9 @@ export default function Compliance({
         expiryDateEnabled,
         expiryDate
       });
-      // handleClose();
+      handleClose();
       setOpenDocumentEditModal(false);
+      setOpenListModal(true);
     }
   };
   // ---------------- To Update the Document End Here ----------------
@@ -649,6 +653,7 @@ export default function Compliance({
     // Call your mutate function here
   };
 
+  const isDisabled = isPendingCompliance || isPendingUpdate;
   return (
     <StyledPaper>
       <Stack
@@ -866,11 +871,12 @@ export default function Compliance({
             variant="contained"
             color="error"
             onClick={handleCloseListModal}
+            // disabled={isDisabled}
           >
             Close
           </Button>
-          <Button variant="contained" onClick={handleOpenComplianceModal}>
-            Add Document
+          <Button variant="contained" onClick={handleOpenComplianceModal}  disabled={isDisabled}>
+            {isDisabled?"Please wait...":"Add Document"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -968,7 +974,7 @@ export default function Compliance({
             loading={loading}
             variant="contained"
           >
-            Submit
+            {isPendingCompliance?"Please wait...":"Submit"}
           </LoadingButton>
         </DialogActions>
       </Dialog>
@@ -1063,6 +1069,7 @@ export default function Compliance({
             variant="contained"
             color="error"
             onClick={handleCloseDocumentEditModal}
+            disabled={isPendingUpdate}
           >
             Close
           </Button>
@@ -1070,8 +1077,9 @@ export default function Compliance({
             onClick={handleUpdate}
             loading={loading}
             variant="contained"
+            disabled={isPendingUpdate}
           >
-            Update
+            {isPendingUpdate?"Please wait...":"Update"}
           </LoadingButton>
           {/* <Button variant="contained" onClick={handleSubmitDocumentEditModal}>
             Update
@@ -1101,11 +1109,12 @@ export default function Compliance({
             variant="contained"
             color="error"
             onClick={handleCloseDocumentDeleteModal}
+            disabled={isPending}
           >
             No
           </Button>
-          <Button variant="contained" onClick={confirmDocumentDelete}>
-            Yes
+          <Button variant="contained" onClick={confirmDocumentDelete} disabled={isPending}>
+            {isPending?"Please wait...":"Yes"}
           </Button>
         </DialogActions>
       </Dialog>
@@ -1267,3 +1276,4 @@ export default function Compliance({
     </StyledPaper>
   );
 }
+

@@ -59,7 +59,7 @@ export const endpoints = {
       subcategoryId: string,
       documentId: string
     ) =>
-      `/document/uploaded-documents/${employeeId}/${subcategoryId}/${documentId}`,
+      `/document/update-documents/${employeeId}/${subcategoryId}/${documentId}`,
     // time_sheet: (id: number) => `/timesheets/${id}`
     // timesheets: "/timesheets/employee"
     // gettimesheet: "/timesheets/employee",

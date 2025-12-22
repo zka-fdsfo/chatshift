@@ -224,7 +224,7 @@ export const updateCompliance = async ({
   data: FormData;
 }) => {
   try {
-    const res = await axiosInstance.post(
+    const res = await axiosInstance.put(
       endpoints.staff.update_compliance(employeeId, subcategoryId, documentId),
       data
     );
