@@ -13,7 +13,9 @@ const Cockpit = () => {
   // const [filterByShiftGraph, setFilterByShiftGraph] = useState("yearly");
   const router = useRouter();
   const today = new Date();
-  const date = `${today.getFullYear()}-${today.getMonth() + 1}`;
+  // const date = `${today.getFullYear()}-${today.getMonth() + 1}`;
+  const date = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}`;
+
 
   const { data, isLoading, isError } = useQuery({
     enabled: !!date,
@@ -66,7 +68,7 @@ const Cockpit = () => {
       <Typography variant='h5' mb={2} style={{color:'#1D2A33'}}>Dashboard</Typography>
 
       <Typography variant='h6' mb={2} style={{color:'#5A7A8C'}}>KPIS</Typography>
-      <Grid container spacing={2.5} mb={5}>
+      {/* <Grid container spacing={2.5} mb={5}>
         {data?.kpis?.map((item: any, i: number) => (
           <Grid item xs={12} sm={6} md={4} key={i}> 
             <Paper
@@ -109,7 +111,69 @@ const Cockpit = () => {
             </Paper>
           </Grid>
         ))}
+      </Grid> */}
+
+
+<Grid container spacing={2.5} mb={5}>
+  {data?.kpis?.map((item: any, i: number) => {
+    const label =
+      i === 0
+        ? "Employee with shift this month"
+        : i === 1
+        ? "Client with shift this month"
+        : item?.label;
+
+    return (
+      <Grid item xs={12} sm={6} md={4} key={i}>
+        <Paper
+          elevation={2}
+          onClick={() => router.push(getRedirectPath(i))}
+          sx={{
+            p: 3,
+            backgroundColor: "#F7FAFC",
+            cursor: "pointer",
+            height: "100%",
+            "&:hover": { boxShadow: 6 },
+          }}
+        >
+          <Typography
+            variant="h6"
+            mb={2}
+            sx={{ color: "#5A7A8C", fontWeight: 400 }}
+          >
+            {label}
+          </Typography>
+
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Box
+              sx={{
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                background: "rgba(0,0,0,0.05)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography variant="h5" sx={{ fontWeight: 300 }}>
+                {item?.current}
+              </Typography>
+            </Box>
+
+            {item?.trend !== 2 && (
+              <Typography sx={{ color: "#5A7A8C", fontSize: 12, fontWeight: 500 }}>
+                ↑ {item?.trend === 0 ? "increase" : "decrease"}{" "}
+                {Math.round(item?.percentChange)}%
+              </Typography>
+            )}
+          </Stack>
+        </Paper>
       </Grid>
+    );
+  })}
+</Grid>
+
 
 
 
