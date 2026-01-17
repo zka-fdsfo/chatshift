@@ -86,6 +86,7 @@ import Tracking from "pages/staff/tracking";
 import ClientSectionView from "./client-section-view";
 import StaffSectionView from "./staff-section-view";
 import TimeLocationView from "./time-location-view";
+import moment from "moment";
 
 interface DrawerInterface extends DrawerProps {
   open?: boolean;
@@ -547,6 +548,11 @@ export default function AddShiftView({
     enabled: Boolean(client) && role === "ROLE_ADMINS"
   });
 
+
+  useEffect(()=>{
+    console.log('-------------: Shift in Add-shift-view.tsx :-------------',shift);
+  },[shift])
+
   // --------- Parent to child access start here ----------
   const clientSectionRef = useRef<any>(null);
   const handleClearAll = () => {
@@ -786,6 +792,11 @@ export default function AddShiftView({
   //    );
   //   }
   // },[shift])
+
+  const today = moment().startOf("day");
+const shiftDate = moment(shift?.startDate).startOf("day");
+
+const isTodayOrFuture = shiftDate.isSameOrAfter(today, "day");
 
   return (
     <>
@@ -1046,7 +1057,7 @@ export default function AddShiftView({
                 //   </Button>
                 // </Stack>
                 <>
-                  {role === "ROLE_ADMIN" && !shift?.isPickupJob && (
+                  {role === "ROLE_ADMIN" && !shift?.isPickupJob && isTodayOrFuture && (
   <Stack direction="row" alignItems="center" gap={1}>
     <LoadingButton
       variant="contained"
@@ -1173,11 +1184,11 @@ export default function AddShiftView({
                  
                   {shift?.id && (
                            <>
-                           <Tracking employeeId={shift.employee.id} shiftId={shift.id} clockIn={shift.isEmployeeClockedIn}  clockOut={shift.isEmployeeClockedOut}  />
+                           <Tracking employeeId={shift.employee.id} shiftId={shift?.id} clockIn={shift.isEmployeeClockedIn}  clockOut={shift.isEmployeeClockedOut}  />
                            </>
                         )}
 
-                  {/* {view && <ShiftRelatedNotes shift={shift} />} */}
+                  {view && <ShiftRelatedNotes shift={shift} />}
                 </>
               )}
             </FormProvider>

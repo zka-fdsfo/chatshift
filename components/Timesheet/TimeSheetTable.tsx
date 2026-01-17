@@ -34,7 +34,7 @@ import AddShift from "../add-shift/add-shift";
 import { useRouter } from "next/router";
 import { getStaffList } from "@/api/functions/staff.api";
 import { IStaff } from "@/interface/staff.interfaces";
-import Loader from "@/ui/Loader/Loder";
+// import Loader from "@/ui/Loader/Loder";
 import { getAllClients } from "@/api/functions/client.api";
 import { IClient } from "@/interface/client.interface";
 import Link from "next/link";
@@ -50,6 +50,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { getAllShiftsIdList } from "@/api/functions/shift.api";
 import { parseCookies } from "nookies";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+import Loader from "../Loader";
 
 const StyledTable = styled(Table)`
   border: 1px solid #ddd;
@@ -291,6 +292,8 @@ export default function TimeSheetTable({
     setError(""); // Clear any previous error
   };
 
+
+
   const { mutate: saveSwapShift } = useMutation({
     mutationFn: swapShift,
     onSuccess: () => {
@@ -398,6 +401,10 @@ export default function TimeSheetTable({
   const [bulkaction, setBulkAction] = useState(false);
   const [selectall, setSelectAll] = useState(false);
 
+  useEffect(()=>{
+    console.log("Shift in TimeSheetTable.tsx-----------",shifts)
+  },[shifts])
+
   useEffect(() => {
     // console.log("selectAll after update:", selectall); // This will log the correct updated value
   }, [selectall]);
@@ -485,6 +492,9 @@ export default function TimeSheetTable({
         }
       }
     });
+
+
+
 
     return (
       // ------------------ ROSTER ROW START HERE -----------------

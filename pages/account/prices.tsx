@@ -32,6 +32,7 @@ import PriceImport from "./price-import";
 import Iconify from "@/components/Iconify/Iconify";
 import { queryClient } from "pages/_app";
 import SamplePriceBook from "pages/sample-price-book";
+import Loader from "@/components/Loader";
 
 const StyledPage = styled(Box)`
   padding: 20px 10px;
@@ -87,6 +88,10 @@ export default function Prices() {
       // props.onClose();
     }
   });
+
+    if (isPending) {
+      return <Loader />
+    }
 
   const handleImport = () => {
     mutate(0);

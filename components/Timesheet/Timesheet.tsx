@@ -41,7 +41,7 @@ export default function Timesheet({ shifts }: { shifts: Shift[] }) {
     initialData: shifts
   });
 
-  console.log("Shift Data:::::::::::::::::::::::::::::::", data);
+  console.log("Shift Data:::::::::::::::::::::::::::::::*****", data);
 
   const zoomIn = () => {
     setZoomLevel((prev) => {

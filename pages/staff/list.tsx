@@ -82,6 +82,10 @@ export default function Index() {
     }
   ];
 
+    if (isLoading) {
+      return <Loader />
+    }
+
   return (
     <DashboardLayout isLoading={isLoading}>
       <StyledUserPage>

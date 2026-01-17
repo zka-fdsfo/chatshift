@@ -19,6 +19,17 @@ export function middleware(request: NextRequest) {
     "/admin-dashboard",
     "/coordinator-dashboard",
     "/kiosk_scheduler",
+    "/about",     
+    "/contact",
+    "/features",
+    "/how-it-work",
+    "/security",
+    "/pricing",
+    "/help-center",
+    "/ndis-guidelines",
+    "/blog",
+    "/faqs",
+
   ];
 
   const pathname = request.nextUrl.pathname;

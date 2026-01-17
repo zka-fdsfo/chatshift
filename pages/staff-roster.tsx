@@ -23,7 +23,7 @@ export default function StaffRoster() {
   });
 
   useEffect(() => {
-    console.log("--------------: is Pickup Test :--------------", data);
+    console.log("--------------: Shift in Staff Roster :--------------", data);
   }, [data]);
 
   return (

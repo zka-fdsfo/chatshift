@@ -85,6 +85,10 @@ export default function Shift({
     return savedIds ? JSON.parse(savedIds) : [];
   });
 
+  useEffect(()=>{
+    console.log("------------ shift in shift.tsx -----------",shift)
+  },[shift])
+
   const handleClick = (shift: any) => {
     if (shift.shiftCategory === "PICKUP_SHIFT") {
       toast.error("You are not allowed to cancel Pickup Shift");
@@ -236,6 +240,16 @@ export default function Shift({
     }
   };
 
+  const today = moment().startOf("day");
+  const shiftDate = moment(shift.startDate).startOf("day");
+  
+  const bgColor = shiftDate.isSame(today, "day")
+    ? "#99cef6"      // today → light blue
+    : shiftDate.isAfter(today, "day")
+    ? "#b7e4c7"      // future → light green
+    : "#e0e0e0";     // past → light gray
+
+
   // console.log("----------------- Shift Details ----------------", shift);
   return (
     <>
@@ -346,6 +360,8 @@ export default function Shift({
                   paddingLeft: "10px"
                 }
           }
+
+          style={{ backgroundColor: bgColor }}
           // onClick={() =>
           //   bulkaction ? handleClick(shift.id) : setViewModal(true)
           // }

@@ -81,6 +81,7 @@ import {
   updateClientDocument
 } from "@/api/functions/client.api";
 import { getRole } from "@/lib/functions/_helpers.lib";
+import Loader from "@/components/Loader";
 
 const StyledBox = styled(Box)`
   th:not(:nth-of-type(1)),
@@ -620,7 +621,7 @@ export default function TemplateSubsection({
   }, []); // Empty dependency array ensures this runs only once
 
   if (isLoading) {
-    return <Typography>Loading...</Typography>;
+    return <Loader />
   }
 
   if (error) {

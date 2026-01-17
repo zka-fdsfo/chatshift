@@ -134,6 +134,19 @@ export default function CalendarComponent({
                         </Typography>
 
                         {/* Shifts */}
+                        {/* {role === "ROLE_CLIENT" ? (
+                          <ShiftBoxParticipant
+                            shifts={filteredShifts}
+                            isMonthly
+                          />
+                        ) : (
+                          <ShiftBox
+                            shifts={filteredShifts}
+                            isMonthly
+                          />
+                        )} */}
+
+
                         {role === "ROLE_CLIENT" ? (
                           <ShiftBoxParticipant
                             shifts={filteredShifts}

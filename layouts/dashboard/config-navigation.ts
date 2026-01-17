@@ -77,7 +77,7 @@ const navConfig: NavItem[] = (() => {
         hasChild: false
       },
       {
-        title: "Client",
+        title: "Participants",
         path: "/clients/list",
         icon: PeopleAltIcon,
         children: [
@@ -159,7 +159,7 @@ const navConfig: NavItem[] = (() => {
         hasChild: true
       },
       {
-        title: "Clients",
+        title: "Participants",
         path: "/clients/list",
         icon: PeopleAltIcon,
         children: [
@@ -206,7 +206,7 @@ const navConfig: NavItem[] = (() => {
             hasChild: false
           },
           {
-            title: "Client Notes",
+            title: "Participants Notes",
             path: "/client-notes",
             icon: TocIcon,
             children: [],
@@ -493,7 +493,7 @@ const navConfig: NavItem[] = (() => {
         hasChild: true
       },
       {
-        title: "Clients",
+        title: "Participants",
         path: "/clients/list",
         icon: PeopleAltIcon,
         children: [
@@ -540,7 +540,7 @@ const navConfig: NavItem[] = (() => {
             hasChild: false
           },
           {
-            title: "Client Notes",
+            title: "Participants Notes",
             path: "/client-notes",
             icon: TocIcon,
             children: [],
@@ -854,7 +854,7 @@ const navConfig: NavItem[] = (() => {
         hasChild: false
       },
       {
-        title: "Clients",
+        title: "Participants",
         path: "/clients/list",
         icon: PeopleAltIcon,
         children: [
@@ -901,7 +901,7 @@ const navConfig: NavItem[] = (() => {
             hasChild: false
           },
           {
-            title: "Client Notes",
+            title: "Participants Notes",
             path: "/client-notes",
             icon: TocIcon,
             children: [],
@@ -1099,7 +1099,7 @@ const navConfig: NavItem[] = (() => {
         hasChild: true
       },
       {
-        title: "Clients",
+        title: "Participants",
         path: "/clients/list",
         icon: PeopleAltIcon,
         children: [
@@ -1146,7 +1146,7 @@ const navConfig: NavItem[] = (() => {
             hasChild: false
           },
           {
-            title: "Client Notes",
+            title: "Participants Notes",
             path: "/client-notes",
             icon: TocIcon,
             children: [],
@@ -1330,7 +1330,7 @@ const navConfig: NavItem[] = (() => {
       //   default: true
       // },
       {
-        title: "Client",
+        title: "Participants",
         path: "/clients/list",
         icon: PeopleAltIcon,
         children: [

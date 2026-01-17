@@ -5,7 +5,8 @@ import Box from "@mui/material/Box";
 import Header from "./header/header";
 import Main from "./main";
 import Sidebar from "./sidebar/Sidebar";
-import Loader from "@/ui/Loader/Loder";
+import Loader from "@/components/Loader";
+
 
 // ----------------------------------------------------------------------
 

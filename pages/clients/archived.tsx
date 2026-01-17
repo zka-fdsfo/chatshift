@@ -6,6 +6,7 @@ import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useQuery } from "@tanstack/react-query";
 import ArchivedClientRow from "./archived-client-row";
+import Loader from "@/components/Loader";
 
 const StyledPage = styled(Box)`
   padding: 20px 10px;
@@ -50,7 +51,9 @@ export default function Archived() {
       label: "Area"
     }
   ];
-
+  if (isLoading) {
+    return <Loader />
+  }
   return (
     <DashboardLayout isLoading={isLoading}>
       <StyledPage>

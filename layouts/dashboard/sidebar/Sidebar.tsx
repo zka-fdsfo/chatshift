@@ -19,6 +19,7 @@ import SidebarItem from "./SidebarItem";
 import useUser from "@/hooks/react-query/useUser";
 import NewLogo from "@/components/logo/new-logo";
 import { Paper } from "@mui/material";
+import NewLogoSidebar from "@/components/logo/new-logo-sidebar";
 
 interface SidebarProps {
   openNav: boolean;
@@ -104,7 +105,7 @@ export default function Sidebar({ openNav, onCloseNav }: SidebarProps) {
       }}
       ref={ref}
     >
-      <NewLogo sx={{ mt: 3, ml: 4 }} />
+      <NewLogoSidebar sx={{ mt: 3, ml: 4 }} />
 
 
       {renderAccount}

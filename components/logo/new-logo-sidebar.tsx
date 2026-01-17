@@ -8,7 +8,7 @@ interface NewLogoProps extends BoxProps {
   disabledLink?: boolean;
 }
 
-const NewLogo = forwardRef<HTMLAnchorElement, NewLogoProps>(
+const NewLogoSidebar = forwardRef<HTMLAnchorElement, NewLogoProps>(
   ({ disabledLink, sx, ...other }, ref) => {
     const logo = (
       <Box
@@ -40,7 +40,7 @@ const NewLogo = forwardRef<HTMLAnchorElement, NewLogoProps>(
     }
 
     return (
-      <Link href="/" passHref legacyBehavior>
+      <Link href="">
         {logo}
       </Link>
     );
@@ -48,6 +48,6 @@ const NewLogo = forwardRef<HTMLAnchorElement, NewLogoProps>(
 );
 
 // ✅ ADD THIS LINE
-NewLogo.displayName = "NewLogo";
+NewLogoSidebar.displayName = "NewLogoNewLogoSidebar";
 
-export default NewLogo;
+export default NewLogoSidebar;

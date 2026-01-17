@@ -20,6 +20,7 @@ import {
 } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import Loader from "@/components/Loader";
 
 // InvoiceTable Component
 const InvoiceTable = ({ data }: { data: any[] }) => {
@@ -48,6 +49,8 @@ const InvoiceTable = ({ data }: { data: any[] }) => {
       item.invoiceNumber.toLowerCase().includes(search.toLowerCase()) ||
       item.clientName.toLowerCase().includes(search.toLowerCase())
   );
+
+  
 
   return (
     <Paper sx={{ padding: 2, marginTop: 2 }}>
@@ -150,6 +153,11 @@ export default function ListVoid() {
       console.log("The list of Void invoices is as below::::::", data);
     }
   }, [data]);
+
+
+  if (isLoading) {
+    return <Loader/>
+  }
 
   return (
     <DashboardLayout>

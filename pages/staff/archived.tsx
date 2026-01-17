@@ -6,6 +6,7 @@ import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useQuery } from "@tanstack/react-query";
 import ArchivedStaffRow from "./archived-staff-row";
+import Loader from "@/components/Loader";
 
 const StyledPage = styled(Box)`
   padding: 20px 10px;
@@ -15,7 +16,7 @@ const StyledPage = styled(Box)`
 `;
 
 export default function Archived() {
-  const { data, isLoading } = useQuery({
+  const { data, isLoading,isError } = useQuery({
     queryKey: ["archived_list_staff"],
     queryFn: getArchivedList
   });
@@ -38,6 +39,12 @@ export default function Archived() {
       label: "Phone No"
     }
   ];
+
+  
+  if (isLoading) {
+    return <Loader />
+  }
+
 
   return (
     <DashboardLayout isLoading={isLoading}>
