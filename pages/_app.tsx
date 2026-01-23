@@ -17,6 +17,9 @@ import { Provider } from "react-redux";
 import { store } from "@/reduxtoolkit/store/store";
 import { Toaster } from "sonner";
 import { useJwtAutoLogout } from "@/hooks/useJwtAutoLogout";
+import { SessionConfirmProvider } from "@/components/SessionConfirmProvider";
+import JwtAutoLogoutHandler from "@/components/JwtAutoLogoutHandler";
+
 
 /**
  * It suppresses the useLayoutEffect warning when running in SSR mode
@@ -55,10 +58,12 @@ export default function CustomApp({
 
 
   // ----------- Code for auto logout is start here -----------
-  useJwtAutoLogout(); // ✅ no arguments
+  // useJwtAutoLogout(); // ✅ no arguments
     // ----------- Code for auto logout is end here -----------
   return (
     <Provider store={store}>
+       <SessionConfirmProvider>
+       <JwtAutoLogoutHandler />
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <QueryClientProvider client={queryClient}>
           <CacheProvider value={emotionCache}>
@@ -71,6 +76,7 @@ export default function CustomApp({
           </CacheProvider>
         </QueryClientProvider>
       </LocalizationProvider>
+      </SessionConfirmProvider>
     </Provider>
   );
 }

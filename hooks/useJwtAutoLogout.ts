@@ -1,17 +1,36 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { jwtDecode } from "jwt-decode";
 import { getCookie, setCookieClient } from "@/lib/functions/storage.lib";
 import { updateToken } from "@/api/functions/admin.api";
+import { useSessionConfirm } from "@/components/SessionConfirmProvider";
+
+const CHECK_INTERVAL = 30_000; // every 30s (safe)
 
 export function useJwtAutoLogout() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isRefreshingRef = useRef(false);
+  const { confirm } = useSessionConfirm();
 
   useEffect(() => {
     startTimer();
+    startInterval();
 
-    return () => clearTimer();
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      clearTimer();
+      clearIntervalCheck();
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, []);
+
+  const handleVisibility = () => {
+    if (document.visibilityState === "visible") {
+      startTimer();
+      checkNow();
+    }
+  };
 
   const clearTimer = () => {
     if (timeoutRef.current) {
@@ -20,10 +39,42 @@ export function useJwtAutoLogout() {
     }
   };
 
+  const clearIntervalCheck = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  const startInterval = () => {
+    clearIntervalCheck();
+    intervalRef.current = setInterval(checkNow, CHECK_INTERVAL);
+  };
+
+  const checkNow = () => {
+    const token = getCookie(process.env.NEXT_APP_TOKEN_NAME!) as
+      | string
+      | undefined;
+
+    if (!token) return;
+
+    try {
+      const { exp }: { exp: number } = jwtDecode(token);
+      if (exp * 1000 <= Date.now()) {
+        onTokenExpired();
+      }
+    } catch {
+      logout();
+    }
+  };
+
   const startTimer = () => {
     clearTimer();
 
-    const token = getCookie(process.env.NEXT_APP_TOKEN_NAME!) as string | undefined;
+    const token = getCookie(process.env.NEXT_APP_TOKEN_NAME!) as
+      | string
+      | undefined;
+
     if (!token) return;
 
     try {
@@ -40,61 +91,19 @@ export function useJwtAutoLogout() {
       logout();
     }
   };
-  
 
   const onTokenExpired = async () => {
-    if (isRefreshingRef.current) return; // ⛔ prevent double calls
+    if (isRefreshingRef.current) return;
     isRefreshingRef.current = true;
 
-    const shouldContinue = window.confirm(
-      "Your session has expired. Do you want to continue?"
-    );
+    console.log("🔥 TOKEN EXPIRED");
 
-    // if (!shouldContinue) {
-    //   logout();
-    //   return;
-    // }
+    const shouldContinue = await confirm();
 
-    // ------- START ----------
-    
-    function waitForUserResponse(timeout = 10000): Promise<boolean> {
-        return new Promise((resolve) => {
-          let responded = false;
-      
-          // Example: hook into some user event or your logic that sets shouldContinue
-          const checkUser = (value: boolean) => {
-            if (!responded) {
-              responded = true;
-              resolve(value);
-            }
-          };
-      
-          // Timeout fallback
-          setTimeout(() => {
-            if (!responded) {
-              resolve(false); // treat as no response
-            }
-          }, timeout);
-      
-          // Expose checkUser so you can call it when user responds
-          (window as any).userResponded = checkUser;
-        });
-      }
-      
-      // Usage
-      (async () => {
-        const shouldContinue = await waitForUserResponse(10000);
-      
-        if (!shouldContinue) {
-          logout();
-          window.location.reload();
-          return;
-        }
-      
-        // Continue your normal flow if user responded true
-      })();
-      
-     // -------- END ---------
+    if (!shouldContinue) {
+      logout();
+      return;
+    }
 
     try {
       const data = await updateToken();
@@ -103,40 +112,24 @@ export function useJwtAutoLogout() {
         process.env.NEXT_APP_TOKEN_NAME!,
         data.jwtToken
       );
-
       setCookieClient(
         process.env.NEXT_REFRESH_TOKEN_NAME!,
         data.refreshToken
       );
 
       isRefreshingRef.current = false;
-      startTimer(); // 🔁 restart timer safely
+      startTimer();
     } catch {
-    //   logout();
+      logout();
     }
   };
 }
 
 function logout() {
-    console.log("*************: Log Out :**************");
-  
-    // Clear access token cookie
-    document.cookie = `${process.env.NEXT_APP_TOKEN_NAME}=; Max-Age=0; path=/`;
-  
-    // Clear refresh token cookie
-    document.cookie = `${process.env.NEXT_REFRESH_TOKEN_NAME}=; Max-Age=0; path=/`;
-  
-    // Redirect to login/home
-    window.location.href = "/";
-  }
-  
+  console.log("🚪 LOGOUT");
 
+  document.cookie = `${process.env.NEXT_APP_TOKEN_NAME}=; Max-Age=0; path=/`;
+  document.cookie = `${process.env.NEXT_REFRESH_TOKEN_NAME}=; Max-Age=0; path=/`;
 
-// function logout() {
-//   console.log("*************: Log Out :**************");
-
-//   // Clear cookies
-//   document.cookie = `${process.env.NEXT_APP_TOKEN_NAME}=; Max-Age=0; path=/`;
-
-//   window.location.href = "/";
-// }
+  window.location.href = "/";
+}
