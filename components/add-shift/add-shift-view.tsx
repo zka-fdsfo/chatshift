@@ -549,9 +549,9 @@ export default function AddShiftView({
   });
 
 
-  useEffect(()=>{
-    console.log('-------------: Shift in Add-shift-view.tsx :-------------',shift);
-  },[shift])
+  // useEffect(()=>{
+  //   console.log('-------------: Shift in Add-shift-view.tsx :-------------',shift);
+  // },[shift])
 
   // --------- Parent to child access start here ----------
   const clientSectionRef = useRef<any>(null);

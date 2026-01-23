@@ -18,7 +18,8 @@ export const endpoints = {
     reset_password: "/auth/reset-password",
     change_password: "/auth/change-password",
     last_signin: (id: string) => `/auth/${id}/last-signin`,
-    resend_invite: "/auth/verification-link"
+    resend_invite: "/auth/verification-link",
+    update_token: '/auth/refreshToken',
   },
   admin: {
     admin_dashboard: (date: string) => `/admin/dashboard?month=${date}`,

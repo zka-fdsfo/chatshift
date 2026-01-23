@@ -17,6 +17,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import AddNewClient from "./addnewclient";
 import { NextRequest, NextResponse } from "next/server";
 import Loader from "@/components/Loader";
+
 const StyledClientPage = styled(Box)`
   padding: 20px 10px;
   h4 {

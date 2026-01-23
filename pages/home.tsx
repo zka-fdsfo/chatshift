@@ -122,7 +122,7 @@ export default function Home({
 }) {
   setCookieClient("firstLoad", "false");
   const [isFirstLoadComplete, setIsFirstLoadComplete] = useState(false);
-  console.log("-------------- First Load --------------");
+  // console.log("-------------- First Load --------------");
   useEffect(() => {
     // window.location.href = "https://your-new-page-url.com";
     const isFirstLoad = getCookie("firstLoad");

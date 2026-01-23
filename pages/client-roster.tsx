@@ -51,9 +51,9 @@ export default function StaffRoster({ onOpenNav }: HeaderProps) {
       })
   });
 
-  useEffect(() => {
-    console.log("----------- Carer List ------------", data);
-  }, [data]);
+  // useEffect(() => {
+  //   console.log("----------- Carer List ------------", data);
+  // }, [data]);
 
   const dispatch = useAppDispatch();
 
@@ -133,7 +133,7 @@ export default function StaffRoster({ onOpenNav }: HeaderProps) {
 
    setCookieClient("firstLoad", "false");
     const [isFirstLoadComplete, setIsFirstLoadComplete] = useState(false);
-    console.log("-------------- First Load --------------");
+    // console.log("-------------- First Load --------------");
     useEffect(() => {
       // window.location.href = "https://your-new-page-url.com";
       const isFirstLoad = getCookie("firstLoad");

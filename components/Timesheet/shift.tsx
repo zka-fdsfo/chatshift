@@ -85,9 +85,9 @@ export default function Shift({
     return savedIds ? JSON.parse(savedIds) : [];
   });
 
-  useEffect(()=>{
-    console.log("------------ shift in shift.tsx -----------",shift)
-  },[shift])
+  // useEffect(()=>{
+  //   console.log("------------ shift in shift.tsx -----------",shift)
+  // },[shift])
 
   const handleClick = (shift: any) => {
     if (shift.shiftCategory === "PICKUP_SHIFT") {

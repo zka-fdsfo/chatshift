@@ -89,9 +89,6 @@ export default function Prices() {
     }
   });
 
-    if (isPending) {
-      return <Loader />
-    }
 
   const handleImport = () => {
     mutate(0);
@@ -141,6 +138,9 @@ export default function Prices() {
       );
     }
   }, [priceBookData, router.query.page]);
+  if (isPending) {
+    return <Loader />
+  }
 
   return (
     // <DashboardLayout isLoading={isLoading}>

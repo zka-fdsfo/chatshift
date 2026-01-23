@@ -10,8 +10,8 @@ import AdminDashboardHeatMap from './AdminDashboardHeatmap';
 import { useRouter } from 'next/router';
 import {
   Accordion,
-  AccordionSummary,
-  AccordionDetails
+  AccordionDetails,
+  AccordionSummary
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
@@ -181,7 +181,60 @@ const Cockpit = () => {
         })}
       </Grid>
 
+     {/* =========================== */}
+     <Accordion defaultExpanded sx={{ mt: 0 }}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <Typography variant="h6" sx={{ color: "#5A7A8C" }}>
+            SHIFT
+          </Typography>
+        </AccordionSummary>
 
+        <AccordionDetails>
+          <Grid
+            item
+            xs={12}
+            md={12}
+            lg={12}
+            display="flex"
+            gap={2.5}
+            flexWrap="wrap"
+          >
+            <TableContainer component={Paper} elevation={2}>
+              <Table size="small">
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: "#f5f7fa" }}>
+                    <TableCell><b>Employee</b></TableCell>
+                    <TableCell><b>Client</b></TableCell>
+                    <TableCell><b>Role</b></TableCell>
+                    <TableCell><b>Start Time</b></TableCell>
+                    <TableCell><b>End Time</b></TableCell>
+                  </TableRow>
+                </TableHead>
+
+                <TableBody>
+                  {data?.todayShifts?.length > 0 ? (
+                    data.todayShifts.map((shift: any) => (
+                      <TableRow key={shift.shiftId} hover>
+                        <TableCell>{shift.employeeName}</TableCell>
+                        <TableCell>{shift.clientName}</TableCell>
+                        <TableCell>{formatRoleName(shift.roleName)}</TableCell>
+                        <TableCell>{shift.startTime}</TableCell>
+                        <TableCell>{shift.endTime}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} align="center">
+                        No shifts available
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Grid>
+        </AccordionDetails>
+      </Accordion>
 
 
       {/* ======================== */}
@@ -254,7 +307,7 @@ const Cockpit = () => {
                     }}
                   >
                     <Typography variant="h5" sx={{ fontWeight: 300 }}>
-                      {String(value)}
+                    {value != null ? Math.round(Number(value)) : 0}
                     </Typography>
                   </Box>
                 </Paper>
@@ -312,60 +365,7 @@ const Cockpit = () => {
       </Accordion>
 
 
-      {/* =========================== */}
-      <Accordion sx={{ mt: 0 }}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6" sx={{ color: "#5A7A8C" }}>
-            SHIFT
-          </Typography>
-        </AccordionSummary>
-
-        <AccordionDetails>
-          <Grid
-            item
-            xs={12}
-            md={12}
-            lg={12}
-            display="flex"
-            gap={2.5}
-            flexWrap="wrap"
-          >
-            <TableContainer component={Paper} elevation={2}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: "#f5f7fa" }}>
-                    <TableCell><b>Employee</b></TableCell>
-                    <TableCell><b>Client</b></TableCell>
-                    <TableCell><b>Role</b></TableCell>
-                    <TableCell><b>Start Time</b></TableCell>
-                    <TableCell><b>End Time</b></TableCell>
-                  </TableRow>
-                </TableHead>
-
-                <TableBody>
-                  {data?.todayShifts?.length > 0 ? (
-                    data.todayShifts.map((shift: any) => (
-                      <TableRow key={shift.shiftId} hover>
-                        <TableCell>{shift.employeeName}</TableCell>
-                        <TableCell>{shift.clientName}</TableCell>
-                        <TableCell>{formatRoleName(shift.roleName)}</TableCell>
-                        <TableCell>{shift.startTime}</TableCell>
-                        <TableCell>{shift.endTime}</TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={5} align="center">
-                        No shifts available
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Grid>
-        </AccordionDetails>
-      </Accordion>
+ 
 
       {/* ============================= */}
 
@@ -376,7 +376,7 @@ const Cockpit = () => {
       </Box>
 
       {/* YEARLY SHIFTS */}
-      <Accordion defaultExpanded sx={{ mb: 2, boxShadow: "none" }}>
+      <Accordion  sx={{ mb: 2, boxShadow: "none" }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Box>
             <Typography variant="h6">Shifts by Yearly</Typography>

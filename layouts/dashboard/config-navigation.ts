@@ -54,10 +54,11 @@ if (typeof window !== "undefined") {
   role = localStorage.getItem("user_role");
 }
 
-console.log(
-  ":::::::::::::::::::::::::================= USER ROLE from Session Config Navigation ========================:::::::::::::::::",
-  role
-);
+// console.log(
+//   ":::::::::::::::::::::::::================= USER ROLE from Session Config Navigation ========================:::::::::::::::::",
+//   role
+// );
+
 const navConfig: NavItem[] = (() => {
   if (role === "ROLE_CARER") {
     return [

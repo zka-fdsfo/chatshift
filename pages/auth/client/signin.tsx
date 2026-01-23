@@ -101,6 +101,7 @@ export default function ClientLoginView() {
   const { mutate, isPending } = useMutation({
     mutationFn: clientLoginMutation,
     onSuccess: (data: any) => {
+      console.log("----------:CLIENT SIGN IN DATA:----------",data);
       setCookieClient(process.env.NEXT_APP_TOKEN_NAME!, data.jwtToken);
       sessionStorage.setItem("user_role", data.role[0]?.name);
       localStorage.setItem("user_role", data.role[0]?.name);

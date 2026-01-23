@@ -22,9 +22,9 @@ export default function StaffRoster() {
       })
   });
 
-  useEffect(() => {
-    console.log("--------------: Shift in Staff Roster :--------------", data);
-  }, [data]);
+  // useEffect(() => {
+  //   console.log("--------------: Shift in Staff Roster :--------------", data);
+  // }, [data]);
 
   return (
     <DashboardLayout isLoading={isLoading}>
