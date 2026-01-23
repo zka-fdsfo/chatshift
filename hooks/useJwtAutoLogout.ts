@@ -4,7 +4,8 @@ import { getCookie, setCookieClient } from "@/lib/functions/storage.lib";
 import { updateToken } from "@/api/functions/admin.api";
 import { useSessionConfirm } from "@/components/SessionConfirmProvider";
 
-const CHECK_INTERVAL = 30_000; // every 30s (safe)
+const CHECK_INTERVAL = 30_000; // check token every 30s
+const MODAL_AUTO_CLOSE = 10_000; // 10s auto-close modal
 
 export function useJwtAutoLogout() {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -25,13 +26,16 @@ export function useJwtAutoLogout() {
     };
   }, []);
 
+  // Recheck token if tab becomes active
   const handleVisibility = () => {
+    if (typeof window === "undefined") return;
     if (document.visibilityState === "visible") {
       startTimer();
       checkNow();
     }
   };
 
+  // Clear main timeout
   const clearTimer = () => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
@@ -39,6 +43,7 @@ export function useJwtAutoLogout() {
     }
   };
 
+  // Clear interval
   const clearIntervalCheck = () => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -46,16 +51,15 @@ export function useJwtAutoLogout() {
     }
   };
 
+  // Periodic check
   const startInterval = () => {
     clearIntervalCheck();
     intervalRef.current = setInterval(checkNow, CHECK_INTERVAL);
   };
 
+  // Check token immediately
   const checkNow = () => {
-    const token = getCookie(process.env.NEXT_APP_TOKEN_NAME!) as
-      | string
-      | undefined;
-
+    const token = getCookie(process.env.NEXT_APP_TOKEN_NAME!);
     if (!token) return;
 
     try {
@@ -68,13 +72,10 @@ export function useJwtAutoLogout() {
     }
   };
 
+  // Timer for exact expiry
   const startTimer = () => {
     clearTimer();
-
-    const token = getCookie(process.env.NEXT_APP_TOKEN_NAME!) as
-      | string
-      | undefined;
-
+    const token = getCookie(process.env.NEXT_APP_TOKEN_NAME!);
     if (!token) return;
 
     try {
@@ -96,29 +97,44 @@ export function useJwtAutoLogout() {
     if (isRefreshingRef.current) return;
     isRefreshingRef.current = true;
 
-    console.log("🔥 TOKEN EXPIRED");
+    if (typeof window === "undefined") return;
 
-    const shouldContinue = await confirm();
+    // Check if modal was already shown (skip if tab closed & reopened)
+    // alert("Tab count: " + tabcount);
+    // const popupShown = localStorage.getItem("session-popup-shown");
+    // if (popupShown) {
+    //   logout();
+    //   return;
+    // }
 
-    if (!shouldContinue) {
+    const TAB_COUNT_KEY = "app-open-tabs";
+    const tabcount = localStorage.getItem(TAB_COUNT_KEY);
+    const count = Number(tabcount);
+
+    if (isNaN(count) || count < 2) {
+      logout();
+      return;
+    }
+
+    // localStorage.setItem("session-popup-shown", "true");
+
+    // Show modal, auto-close after 10s
+    const shouldContinue = await confirm(MODAL_AUTO_CLOSE);
+
+    if (shouldContinue) {
+      localStorage.removeItem("session-popup-shown");
+    } else {
       logout();
       return;
     }
 
     try {
       const data = await updateToken();
-
-      setCookieClient(
-        process.env.NEXT_APP_TOKEN_NAME!,
-        data.jwtToken
-      );
-      setCookieClient(
-        process.env.NEXT_REFRESH_TOKEN_NAME!,
-        data.refreshToken
-      );
+      setCookieClient(process.env.NEXT_APP_TOKEN_NAME!, data.jwtToken);
+      setCookieClient(process.env.NEXT_REFRESH_TOKEN_NAME!, data.refreshToken);
 
       isRefreshingRef.current = false;
-      startTimer();
+      startTimer(); // restart timer safely
     } catch {
       logout();
     }
@@ -126,8 +142,9 @@ export function useJwtAutoLogout() {
 }
 
 function logout() {
-  console.log("🚪 LOGOUT");
+  if (typeof window === "undefined") return;
 
+  console.log("🚪 Logging out...");
   document.cookie = `${process.env.NEXT_APP_TOKEN_NAME}=; Max-Age=0; path=/`;
   document.cookie = `${process.env.NEXT_REFRESH_TOKEN_NAME}=; Max-Age=0; path=/`;
 
