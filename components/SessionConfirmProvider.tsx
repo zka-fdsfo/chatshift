@@ -1,12 +1,23 @@
-import { createContext, useContext, useRef, useState, ReactNode, useEffect } from "react";
+import { 
+  ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState
+} from "react";
+
+
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Button,
-  Typography,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Typography
 } from "@mui/material";
+
+
 
 type Resolver = (value: boolean) => void;
 
@@ -21,7 +32,35 @@ export function SessionConfirmProvider({ children }: { children: ReactNode }) {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const confirm = (timeoutMs: number = 10_000) => {
+  // const confirm = (timeoutMs: number = 10_000) => {
+  //   setOpen(true);
+  //   setCountdown(timeoutMs / 1000); // set countdown in seconds
+
+  //   // live countdown interval
+  //   intervalRef.current = setInterval(() => {
+  //     setCountdown((prev) => {
+  //       if (prev <= 1) {
+  //         clearInterval(intervalRef.current!);
+  //         return 0;
+  //       }
+  //       return prev - 1;
+  //     });
+  //   }, 1000);
+
+  //   return new Promise<boolean>((resolve) => {
+  //     resolverRef.current = resolve;
+
+  //     // Auto-close after timeoutMs
+  //     timeoutRef.current = setTimeout(() => {
+  //       clearInterval(intervalRef.current!);
+  //       resolve(false);      // treat as "No"
+  //       setOpen(false);
+  //       resolverRef.current = null;
+  //     }, timeoutMs);
+  //   });
+  // };
+
+  const confirm = (timeoutMs = 10_000) => {
     setOpen(true);
     setCountdown(timeoutMs / 1000); // set countdown in seconds
 
@@ -47,7 +86,9 @@ export function SessionConfirmProvider({ children }: { children: ReactNode }) {
         resolverRef.current = null;
       }, timeoutMs);
     });
-  };
+};
+
+
 
   const close = (value: boolean) => {
     if (timeoutRef.current) {
@@ -68,7 +109,8 @@ export function SessionConfirmProvider({ children }: { children: ReactNode }) {
     <SessionConfirmContext.Provider value={{ confirm }}>
       {children}
 
-      <Dialog open={open} disableEscapeKeyDown onClose={() => {}}>
+      {/* <Dialog open={open} disableEscapeKeyDown onClose={() => {}}> */}
+      <Dialog open={open} disableEscapeKeyDown>
         <DialogTitle>Session Expired</DialogTitle>
 
         <DialogContent>
