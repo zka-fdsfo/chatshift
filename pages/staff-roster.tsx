@@ -29,6 +29,7 @@ export default function StaffRoster() {
   return (
     <DashboardLayout isLoading={isLoading}>
       <CalendarToolbar date={date} setDate={setDate} />
+      <br></br>
       <CalendarComponent date={date} shifts={data} />
     </DashboardLayout>
   );

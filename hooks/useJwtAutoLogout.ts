@@ -111,10 +111,10 @@ export function useJwtAutoLogout() {
     const tabcount = localStorage.getItem(TAB_COUNT_KEY);
     const count = Number(tabcount);
 
-    if (isNaN(count) || count < 2) {
-      logout();
-      return;
-    }
+    // if (isNaN(count) || count < 2) {
+    //   logout();
+    //   return;
+    // }
 
     // localStorage.setItem("session-popup-shown", "true");
 

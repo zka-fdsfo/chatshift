@@ -75,53 +75,8 @@ const Cockpit = () => {
       <Typography variant='h5' mb={2} style={{ color: '#1D2A33' }}>Dashboard</Typography>
 
       <Typography variant='h6' mb={2} style={{ color: '#5A7A8C' }}>KPIS</Typography>
+
       {/* <Grid container spacing={2.5} mb={5}>
-        {data?.kpis?.map((item: any, i: number) => (
-          <Grid item xs={12} sm={6} md={4} key={i}> 
-            <Paper
-              elevation={2}
-              onClick={() => router.push(getRedirectPath(i))}
-              sx={{
-                p: 3,
-                backgroundColor: "#F7FAFC",
-                cursor: "pointer",
-                height: "100%",
-                "&:hover": { boxShadow: 6 },
-              }}
-            >
-              <Typography variant="h6" mb={2} style={{color:'#5A7A8C', fontWeight:400}}>
-                {item?.label}
-              </Typography>
-
-              <Stack direction="row" alignItems="center" justifyContent="space-between">
-                <Box
-                  sx={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: "50%",
-                    background: "rgba(0,0,0,0.05)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Typography variant="h5" style={{fontWeight:300}}>{item?.current}</Typography>
-                </Box>
-
-                {item?.trend !== 2 && (
-                  <Typography sx={{ color: "#5A7A8C", fontSize: 12, fontWeight: 500 }}>
-                    ↑ {item?.trend === 0 ? "increase" : "decrease"}{" "}
-                    {Math.round(item?.percentChange)}%
-                  </Typography>
-                )}
-              </Stack>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid> */}
-
-
-      <Grid container spacing={2.5} mb={5}>
         {data?.kpis?.map((item: any, i: number) => {
           const label =
             i === 0
@@ -179,10 +134,105 @@ const Cockpit = () => {
             </Grid>
           );
         })}
+      </Grid> */}
+
+      <Grid container spacing={2.5} mb={5}>
+        {data?.kpis?.map((item: any, i: number) => {
+          const label =
+            i === 0
+              ? "Employee with shift this month"
+              : i === 1
+                ? "Client with shift this month"
+                : item?.label;
+
+          // Optional icons for medical theme
+          const icon = i === 0 ? "👩‍⚕️" : i === 1 ? "🧑‍🦽" : "📊";
+
+          return (
+            <Grid item xs={12} sm={6} md={4} key={i}>
+              <Paper
+                elevation={2}
+                onClick={() => router.push(getRedirectPath(i))}
+                sx={{
+                  p: 3,
+                  backgroundColor: "#F7FAFC", // Background Bright
+                  borderLeft: `6px solid ${item?.trend === 0 ? "#67D085" : item?.trend === 1 ? "#D84F67" : "#5A7A8C"}`, // trend border
+                  cursor: "pointer",
+                  height: "100%",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    boxShadow: 6,
+                    transform: "translateY(-2px)",
+                  },
+                }}
+              >
+                {/* Header with icon and label */}
+                <Stack direction="row" spacing={2} alignItems="center" mb={2}>
+                  <Box
+                    sx={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: "50%",
+                      backgroundColor: "#D8EFFE", // Calm Accent
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 24,
+                    }}
+                  >
+                    {icon}
+                  </Box>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ color: "#1D2A33", fontWeight: 500 }} // Primary Dark
+                  >
+                    {label}
+                  </Typography>
+                </Stack>
+
+                {/* KPI Number and Trend */}
+                <Stack direction="row" alignItems="center" justifyContent="space-between">
+                  <Box
+                    sx={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: "50%",
+                      backgroundColor: "#D8EFFE", // Calm Accent
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{ fontWeight: 600, color: "#67D085" }} // Primary Accent
+                    >
+                      {item?.current}
+                    </Typography>
+                  </Box>
+
+                  {item?.trend !== 2 && (
+                    <Typography
+                      sx={{
+                        color: item?.trend === 0 ? "#67D085" : "#D84F67", // green/red trend
+                        fontSize: 12,
+                        fontWeight: 500,
+                      }}
+                    >
+                      {item?.trend === 0 ? "↑ Increase" : "↓ Decrease"}{" "}
+                      {Math.round(item?.percentChange)}%
+                    </Typography>
+                  )}
+                </Stack>
+              </Paper>
+            </Grid>
+          );
+        })}
       </Grid>
 
-     {/* =========================== */}
-     <Accordion defaultExpanded sx={{ mt: 0 }}>
+
+      {/* =========================== */}
+      {/* <Accordion defaultExpanded sx={{ mt: 0 }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography variant="h6" sx={{ color: "#5A7A8C" }}>
             SHIFT
@@ -234,11 +284,89 @@ const Cockpit = () => {
             </TableContainer>
           </Grid>
         </AccordionDetails>
+      </Accordion> */}
+
+      <Accordion defaultExpanded sx={{ mt: 0, boxShadow: 2, borderRadius: 2 }}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={{
+            backgroundColor: "#D8EFFE", // Calm Accent for header
+            borderRadius: "8px",
+            "& .MuiAccordionSummary-content": { alignItems: "center" },
+          }}
+        >
+          <Typography variant="h6" sx={{ color: "#1D2A33", fontWeight: 600 }}>
+            SHIFT
+          </Typography>
+        </AccordionSummary>
+
+        <AccordionDetails sx={{ backgroundColor: "#F7FAFC", p: 2 }}>
+          <Grid item xs={12} display="flex" gap={2.5} flexWrap="wrap">
+            <TableContainer
+              component={Paper}
+              elevation={2}
+              sx={{ borderRadius: 2, overflow: "hidden" }}
+            >
+              <Table size="small">
+                <TableHead>
+                  <TableRow sx={{ backgroundColor: "#5A7A8C" }}>
+                    <TableCell sx={{ color: "#F7FAFC", fontWeight: 600 }}>
+                      Employee
+                    </TableCell>
+                    <TableCell sx={{ color: "#F7FAFC", fontWeight: 600 }}>
+                      Client
+                    </TableCell>
+                    <TableCell sx={{ color: "#F7FAFC", fontWeight: 600 }}>
+                      Role
+                    </TableCell>
+                    <TableCell sx={{ color: "#F7FAFC", fontWeight: 600 }}>
+                      Start Time
+                    </TableCell>
+                    <TableCell sx={{ color: "#F7FAFC", fontWeight: 600 }}>
+                      End Time
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+
+                <TableBody>
+                  {data?.todayShifts?.length > 0 ? (
+                    data.todayShifts.map((shift: any) => (
+                      <TableRow
+                        key={shift.shiftId}
+                        hover
+                        sx={{
+                          "&:hover": {
+                            backgroundColor: "#D8EFFE", // calm hover
+                          },
+                        }}
+                      >
+                        <TableCell sx={{ color: "#1D2A33" }}>{shift.employeeName}</TableCell>
+                        <TableCell sx={{ color: "#1D2A33" }}>{shift.clientName}</TableCell>
+                        <TableCell sx={{ color: "#1D2A33" }}>
+                          {formatRoleName(shift.roleName)}
+                        </TableCell>
+                        <TableCell sx={{ color: "#1D2A33" }}>{shift.startTime}</TableCell>
+                        <TableCell sx={{ color: "#1D2A33" }}>{shift.endTime}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} align="center" sx={{ color: "#5A7A8C" }}>
+                        No shifts available
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Grid>
+        </AccordionDetails>
       </Accordion>
 
 
+
       {/* ======================== */}
-      <Accordion>
+      {/* <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography variant="h6" sx={{ color: "#5A7A8C" }}>
             ROLES
@@ -274,12 +402,76 @@ const Cockpit = () => {
             ))}
           </Grid>
         </AccordionDetails>
+      </Accordion> */}
+
+      <Accordion sx={{ boxShadow: 2, borderRadius: 2 }}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={{
+            backgroundColor: "#D8EFFE", // Calm Accent
+            borderRadius: "8px",
+            "& .MuiAccordionSummary-content": { alignItems: "center" },
+          }}
+        >
+          <Typography variant="h6" sx={{ color: "#1D2A33", fontWeight: 600 }}>
+            ROLES
+          </Typography>
+        </AccordionSummary>
+
+        <AccordionDetails sx={{ backgroundColor: "#F7FAFC", p: 2 }}>
+          <Grid container spacing={2.5}>
+            {data?.roles?.map((item: any, i: number) => (
+              <Grid item xs={12} sm={6} md={3} key={i}>
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 3,
+                    backgroundColor: "#F7FAFC",
+                    borderLeft: `6px solid #67D085`, // Primary Accent highlight
+                    cursor: "pointer",
+                    "&:hover": { boxShadow: 6, transform: "translateY(-2px)" },
+                    borderRadius: 2,
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    mb={2}
+                    sx={{ color: "#5A7A8C", fontWeight: 500 }}
+                  >
+                    Role {formatRoleName(item?.roleName)}
+                  </Typography>
+
+                  <Box
+                    sx={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: "50%",
+                      backgroundColor: "#D8EFFE", // Calm Accent circle
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: 600,
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{ fontWeight: 600, color: "#67D085" }} // Primary Accent
+                    >
+                      {item?.count}
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        </AccordionDetails>
       </Accordion>
 
 
 
+
       {/* =========================== */}
-      <Accordion>
+      {/* <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography variant="h6" sx={{ color: "#5A7A8C" }}>
             EXTRA
@@ -307,7 +499,70 @@ const Cockpit = () => {
                     }}
                   >
                     <Typography variant="h5" sx={{ fontWeight: 300 }}>
-                    {value != null ? Math.round(Number(value)) : 0}
+                      {value != null ? Math.round(Number(value)) : 0}
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        </AccordionDetails>
+      </Accordion> */}
+
+      <Accordion sx={{ boxShadow: 2, borderRadius: 2 }}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={{
+            backgroundColor: "#D8EFFE", // Calm Accent
+            borderRadius: "8px",
+            "& .MuiAccordionSummary-content": { alignItems: "center" },
+          }}
+        >
+          <Typography variant="h6" sx={{ color: "#1D2A33", fontWeight: 600 }}>
+            EXTRA
+          </Typography>
+        </AccordionSummary>
+
+        <AccordionDetails sx={{ backgroundColor: "#F7FAFC", p: 2 }}>
+          <Grid container spacing={2.5}>
+            {extrasArray.map(([key, value]) => (
+              <Grid item xs={12} sm={6} md={4} key={key}>
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 3,
+                    backgroundColor: "#F7FAFC",
+                    borderLeft: `6px solid #67D085`, // Primary Accent highlight
+                    cursor: "pointer",
+                    "&:hover": { boxShadow: 6, transform: "translateY(-2px)" },
+                    borderRadius: 2,
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    mb={2}
+                    sx={{ color: "#5A7A8C", fontWeight: 500 }}
+                  >
+                    {formatLabel(key)}
+                  </Typography>
+
+                  <Box
+                    sx={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: "50%",
+                      backgroundColor: "#D8EFFE", // Calm Accent
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: 600,
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{ fontWeight: 600, color: "#67D085" }} // Primary Accent
+                    >
+                      {value != null ? Math.round(Number(value)) : 0}
                     </Typography>
                   </Box>
                 </Paper>
@@ -318,8 +573,9 @@ const Cockpit = () => {
       </Accordion>
 
 
+
       {/* =========================== */}
-      <Accordion>
+      {/* <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography variant="h6" sx={{ color: "#5A7A8C" }}>
             TOP EMPLOYEE OF THE MONTH
@@ -362,10 +618,73 @@ const Cockpit = () => {
             ))}
           </Grid>
         </AccordionDetails>
+      </Accordion> */}
+
+      <Accordion sx={{ boxShadow: 2, borderRadius: 2 }}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={{
+            backgroundColor: "#D8EFFE", // Calm Accent
+            borderRadius: "8px",
+            "& .MuiAccordionSummary-content": { alignItems: "center" },
+          }}
+        >
+          <Typography variant="h6" sx={{ color: "#1D2A33", fontWeight: 600 }}>
+            TOP EMPLOYEE OF THE MONTH
+          </Typography>
+        </AccordionSummary>
+
+        <AccordionDetails sx={{ backgroundColor: "#F7FAFC", p: 2 }}>
+          <Grid container spacing={2.5}>
+            {data?.topEmployeesThisMonth?.map((item: any, i: number) => (
+              <Grid item xs={12} sm={6} md={3} key={i}>
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 3,
+                    backgroundColor: "#F7FAFC",
+                    height: "100%",
+                    borderLeft: `6px solid #67D085`, // Primary Accent highlight
+                    cursor: "pointer",
+                    "&:hover": { boxShadow: 6, transform: "translateY(-2px)" },
+                    borderRadius: 2,
+                  }}
+                >
+                  <Typography
+                    variant="subtitle1"
+                    mb={2}
+                    sx={{ color: "#5A7A8C", fontWeight: 500 }}
+                  >
+                    {item?.employeeName}
+                  </Typography>
+
+                  <Box
+                    sx={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: "50%",
+                      backgroundColor: "#D8EFFE", // Calm Accent
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: 600,
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      sx={{ fontWeight: 600, color: "#67D085" }} // Primary Accent
+                    >
+                      {item?.count}
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Grid>
+            ))}
+          </Grid>
+        </AccordionDetails>
       </Accordion>
 
 
- 
 
       {/* ============================= */}
 
@@ -376,7 +695,7 @@ const Cockpit = () => {
       </Box>
 
       {/* YEARLY SHIFTS */}
-      <Accordion  sx={{ mb: 2, boxShadow: "none" }}>
+      {/* <Accordion sx={{ mb: 2, boxShadow: "none" }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Box>
             <Typography variant="h6">Shifts by Yearly</Typography>
@@ -400,10 +719,45 @@ const Cockpit = () => {
             <AdminDashboardGraph data={data?.shiftsByMonth} />
           </Box>
         </AccordionDetails>
+      </Accordion> */}
+
+      <Accordion sx={{ mb: 2, boxShadow: 2, borderRadius: 2 }}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={{
+            backgroundColor: "#D8EFFE", // Calm Accent
+            borderRadius: "8px",
+            "& .MuiAccordionSummary-content": { alignItems: "center" },
+          }}
+        >
+          <Box>
+            <Typography variant="h6" sx={{ color: "#1D2A33", fontWeight: 600 }}>
+              Shifts by Yearly
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#5A7A8C" }}>
+              {today.getFullYear()}
+            </Typography>
+          </Box>
+        </AccordionSummary>
+
+        <AccordionDetails sx={{ backgroundColor: "#F7FAFC", p: 2 }}>
+          <Box
+            sx={{
+              p: 2,
+              width: "100%",
+              backgroundColor: "#FFFFFF", // white card for chart
+              borderRadius: 2,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.08)", // subtle shadow
+            }}
+          >
+            <AdminDashboardGraph data={data?.shiftsByMonth} />
+          </Box>
+        </AccordionDetails>
       </Accordion>
 
+
       {/* MONTHLY SHIFTS */}
-      <Accordion sx={{ boxShadow: "none" }}>
+      {/* <Accordion sx={{ boxShadow: "none" }}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Box>
             <Typography variant="h6">Shifts by Monthly</Typography>
@@ -427,6 +781,40 @@ const Cockpit = () => {
             <AdminDashboardHeatMap
               data={data?.shiftsByDayCurrentMonth}
             />
+          </Box>
+        </AccordionDetails>
+      </Accordion> */}
+
+      <Accordion sx={{ mb: 2, boxShadow: 2, borderRadius: 2 }}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={{
+            backgroundColor: "#D8EFFE", // Calm Accent
+            borderRadius: "8px",
+            "& .MuiAccordionSummary-content": { alignItems: "center" },
+          }}
+        >
+          <Box>
+            <Typography variant="h6" sx={{ color: "#1D2A33", fontWeight: 600 }}>
+              Shifts by Monthly
+            </Typography>
+            <Typography variant="body2" sx={{ color: "#5A7A8C" }}>
+              {today.toLocaleString("default", { month: "long" })}
+            </Typography>
+          </Box>
+        </AccordionSummary>
+
+        <AccordionDetails sx={{ backgroundColor: "#F7FAFC", p: 2 }}>
+          <Box
+            sx={{
+              p: 2,
+              width: "100%",
+              backgroundColor: "#FFFFFF", // white card for heatmap
+              borderRadius: 2,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.08)", // subtle shadow
+            }}
+          >
+            <AdminDashboardHeatMap data={data?.shiftsByDayCurrentMonth} />
           </Box>
         </AccordionDetails>
       </Accordion>
