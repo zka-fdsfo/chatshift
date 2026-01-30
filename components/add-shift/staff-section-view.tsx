@@ -54,8 +54,7 @@ export default function StaffSectionView({
 
   useEffect(() => {
 
-    if (isOpenShift || isPickupJob)
-    {
+    if (isOpenShift || isPickupJob) {
       // Unselect all selected carers by resetting employeeIds
       setValue("employeeIds", []);
     }
@@ -66,6 +65,10 @@ export default function StaffSectionView({
   //   "-------------+++++++++++ Selected SHIFT +++++++++++ --------------",
   //   shift
   // );
+
+  // useEffect(()=>{
+  //   console.log("--------- SHIFT DATA ---------", shift)
+  // },[shift])
 
   // console.log("============ SHIFT EDITABLE DATA =============", shift);
   const router = useRouter();
@@ -164,68 +167,93 @@ export default function StaffSectionView({
         <Divider sx={{ marginBlock: "10px" }} />
         {view ? (
           <Grid container alignItems="center" rowSpacing={2}>
-            <Grid item lg={8} md={6} sm={12} xs={12}>
-              <Typography>Name</Typography>
-            </Grid>
-            <Grid item lg={4} md={6} sm={12} xs={12}>
-              <Link
-                href={`/participants/${shift?.employee.id}/view`}
-                style={{ textDecoration: "none", color: "#333" }}
-              >
-                <Typography variant="body1" textAlign="right">
-                  {shift?.employee.displayName}
-                </Typography>
-              </Link>
-            </Grid>
-            <Grid item lg={8} md={6} sm={12} xs={12}>
-              <Typography>Time</Typography>
-            </Grid>
-            <Grid item lg={4} md={6} sm={12} xs={12}>
-              <Typography variant="body1" textAlign="right">
-                <strong>
-                  {moment(
-                    `${shift?.startTime[0]}:${shift?.startTime[1]}`,
-                    "HH:mm"
-                  ).format("hh:mm a")}{" "}
-                  to{" "}
-                  {moment(
-                    `${shift?.endTime[0]}:${shift?.endTime[1]}`,
-                    "HH:mm"
-                  ).format("hh:mm a")}
-                </strong>
-              </Typography>
-            </Grid>
-            <Grid item lg={8} md={6} sm={12} xs={12}>
-              <Typography>
-                Total hours scheduled on{" "}
-                {moment(shift?.startDate).format("DD/MM/YYYY")}
-              </Typography>
-            </Grid>
-            <Grid item lg={4} md={6} sm={12} xs={12}>
-              <Typography variant="body1" textAlign="right">
-                <strong>{shift?.shiftHours}</strong> hours
-              </Typography>
-            </Grid>
+
+            {role !== "ROLE_CARER" && role !== "ROLE_ADMIN" ? (
+              <>
+                <Grid item lg={8} md={6} sm={12} xs={12}>
+                  <Typography>Name</Typography>
+                </Grid>
+                <Grid item lg={4} md={6} sm={12} xs={12}>
+                  <Link
+                    href={`/participants/${shift?.employee.id}/view`}
+                    style={{ textDecoration: "none", color: "#333" }}
+                  >
+                    <Typography variant="body1" textAlign="right">
+                      {shift?.employee.displayName}
+                    </Typography>
+                  </Link>
+                </Grid>
+              </>
+            ) : (
+              <>
+                <Grid item lg={8} md={6} sm={12} xs={12}>
+                  <Typography>Name</Typography>
+                </Grid>
+                <Grid item lg={4} md={6} sm={12} xs={12}>
+                  <Link
+                    href={`/participants/${shift?.employee.id}/view`}
+                    style={{ textDecoration: "none", color: "#333" }}
+                  >
+                    <Typography variant="body1" textAlign="right">
+                      {shift?.employee.displayName}
+                    </Typography>
+                  </Link>
+                </Grid>
+
+                <Grid item lg={8} md={6} sm={12} xs={12}>
+                  <Typography>Time</Typography>
+                </Grid>
+                <Grid item lg={4} md={6} sm={12} xs={12}>
+                  <Typography variant="body1" textAlign="right">
+                    <strong>
+                      {moment(
+                        `${shift?.startTime[0]}:${shift?.startTime[1]}`,
+                        "HH:mm"
+                      ).format("hh:mm a")}{" "}
+                      to{" "}
+                      {moment(
+                        `${shift?.endTime[0]}:${shift?.endTime[1]}`,
+                        "HH:mm"
+                      ).format("hh:mm a")}
+                    </strong>
+                  </Typography>
+                </Grid>
+
+                <Grid item lg={8} md={6} sm={12} xs={12}>
+                  <Typography>
+                    Total hours scheduled on{" "}
+                    {moment(shift?.startDate).format("DD/MM/YYYY")}
+                  </Typography>
+                </Grid>
+                <Grid item lg={4} md={6} sm={12} xs={12}>
+                  <Typography variant="body1" textAlign="right">
+                    <strong>{shift?.shiftHours}</strong> hours
+                  </Typography>
+                </Grid>
+              </>
+            )}
+
+
           </Grid>
         ) : (
           <Grid container alignItems="center">
-             {!isPickupJob && staffId !== "PICKUP SHIFT" && (
-            <Grid item lg={4} md={6} sm={12} xs={12}>
-              <Controller
-                name="isOpenShift"
-                control={control}
-                render={({ field }) => (
-                  <FormControlLabel
-                    control={<Checkbox size="small" />}
-                    checked={staffId === "OPEN SHIFT" ? true : field.value} 
-                    {...field}
-                    label="Is Open Shift"
-                  />
-                )}
-              />
-            </Grid>
+            {!isPickupJob && staffId !== "PICKUP SHIFT" && (
+              <Grid item lg={4} md={6} sm={12} xs={12}>
+                <Controller
+                  name="isOpenShift"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={<Checkbox size="small" />}
+                      checked={staffId === "OPEN SHIFT" ? true : field.value}
+                      {...field}
+                      label="Is Open Shift"
+                    />
+                  )}
+                />
+              </Grid>
             )}
-                     {/* {!isOpenShift && staffId !== "OPEN SHIFT" && (
+            {/* {!isOpenShift && staffId !== "OPEN SHIFT" && (
                         <Grid item lg={4} md={6} sm={12} xs={12}>
                           <Controller
                             name="isPickupJob"
@@ -250,26 +278,26 @@ export default function StaffSectionView({
                     )} */}
 
 
-{!isOpenShift && staffId !== "OPEN SHIFT" && (
-  <Grid item lg={4} md={6} sm={12} xs={12}>
-    <Controller
-      name="isPickupJob"
-      control={control}
-      render={({ field }) => (
-        <FormControlLabel
-          control={<Checkbox size="small" />}
-          checked={
-            staffId === "PICKUP SHIFT"
-              ? true
-              : field.value ?? true // 👈 precheck if undefined
-          }
-          {...field}
-          label="Is Pickup Job"
-        />
-      )}
-    />
-  </Grid>
-)}
+            {!isOpenShift && staffId !== "OPEN SHIFT" && (
+              <Grid item lg={4} md={6} sm={12} xs={12}>
+                <Controller
+                  name="isPickupJob"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={<Checkbox size="small" />}
+                      checked={
+                        staffId === "PICKUP SHIFT"
+                          ? true
+                          : field.value ?? true // 👈 precheck if undefined
+                      }
+                      {...field}
+                      label="Is Pickup Job"
+                    />
+                  )}
+                />
+              </Grid>
+            )}
 
 
 
@@ -280,7 +308,7 @@ export default function StaffSectionView({
             {!isOpenShift &&
               staffId !== "OPEN SHIFT" &&
               staffId !== "PICKUP SHIFT" &&
-              !isPickupJob &&(
+              !isPickupJob && (
                 <Grid container alignItems="center">
                   <Grid container spacing={2}>
                     <Grid item lg={4} md={6} sm={12} xs={12}>
@@ -291,9 +319,9 @@ export default function StaffSectionView({
                         control={control}
                         name="employeeIds"
                         render={({ field, fieldState: { error, invalid } }) => {
-                          return (                          
+                          return (
                             <Box>
-  {/* <Select
+                              {/* <Select
     fullWidth
     size="small"
     {...field}
@@ -345,94 +373,94 @@ export default function StaffSectionView({
     )}
   </Select> */}
 
-<Select
-  fullWidth
-  size="small"
-  {...field}
-  open={openList}      
-  onOpen={() => setOpenList(true)}
-  onClose={() => setOpenList(false)}
-  value={Array.isArray(field.value) ? field.value : []}
-  multiple
-  displayEmpty
-  onChange={(e) => {
-    const _value = e.target.value;
-    field.onChange(_value);
+                              <Select
+                                fullWidth
+                                size="small"
+                                {...field}
+                                open={openList}
+                                onOpen={() => setOpenList(true)}
+                                onClose={() => setOpenList(false)}
+                                value={Array.isArray(field.value) ? field.value : []}
+                                multiple
+                                displayEmpty
+                                onChange={(e) => {
+                                  const _value = e.target.value;
+                                  field.onChange(_value);
 
-    // Map selected clients
-    const selectedClients = data?.filter((client: any) =>
-      _value.includes(client.id)
-    );
+                                  // Map selected clients
+                                  const selectedClients = data?.filter((client: any) =>
+                                    _value.includes(client.id)
+                                  );
 
-    const selectedNames = selectedClients
-      ?.map((client: any) => client.name)
-      .join(", ");
-    setSelectedDisplayNames(selectedNames);
+                                  const selectedNames = selectedClients
+                                    ?.map((client: any) => client.name)
+                                    .join(", ");
+                                  setSelectedDisplayNames(selectedNames);
 
-    const selectedId = selectedClients
-      ?.map((client: any) => client.id)
-      .join(", ");
-    if (selectedId) setSelectedCarerId(selectedId);
+                                  const selectedId = selectedClients
+                                    ?.map((client: any) => client.id)
+                                    .join(", ");
+                                  if (selectedId) setSelectedCarerId(selectedId);
 
-    // ❗ DO NOT auto-open/close based on selection
-  }}
-  renderValue={
-    field.value?.length
-      ? (selected) =>
-          data
-            ?.filter((client: any) => selected.includes(client.id))
-            .map((client: any) => client.name)
-            .join(", ")
-      : () => "Select Carer"
-  }
->
-  {isLoading ? (
-    <MenuItem disabled>Loading...</MenuItem>
-  ) : isPickupJob ? (
-    <MenuItem disabled>No carers available for pickup jobs</MenuItem>
-  ) : (
-    data?.slice(2).map((_data: IStaff) => (
-      <MenuItem value={_data.id} key={_data.id}>
-        <Checkbox checked={field.value?.includes(_data.id)} size="small" />
-        {_data.name}
-      </MenuItem>
-    ))
-  )}
+                                  // ❗ DO NOT auto-open/close based on selection
+                                }}
+                                renderValue={
+                                  field.value?.length
+                                    ? (selected) =>
+                                      data
+                                        ?.filter((client: any) => selected.includes(client.id))
+                                        .map((client: any) => client.name)
+                                        .join(", ")
+                                    : () => "Select Carer"
+                                }
+                              >
+                                {isLoading ? (
+                                  <MenuItem disabled>Loading...</MenuItem>
+                                ) : isPickupJob ? (
+                                  <MenuItem disabled>No carers available for pickup jobs</MenuItem>
+                                ) : (
+                                  data?.slice(2).map((_data: IStaff) => (
+                                    <MenuItem value={_data.id} key={_data.id}>
+                                      <Checkbox checked={field.value?.includes(_data.id)} size="small" />
+                                      {_data.name}
+                                    </MenuItem>
+                                  ))
+                                )}
 
-  {/* Divider */}
-  <MenuItem divider />
+                                {/* Divider */}
+                                <MenuItem divider />
 
-  {/* ⭐ Beautiful Close Button */}
-  <MenuItem
-    onClick={(e) => {
-      e.stopPropagation();
-      setOpenList(false);
-    }}
-    sx={{
-      justifyContent: "center",
-      mt: 1,
-    }}
-  >
-    <Box
-      sx={{
-        px: 2,
-        py: 1,
-        width: "100%",
-        textAlign: "center",
-        borderRadius: 2,
-        fontWeight: "bold",
-        bgcolor: "primary.main",
-        color: "white",
-        "&:hover": { bgcolor: "primary.dark" },
-      }}
-    >
-      Close
-    </Box>
-  </MenuItem>
-</Select>
+                                {/* ⭐ Beautiful Close Button */}
+                                <MenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenList(false);
+                                  }}
+                                  sx={{
+                                    justifyContent: "center",
+                                    mt: 1,
+                                  }}
+                                >
+                                  <Box
+                                    sx={{
+                                      px: 2,
+                                      py: 1,
+                                      width: "100%",
+                                      textAlign: "center",
+                                      borderRadius: 2,
+                                      fontWeight: "bold",
+                                      bgcolor: "primary.main",
+                                      color: "white",
+                                      "&:hover": { bgcolor: "primary.dark" },
+                                    }}
+                                  >
+                                    Close
+                                  </Box>
+                                </MenuItem>
+                              </Select>
 
 
-  {invalid && <FormHelperText>{error?.message}</FormHelperText>}
+                              {invalid && <FormHelperText>{error?.message}</FormHelperText>}
                             </Box>
 
                           );
