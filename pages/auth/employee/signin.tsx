@@ -86,10 +86,11 @@ export default function LoginView() {
       console.log("----------:EMPLOYEE SIGN IN DATA:----------",data);
       setCookieClient(process.env.NEXT_APP_TOKEN_NAME!, data.jwtToken);
       setCookieClient(process.env.NEXT_REFRESH_TOKEN_NAME!, data.refreshToken);
+      console.log("TOKEN NAME:", process.env.NEXT_PUBLIC_APP_TOKEN_NAME);
       
       sessionStorage.setItem("user_role", data.role[0]?.name);
       localStorage.setItem("user_role", data.role[0]?.name);
-      delete data.jwtToken;
+      // delete data.jwtToken;
       setCookieClient("user", JSON.stringify(data));
       if (data.role[0].name === "ROLE_ADMIN") window.location.href = "/admin-dashboard";
       else if (data.role[0].name === "ROLE_CARER") window.location.href = "/staff-roster";
