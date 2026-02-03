@@ -231,7 +231,7 @@ export default function Settings({ settings }: { settings: ISettings }) {
           <Grid item lg={7} md={6} sm={12} xs={12}>
             {edit ? (
               <Controller
-                name="hasAccessToAllClients"
+                name="isNotifyTimesheetApproval"
                 control={control}
                 render={({ field }) => (
                   <FormControlLabel
@@ -244,7 +244,7 @@ export default function Settings({ settings }: { settings: ISettings }) {
               />
             ) : (
               <Iconify
-                icon={`eva:${settings?.hasAccessToAllClients ? "checkmark" : "close"
+                icon={`eva:${settings?.isNotifyTimesheetApproval ? "checkmark" : "close"
                   }-fill`}
               ></Iconify>
             )}
