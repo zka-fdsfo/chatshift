@@ -34,7 +34,7 @@ import AddShift from "../add-shift/add-shift";
 import { useRouter } from "next/router";
 import { getStaffList } from "@/api/functions/staff.api";
 import { IStaff } from "@/interface/staff.interfaces";
-import Loader from "@/ui/Loader/Loder";
+// import Loader from "@/ui/Loader/Loder";
 import { getAllClients } from "@/api/functions/client.api";
 import { IClient } from "@/interface/client.interface";
 import Link from "next/link";
@@ -50,6 +50,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { getAllShiftsIdList } from "@/api/functions/shift.api";
 import { parseCookies } from "nookies";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+import Loader from "../Loader";
 
 const StyledTable = styled(Table)`
   border: 1px solid #ddd;
@@ -179,7 +180,7 @@ const StyledTable = styled(Table)`
     text-align: center;
     border-radius: 3px;
     cursor: pointer;
-    background-color: #124c5cb3;
+    background-color: #5A7A8C;
     font-weight: bold;
     color: #ffffff;
 
@@ -291,6 +292,8 @@ export default function TimeSheetTable({
     setError(""); // Clear any previous error
   };
 
+
+
   const { mutate: saveSwapShift } = useMutation({
     mutationFn: swapShift,
     onSuccess: () => {
@@ -336,7 +339,7 @@ export default function TimeSheetTable({
   // console.log("####################################Client Information", staffs);
 
   const cookies = parseCookies();
-  const token: string = cookies[process.env.NEXT_APP_TOKEN_NAME!];
+  const token: string = cookies[process.env.NEXT_PUBLIC_APP_TOKEN_NAME!];
 
   const { data: ShiftIdList } = useQuery({
     queryKey: ["shift_id_list"],
@@ -344,26 +347,43 @@ export default function TimeSheetTable({
   });
   // console.log(":::::::::::::TOKEN::::::::::::", token);
 
+  // useEffect(() => {
+  //   // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",ShiftIdList.shifts)
+  //   if (
+  //     ShiftIdList &&
+  //     ShiftIdList.shiftIds &&
+  //     ShiftIdList.shiftIds.length > 0
+  //   ) {
+  //     const formattedShiftIds = ShiftIdList.shiftIds.map(
+  //       (id: any, index: number) => index + 1
+  //     );
+  //     setAllselecteddata(formattedShiftIds);
+  //     // console.log("Shift Id List is here::::::::::::", formattedShiftIds);
+  //     // console.log("Shift Id List is here::::::::::::", allSelectedData);
+  //     sessionStorage.setItem("shiftIdsList",JSON.stringify(ShiftIdList.shiftIds));
+  //   } else {
+  //     // console.log("ShiftIdList or shiftIds is empty or undefined");
+  //   }
+  // }, [ShiftIdList.shifts]);
+
+
   useEffect(() => {
-    if (
-      ShiftIdList &&
-      ShiftIdList.shiftIds &&
-      ShiftIdList.shiftIds.length > 0
-    ) {
-      const formattedShiftIds = ShiftIdList.shiftIds.map(
-        (id: any, index: number) => index + 1
-      );
-      setAllselecteddata(formattedShiftIds);
-      // console.log("Shift Id List is here::::::::::::", formattedShiftIds);
-      // console.log("Shift Id List is here::::::::::::", allSelectedData);
-      sessionStorage.setItem(
-        "shiftIdsList",
-        JSON.stringify(ShiftIdList.shiftIds)
-      );
+    if (ShiftIdList?.shifts && ShiftIdList.shifts.length > 0) {
+      // Filter out shifts where category is "PICKUP_SHIFT"
+      const filteredShiftIds = ShiftIdList.shifts
+        .filter((shift: any) => shift.category !== "PICKUP_SHIFT")
+        .map((shift: any) => shift.id);
+
+      // Update the component state
+      setAllselecteddata(filteredShiftIds);
+
+      // Save the filtered IDs to session storage
+      sessionStorage.setItem("shiftIdsList", JSON.stringify(filteredShiftIds));
     } else {
-      // console.log("ShiftIdList or shiftIds is empty or undefined");
+      console.log("ShiftIdList.shifts is empty or undefined");
     }
-  }, [ShiftIdList]); // Only runs when ShiftIdList changes
+  }, [ShiftIdList?.shifts]);
+
 
   const times = [
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -380,6 +400,10 @@ export default function TimeSheetTable({
 
   const [bulkaction, setBulkAction] = useState(false);
   const [selectall, setSelectAll] = useState(false);
+
+  useEffect(() => {
+    console.log("Shift in TimeSheetTable.tsx-----------", shifts)
+  }, [shifts])
 
   useEffect(() => {
     // console.log("selectAll after update:", selectall); // This will log the correct updated value
@@ -407,131 +431,133 @@ export default function TimeSheetTable({
         sessionStorage.setItem("shiftIds", JSON.stringify([]));
       }
     } else {
-      console.log("------- Selected Id 1 --------",savedIds)
+      console.log("------- Selected Id 1 --------", savedIds)
       // if (savedIds) {
       if (savedIds && savedIds.length > 0) {
-        console.log("------- Selected Id 2 --------",savedIds)
+        console.log("------- Selected Id 2 --------", savedIds)
         const shiftIdsArray = JSON.parse(savedIds) as number[];
-        if(shiftIdsArray && shiftIdsArray.length>0)
-        {
+        if (shiftIdsArray && shiftIdsArray.length > 0) {
           mutate(shiftIdsArray);
           // console.log("Cancel the selected Shift:", shiftIdsArray);
-  
+
           // Uncomment the below code once the above function begin to work fine
           // // Clear the session storage
           sessionStorage.removeItem("shiftIds");
-  
+
           // // Optionally, you could save an empty array to the session storage (not strictly necessary)
           sessionStorage.setItem("shiftIds", JSON.stringify([]));
-  
+
           // // Update the component state to reflect the cleared array
           // setShiftIds([]);
         }
-       
+
       }
     }
   };
 
   // ----------------- CODE FOR STAFFs --------------------
   const renderStaffs = staffs
-  ?.slice() // make a shallow copy to avoid mutating original array
-  .sort((a: IStaff, b: IStaff) => {
-    const priority = (name: string) => {
-      if (name === "OPEN SHIFT") return 1;
-      if (name === "PICKUP SHIFT") return 2;
-      return 3; // normal carers after special ones
-    };
-    return priority(a.name) - priority(b.name);
-  })
-  .map((_carer: IStaff) => {
-    let hours = 0;
-    shifts?.forEach((_shift) => {
-      if (type === "daily") {
-        if (
-          day.format("DD/MM/YYYY") ===
+    ?.slice() // make a shallow copy to avoid mutating original array
+    .sort((a: IStaff, b: IStaff) => {
+      const priority = (name: string) => {
+        if (name === "OPEN SHIFT") return 1;
+        if (name === "PICKUP SHIFT") return 2;
+        return 3; // normal carers after special ones
+      };
+      return priority(a.name) - priority(b.name);
+    })
+    .map((_carer: IStaff) => {
+      let hours = 0;
+      shifts?.forEach((_shift) => {
+        if (type === "daily") {
+          if (
+            day.format("DD/MM/YYYY") ===
             moment(_shift.startDate).format("DD/MM/YYYY") &&
-          _shift.employee.id === _carer.id
-        ) {
-          hours += _shift.shiftHours;
+            _shift.employee.id === _carer.id
+          ) {
+            hours += _shift.shiftHours;
+          }
+        } else {
+          const startOfWeek = parseInt(day.format("x"));
+          const endOfWeek = parseInt(moment(day).endOf("isoWeek").format("x"));
+          const currentDay = _shift.startDate;
+
+          if (
+            startOfWeek <= currentDay &&
+            currentDay <= endOfWeek &&
+            _shift.employee.id === _carer.id
+          ) {
+            hours += _shift.shiftHours;
+          }
         }
-      } else {
-        const startOfWeek = parseInt(day.format("x"));
-        const endOfWeek = parseInt(moment(day).endOf("isoWeek").format("x"));
-        const currentDay = _shift.startDate;
+      });
 
-        if (
-          startOfWeek <= currentDay &&
-          currentDay <= endOfWeek &&
-          _shift.employee.id === _carer.id
-        ) {
-          hours += _shift.shiftHours;
-        }
-      }
-    });
 
-    return (
-      // ------------------ ROSTER ROW START HERE -----------------
-      <TableRow key={_carer.id}>
-        {/* -------- First Column: Staff Name -------- */}
-        <TableCell className="named-cell">
-          <Link href={`/staff/${_carer.id}/view`}>
-            <Typography
-              variant="body1"
-              sx={{
-                fontWeight: "500",
-                fontSize: "15px",
-                marginBottom: "5px",
-                color:
-                  _carer.name === "OPEN SHIFT" ||
-                  _carer.name === "PICKUP SHIFT"
-                    ? "red"
-                    : "#000000",
-                textTransform:
-                  _carer.name === "OPEN SHIFT" ||
-                  _carer.name === "PICKUP SHIFT"
-                    ? "uppercase"
-                    : "none",
-              }}
-            >
-              {_carer.name}
-            </Typography>
-          </Link>
-          {hours} Hours
-        </TableCell>
 
-        {/* -------- Daily View -------- */}
-        {type === "daily"
-          ? times.map((_time) => {
-              const shifts_based_on_time = shifts.find(
+
+      return (
+        // ------------------ ROSTER ROW START HERE -----------------
+        <TableRow key={_carer.id}>
+          {/* -------- First Column: Staff Name -------- */}
+          <TableCell className="named-cell">
+            <Link href={`/staff/${_carer.id}/view`}>
+              <Typography
+                variant="body1"
+                sx={{
+                  fontWeight: "500",
+                  fontSize: "15px",
+                  marginBottom: "5px",
+                  color:
+                    _carer.name === "OPEN SHIFT" ||
+                      _carer.name === "PICKUP SHIFT"
+                      ? "red"
+                      : "#000000",
+                  textTransform:
+                    _carer.name === "OPEN SHIFT" ||
+                      _carer.name === "PICKUP SHIFT"
+                      ? "uppercase"
+                      : "none",
+                }}
+              >
+                {_carer.name}
+              </Typography>
+            </Link>
+            {hours} Hours
+          </TableCell>
+
+          {/* -------- Daily View -------- */}
+          {type === "daily"
+            ? times.map((_time) => {
+              const shifts_based_on_time = shifts?.find(
                 (_shift) =>
                   moment(_shift.startDate).format("DD/MM/YYYY") ===
-                    day.format("DD/MM/YYYY") &&
+                  day.format("DD/MM/YYYY") &&
                   _time >= _shift.startTime[0] &&
                   (_shift.isShiftEndsNextDay || _time < _shift.endTime[0]) &&
                   _carer.id === _shift.employee.id
               );
 
-              const pastDayOverflowingShift = shifts.find(
+              const pastDayOverflowingShift = shifts?.find(
                 (_shift) =>
                   moment(_shift.shiftEndDate).format("DD/MM/YYYY") ===
-                    day.format("DD/MM/YYYY") &&
+                  day.format("DD/MM/YYYY") &&
                   _shift.isShiftEndsNextDay &&
                   _time < _shift.endTime[0] &&
                   _carer.id === _shift.employee.id
               );
 
-              const exactShift = shifts.find(
+              const exactShift = shifts?.find(
                 (_shift) =>
                   moment(_shift.startDate).format("DD/MM/YYYY") ===
-                    day.format("DD/MM/YYYY") &&
+                  day.format("DD/MM/YYYY") &&
                   _shift.startTime[0] === _time &&
                   _carer.id === _shift.employee.id
               );
 
               const colSpanByShift = exactShift
                 ? (exactShift?.isShiftEndsNextDay
-                    ? 24
-                    : exactShift?.endTime[0]) - exactShift?.startTime[0]
+                  ? 24
+                  : exactShift?.endTime[0]) - exactShift?.startTime[0]
                 : 1;
 
               return !shifts_based_on_time || exactShift ? (
@@ -550,23 +576,23 @@ export default function TimeSheetTable({
                 </TableCell>
               ) : null;
             })
-          : dates.map((_date, index) => {
+            : dates.map((_date, index) => {
               const carerShiftsByDate = shifts?.filter(
                 (_shift) =>
                   moment(_shift.startDate).format("DD/MM/YYYY") ===
-                    _date.format("DD/MM/YYYY") &&
+                  _date.format("DD/MM/YYYY") &&
                   _carer.id === _shift.employee.id
               );
               const prevCarerShiftsByDate = shifts?.filter(
                 (_shift) =>
                   moment(_shift.startDate).format("DD/MM/YYYY") ===
-                    dates[index !== 0 ? index - 1 : 0].format("DD/MM/YYYY") &&
+                  dates[index !== 0 ? index - 1 : 0].format("DD/MM/YYYY") &&
                   _carer.id === _shift.employee.id
               );
 
               return prevCarerShiftsByDate && prevCarerShiftsByDate[0]?.isShiftEndsNextDay &&
                 prevCarerShiftsByDate[0]?.id !==
-                  carerShiftsByDate[0]?.id ? null : (
+                carerShiftsByDate[0]?.id ? null : (
                 <TableCell
                   width={100}
                   key={_date.unix()}
@@ -576,13 +602,13 @@ export default function TimeSheetTable({
                     minHeight: "100px",
                     backgroundColor:
                       moment().format("DD/MM/YYYY") ===
-                      _date.format("DD/MM/YYYY")
+                        _date.format("DD/MM/YYYY")
                         ? "rgba(0, 169, 169, 0.08) !important"
                         : "rgb(249, 250, 251)",
                   }}
                   colSpan={
                     carerShiftsByDate && carerShiftsByDate[0]?.isShiftEndsNextDay &&
-                    index !== dates.length - 1
+                      index !== dates.length - 1
                       ? 2
                       : 1
                   }
@@ -618,7 +644,7 @@ export default function TimeSheetTable({
                       onClick={() => {
                         router.replace(
                           {
-                            query: { staff: _carer.id,name: _carer.name, },
+                            query: { staff: _carer.id, name: _carer.name, },
                           },
                           undefined,
                           { shallow: true }
@@ -634,9 +660,9 @@ export default function TimeSheetTable({
                 </TableCell>
               );
             })}
-      </TableRow>
-    );
-  });
+        </TableRow>
+      );
+    });
 
 
   // ----------------- CODE FOR CLIENTs --------------------
@@ -646,7 +672,7 @@ export default function TimeSheetTable({
       if (type === "daily") {
         if (
           day.format("DD/MM/YYYY") ===
-            moment(_shift.startDate).format("DD/MM/YYYY") &&
+          moment(_shift.startDate).format("DD/MM/YYYY") &&
           _shift.client.id === _client.id
         ) {
           hours += _shift.shiftHours;
@@ -684,120 +710,120 @@ export default function TimeSheetTable({
         </TableCell>
         {type === "daily"
           ? times.map((_time) => {
-              const shifts_based_on_time = shifts.find((_shift) => {
-                return (
-                  _time >= _shift.startTime[0] &&
-                  (_shift.isShiftEndsNextDay || _time < _shift.endTime[0]) &&
-                  _client.id === _shift.client.id
-                );
-              });
-
-              const pastDayOverflowingShift = shifts.find(
-                (_shift) =>
-                  _shift.isShiftEndsNextDay &&
-                  _time < _shift.endTime[0] &&
-                  _client.id === _shift.client.id
+            const shifts_based_on_time = shifts?.find((_shift) => {
+              return (
+                _time >= _shift.startTime[0] &&
+                (_shift.isShiftEndsNextDay || _time < _shift.endTime[0]) &&
+                _client.id === _shift.client.id
               );
+            });
 
-              const exactShift = shifts.find(
-                (_shift) =>
-                  _shift.startTime[0] === _time &&
-                  _client.id === _shift.client.id
-              );
+            const pastDayOverflowingShift = shifts?.find(
+              (_shift) =>
+                _shift.isShiftEndsNextDay &&
+                _time < _shift.endTime[0] &&
+                _client.id === _shift.client.id
+            );
 
-              const colSpanByShift = exactShift
-                ? (exactShift?.isShiftEndsNextDay
-                    ? 24
-                    : exactShift?.endTime[0]) - exactShift?.startTime[0]
-                : 1;
+            const exactShift = shifts?.find(
+              (_shift) =>
+                _shift.startTime[0] === _time &&
+                _client.id === _shift.client.id
+            );
 
-              return !shifts_based_on_time || exactShift ? (
-                <TableCell
-                  key={_time}
-                  colSpan={colSpanByShift}
-                  sx={{ minWidth: "150px" }}
-                >
-                  {exactShift ? (
-                    // ----------------- CLIENT Alloted Shift Start Here --------------
-                    <Shift
-                      shift={exactShift}
-                      key={exactShift?.id}
-                      type={"comfortable"}
-                      isClient
-                    />
-                  ) : // ----------------- CLIENT Alloted Shift Start Here --------------
+            const colSpanByShift = exactShift
+              ? (exactShift?.isShiftEndsNextDay
+                ? 24
+                : exactShift?.endTime[0]) - exactShift?.startTime[0]
+              : 1;
+
+            return !shifts_based_on_time || exactShift ? (
+              <TableCell
+                key={_time}
+                colSpan={colSpanByShift}
+                sx={{ minWidth: "150px" }}
+              >
+                {exactShift ? (
+                  // ----------------- CLIENT Alloted Shift Start Here --------------
+                  <Shift
+                    shift={exactShift}
+                    key={exactShift?.id}
+                    type={"comfortable"}
+                    isClient
+                  />
+                ) : // ----------------- CLIENT Alloted Shift Start Here --------------
                   null}
-                </TableCell>
-              ) : null;
-            })
+              </TableCell>
+            ) : null;
+          })
           : dates.map((_date, index) => {
-              const carerShiftsByDate = shifts?.filter(
-                (_shift) =>
-                  moment(_shift.startDate).format("DD/MM/YYYY") ===
-                    _date.format("DD/MM/YYYY") &&
-                  _client.id === _shift.client.id
-              );
-              const prevCarerShiftsByDate = shifts?.filter(
-                (_shift) =>
-                  moment(_shift.startDate).format("DD/MM/YYYY") ===
-                    dates[index !== 0 ? index - 1 : 0].format("DD/MM/YYYY") &&
-                  _client.id === _shift.client.id
-              );
+            const carerShiftsByDate = shifts?.filter(
+              (_shift) =>
+                moment(_shift.startDate).format("DD/MM/YYYY") ===
+                _date.format("DD/MM/YYYY") &&
+                _client.id === _shift.client.id
+            );
+            const prevCarerShiftsByDate = shifts?.filter(
+              (_shift) =>
+                moment(_shift.startDate).format("DD/MM/YYYY") ===
+                dates[index !== 0 ? index - 1 : 0].format("DD/MM/YYYY") &&
+                _client.id === _shift.client.id
+            );
 
-              return prevCarerShiftsByDate && prevCarerShiftsByDate[0]?.isShiftEndsNextDay &&
-                prevCarerShiftsByDate[0]?.id !==
-                  carerShiftsByDate[0]?.id ? null : (
-                <TableCell
-                  width={100}
-                  key={_date.unix()}
-                  height={120}
-                  sx={{
-                    position: "relative",
-                    minHeight: "100px",
-                    backgroundColor:
-                      moment().format("DD/MM/YYYY") ===
+            return prevCarerShiftsByDate && prevCarerShiftsByDate[0]?.isShiftEndsNextDay &&
+              prevCarerShiftsByDate[0]?.id !==
+              carerShiftsByDate[0]?.id ? null : (
+              <TableCell
+                width={100}
+                key={_date.unix()}
+                height={120}
+                sx={{
+                  position: "relative",
+                  minHeight: "100px",
+                  backgroundColor:
+                    moment().format("DD/MM/YYYY") ===
                       _date.format("DD/MM/YYYY")
-                        ? "rgba(0, 169, 169, 0.08) !important"
-                        : "rgb(249, 250, 251)"
-                  }}
-                  colSpan={
-                   carerShiftsByDate && carerShiftsByDate[0]?.isShiftEndsNextDay &&
+                      ? "rgba(0, 169, 169, 0.08) !important"
+                      : "rgb(249, 250, 251)"
+                }}
+                colSpan={
+                  carerShiftsByDate && carerShiftsByDate[0]?.isShiftEndsNextDay &&
                     index !== dates.length - 1
-                      ? 2
-                      : 1
-                  }
-                >
-                  {carerShiftsByDate?.length > 0 ? (
-                    <ShiftBox
-                      shifts={carerShiftsByDate}
-                      bulkaction={bulkaction}
-                      selectall={selectall}
-                      isClient
-                    />
-                  ) : (
-                    <Box
-                      className="add-shift-box"
-                      onClick={() => {
-                        router.replace(
-                          {
-                            query: {
-                              client: _client.id
-                            }
-                          },
-                          undefined,
-                          { shallow: true }
-                        );
-                        setSelectedDate(_date);
-                      }}
-                    >
-                      <Typography variant="body1" className="add-shift-text">
-                        <AddIcon sx={{ marginRight: "10px" }} /> Shift
-                      </Typography>
-                    </Box>
-                  )}
-                </TableCell>
-              );
-            })}
+                    ? 2
+                    : 1
+                }
+              >
+                {carerShiftsByDate?.length > 0 ? (
+                  <ShiftBox
+                    shifts={carerShiftsByDate}
+                    bulkaction={bulkaction}
+                    selectall={selectall}
+                    isClient
+                  />
+                ) : (
+                  <Box
+                    className="add-shift-box"
+                    onClick={() => {
+                      router.replace(
+                        {
+                          query: {
+                            client: _client.id
+                          }
+                        },
+                        undefined,
+                        { shallow: true }
+                      );
+                      setSelectedDate(_date);
+                    }}
+                  >
+                    <Typography variant="body1" className="add-shift-text">
+                      <AddIcon sx={{ marginRight: "10px" }} /> Shift
+                    </Typography>
+                  </Box>
+                )}
+              </TableCell>
+            );
+          })}
       </TableRow>
     );
   });
@@ -812,201 +838,327 @@ export default function TimeSheetTable({
   // };
   return (
     <>
-      {/* {bulkaction ? (
-        <Button
-          variant="contained"
-          color="error" // This makes the button red
-          startIcon={<CancelIcon />}
-          onClick={() => {
-            setBulkAction(false); // Set bulkAction to false on click
-            console.log("bulkaction after click:", bulkaction);
-          }}
-          sx={{ marginBottom: "10px" }}
-        >
-          Cancel Bulk Action
-        </Button>
-      ) : (
-        <Button
-          variant="contained"
-          startIcon={<SelectAllIcon />}
-          onClick={() => {
-            setBulkAction(true); // Set bulkAction to true on click
-            console.log("bulkaction after click:", bulkaction);
-          }}
-          sx={{ marginBottom: "10px" }}
-        >
-          Bulk Action
-        </Button>
-      )} */}
+      <Box sx={{ mt: 2 }}></Box>
       {bulkaction ? (
-        <ButtonGroup>
+        <Stack direction="row" spacing={1} flexWrap="wrap" mb={1}>
+          {/* Close Bulk Action */}
           <Button
-            // variant="contained"
-            color="error" // This makes the button red
             startIcon={<ArrowBackIcon />}
             onClick={() => {
-              setBulkAction(false); // Set bulkaction to false on click
-              // console.log("bulkaction after click:", bulkaction);
+              setBulkAction(false);
+              setSelectAll(false);
             }}
-            sx={{ marginBottom: "10px" }}
+            sx={{
+              background: "rgba(255, 107, 107, 0.2)", // translucent red
+              color: "#FF4C4C",
+              borderRadius: "25px",
+              height: 36,
+              px: 2,
+              textTransform: "none",
+              fontWeight: 600,
+              backdropFilter: "blur(12px)",
+              boxShadow: "0 4px 15px rgba(255, 107, 107, 0.25)",
+              border: "1px solid rgba(255,107,107,0.3)",
+              transition: "0.3s all ease",
+              backgroundImage: "linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0))",
+              "&:hover": {
+                background: "rgba(255, 107, 107, 0.35)",
+                color: "#fff",
+                boxShadow: "0 6px 20px rgba(255, 107, 107, 0.6)",
+                border: "1px solid rgba(255,107,107,0.6)",
+              },
+            }}
           >
             Close Bulk Action
           </Button>
+
+          {/* Select / Unselect All */}
           {!selectall ? (
             <Button
-              color="info"
               startIcon={<SelectAllIcon />}
-              onClick={() => {
-                setSelectAll(true);
+              onClick={() => setSelectAll(true)}
+              sx={{
+                background: "rgba(216, 239, 254, 0.2)", // Calm Accent
+                color: "#1D2A33",
+                borderRadius: "25px",
+                height: 36,
+                px: 2,
+                textTransform: "none",
+                fontWeight: 600,
+                backdropFilter: "blur(12px)",
+                boxShadow: "0 4px 15px rgba(0, 122, 255, 0.2)",
+                border: "1px solid rgba(0,122,255,0.3)",
+                backgroundImage: "linear-gradient(145deg, rgba(255,255,255,0.2), rgba(255,255,255,0))",
+                transition: "0.3s all ease",
+                "&:hover": {
+                  background: "rgba(216, 239, 254, 0.4)",
+                  color: "#1D2A33",
+                  boxShadow: "0 6px 20px rgba(0, 122, 255, 0.45)",
+                  border: "1px solid rgba(0,122,255,0.45)",
+                },
               }}
-              sx={{ marginBottom: "10px" }}
             >
               Select All Shift
             </Button>
           ) : (
             <Button
-              color="info"
-              startIcon={<CancelIcon />} // You can replace this with an appropriate icon
-              onClick={() => {
-                setSelectAll(false);
+              startIcon={<CancelIcon />}
+              onClick={() => setSelectAll(false)}
+              sx={{
+                background: "rgba(90, 122, 140, 0.15)", // Soft Secondary
+                color: "#5A7A8C",
+                borderRadius: "25px",
+                height: 36,
+                px: 2,
+                textTransform: "none",
+                fontWeight: 600,
+                backdropFilter: "blur(12px)",
+                boxShadow: "0 4px 15px rgba(90, 122, 140, 0.25)",
+                border: "1px solid rgba(90,122,140,0.25)",
+                backgroundImage: "linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0))",
+                transition: "0.3s all ease",
+                "&:hover": {
+                  background: "rgba(90, 122, 140, 0.35)",
+                  color: "#fff",
+                  boxShadow: "0 6px 20px rgba(90, 122, 140, 0.5)",
+                  border: "1px solid rgba(90,122,140,0.5)",
+                },
               }}
-              sx={{ marginBottom: "10px" }}
             >
               Unselect All Shift
             </Button>
           )}
+
+          {/* Cancel Shift */}
           <Button
-            // variant="contained"
-            color="warning" // You can choose a different color if desired
             startIcon={<CancelShiftIcon />}
             onClick={() => cancelBulkShift()}
-            sx={{ marginBottom: "10px" }}
+            sx={{
+              background: "rgba(255, 205, 102, 0.2)", // Warning
+              color: "#D99000",
+              borderRadius: "25px",
+              height: 36,
+              px: 2,
+              textTransform: "none",
+              fontWeight: 600,
+              backdropFilter: "blur(12px)",
+              boxShadow: "0 4px 15px rgba(255, 205, 102, 0.25)",
+              border: "1px solid rgba(255,205,102,0.25)",
+              backgroundImage: "linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0))",
+              transition: "0.3s all ease",
+              "&:hover": {
+                background: "rgba(255, 205, 102, 0.4)",
+                color: "#fff",
+                boxShadow: "0 6px 20px rgba(255, 205, 102, 0.5)",
+                border: "1px solid rgba(255,205,102,0.5)",
+              },
+            }}
           >
             Cancel Shift
           </Button>
+
+          {/* Swap Shift */}
           <Button
-            // variant="contained"
-            color="success" // You can choose a different color if desired
             startIcon={<SwapHorizIcon />}
             onClick={() => handleOpenStaffListModal()}
-            sx={{ marginBottom: "10px" }}
+            sx={{
+              background: "rgba(103, 208, 133, 0.25)", // Primary Accent
+              color: "#067738",
+              borderRadius: "25px",
+              height: 36,
+              px: 2,
+              textTransform: "none",
+              fontWeight: 600,
+              backdropFilter: "blur(12px)",
+              boxShadow: "0 4px 15px rgba(103, 208, 133, 0.3)",
+              border: "1px solid rgba(103,208,133,0.3)",
+              backgroundImage: "linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0))",
+              transition: "0.3s all ease",
+              "&:hover": {
+                background: "rgba(103, 208, 133, 0.45)",
+                color: "#fff",
+                boxShadow: "0 6px 20px rgba(103, 208, 133, 0.55)",
+                border: "1px solid rgba(103,208,133,0.55)",
+              },
+            }}
           >
             Swap Shift
           </Button>
-        </ButtonGroup>
+        </Stack>
       ) : (
-        <ButtonGroup>
-          <Button
-            // variant="contained"
-            startIcon={<SelectAllIcon />}
-            onClick={() => {
-              setBulkAction(true); // Set bulkaction to true on click
-              // console.log("bulkaction after click:", bulkaction);
-            }}
-            sx={{ marginBottom: "10px" }}
-          >
-            Bulk Action
-          </Button>
-        </ButtonGroup>
+        <Button
+          startIcon={<SelectAllIcon />}
+          onClick={() => setBulkAction(true)}
+          sx={{
+            mb: 1,
+            background: "rgba(216, 239, 254, 0.2)",
+            color: "#1D2A33",
+            borderRadius: "25px",
+            height: 36,
+            px: 2,
+            textTransform: "none",
+            fontWeight: 600,
+            backdropFilter: "blur(12px)",
+            boxShadow: "0 4px 15px rgba(0, 122, 255, 0.2)",
+            border: "1px solid rgba(0,122,255,0.3)",
+            backgroundImage: "linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0))",
+            transition: "0.3s all ease",
+            "&:hover": {
+              background: "rgba(216, 239, 254, 0.4)",
+              color: "#1D2A33",
+              boxShadow: "0 6px 20px rgba(0, 122, 255, 0.4)",
+              border: "1px solid rgba(0,122,255,0.45)",
+            },
+          }}
+        >
+          Bulk Action
+        </Button>
       )}
 
-      <TableContainer>
-        <StyledTable sx={{ minHeight: "100vh" }}>
-          <TableHead>
+
+      <TableContainer
+        sx={{
+          background: "#F7FAFC",
+          padding: 0,
+          borderRadius: "15px",
+        }}
+      >
+        <StyledTable
+          sx={{
+            minHeight: "100vh",
+            borderCollapse: "separate",
+            borderSpacing: 0
+          }}
+        >
+          {/* ================= HEADER ================= */}
+          <TableHead
+            sx={{
+              position: "sticky",
+              top: 0,
+              zIndex: 5
+            }}
+          >
             <TableRow>
-              <TableCell></TableCell>
+              <TableCell />
+
               {type === "daily"
                 ? times.map((_time: number) => (
-                    <TableCell align="center" key={_time}>
+                  <TableCell
+                    key={_time}
+                    align="center"
+                    sx={{
+                      background:
+                        "rgba(29,42,51,0.55)",
+                      backdropFilter: "blur(14px)",
+                      borderRight: "1px solid rgba(255,255,255,0.2)"
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: "13px",
+                        fontWeight: 600,
+                        color: "#FFFFFF",
+                        textShadow: "0 1px 4px rgba(0,0,0,0.6)"
+                      }}
+                    >
+                      {moment(_time, "HH").format("hh:mm A")}
+                    </Typography>
+                  </TableCell>
+                ))
+                : dates.map((_date: Moment) => {
+                  const isToday =
+                    moment().format("DD/MM/YYYY") ===
+                    _date.format("DD/MM/YYYY");
+
+                  return (
+                    <TableCell
+                      key={_date.toISOString()}
+                      align="center"
+                      sx={{
+                        background: isToday
+                          ? "linear-gradient(135deg, rgba(103,208,165,0.65), rgba(90,122,140,0.55))"
+                          : "rgba(29,42,51,0.55)",
+                        backdropFilter: "blur(16px)",
+                        WebkitBackdropFilter: "blur(16px)",
+                        borderRight:
+                          "1px solid rgba(255,255,255,0.2)",
+                        boxShadow: isToday
+                          ? "inset 0 0 0 1px rgba(255,255,255,0.5)"
+                          : "none"
+                      }}
+                    >
                       <Typography
-                        variant="body1"
-                        sx={{ fontSize: "14px", fontWeight: "500" }}
+                        sx={{
+                          fontSize: "14px",
+                          fontWeight: 700,
+                          color: "#FFFFFF",
+                          letterSpacing: "0.5px",
+                          textShadow:
+                            "0 2px 6px rgba(0,0,0,0.7)"
+                        }}
                       >
-                        {moment(_time, "HH").format("hh:mm a")}
+                        {_date.format("dddd")}
+                      </Typography>
+
+                      <Typography
+                        sx={{
+                          fontSize: "13px",
+                          fontWeight: 600,
+                          color: "#F0FFFA",
+                          textShadow:
+                            "0 2px 6px rgba(0,0,0,0.7)"
+                        }}
+                      >
+                        {_date.format("DD MMM, YYYY")}
                       </Typography>
                     </TableCell>
-                  ))
-                : dates.map((_date: Moment) => {
-                    return (
-                      <TableCell
-                        align="center"
-                        key={_date.toISOString()}
-                        sx={
-                          moment().format("DD/MM/YYYY") ===
-                          _date.format("DD/MM/YYYY")
-                            ? {
-                                backgroundColor: "#124c5cb3",
-                                color: "#fff"
-                              }
-                            : {}
-                        }
-                      >
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontSize: "14px",
-                            fontWeight:
-                              moment().format("DD/MM/YYYY") ===
-                              _date.format("DD/MM/YYYY")
-                                ? "700"
-                                : "500",
-                            color:
-                              moment().format("DD/MM/YYYY") ===
-                              _date.format("DD/MM/YYYY")
-                                ? "#fff"
-                                : "#333"
-                          }}
-                        >
-                          {_date.format("dddd")}
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontSize: "14px",
-                            fontWeight:
-                              moment().format("DD/MM/YYYY") ===
-                              _date.format("DD/MM/YYYY")
-                                ? "700"
-                                : "500",
-                            color:
-                              moment().format("DD/MM/YYYY") ===
-                              _date.format("DD/MM/YYYY")
-                                ? "#fff"
-                                : "#333"
-                          }}
-                        >
-                          {_date.format("DD MMM, YYYY")}
-                        </Typography>
-                      </TableCell>
-                    );
-                  })}
+                  );
+                })}
             </TableRow>
           </TableHead>
 
+          {/* ================= BODY ================= */}
           <TableBody>
-            {/* ----------------- Staff and Participant Switching --------------------- */}
             {view === "staff" ? renderStaffs : renderClients}
+
             <TableRow>
               <TableCell />
               {type === "daily"
-                ? times.map((_time) => <TableCell height="100%" key={_time} />)
-                : dates.map((_date) => (
+                ? times.map((_time) => (
+                  <TableCell
+                    key={_time}
+                    sx={{
+                      background: "rgba(255,255,255,0.45)",
+                      backdropFilter: "blur(10px)"
+                    }}
+                  />
+                ))
+                : dates.map((_date) => {
+                  const isToday =
+                    moment().format("DD/MM/YYYY") ===
+                    _date.format("DD/MM/YYYY");
+
+                  return (
                     <TableCell
-                      height="100%"
                       key={_date.toString()}
                       sx={{
-                        backgroundColor:
-                          moment().format("DD/MM/YYYY") ===
-                          _date.format("DD/MM/YYYY")
-                            ? "rgba(0, 169, 169, 0.08) !important"
-                            : "rgb(249, 250, 251)"
+                        background: isToday
+                          ? "rgba(103,208,165,0.15)"
+                          : "rgba(255,255,255,0.5)",
+                        backdropFilter: "blur(10px)",
+                        borderRight:
+                          "1px solid rgba(29,42,51,0.08)"
                       }}
                     />
-                  ))}
+                  );
+                })}
             </TableRow>
           </TableBody>
         </StyledTable>
       </TableContainer>
+
+
+
       <AddShift
         open={Boolean(selectedDate)}
         onClose={() => {
@@ -1020,7 +1172,11 @@ export default function TimeSheetTable({
           setSelectedDate(null);
         }}
         selectedDate={selectedDate}
+        slotProps={{
+          backdrop: { sx: { pointerEvents: "none" } }
+        }}
       />
+
       <Dialog
         open={openStaffListModal}
         onClose={handleCloseStaffListModal}

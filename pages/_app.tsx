@@ -16,6 +16,11 @@ import React from "react";
 import { Provider } from "react-redux";
 import { store } from "@/reduxtoolkit/store/store";
 import { Toaster } from "sonner";
+import { useJwtAutoLogout } from "@/hooks/useJwtAutoLogout";
+import { SessionConfirmProvider } from "@/components/SessionConfirmProvider";
+import JwtAutoLogoutHandler from "@/components/JwtAutoLogoutHandler";
+import { useEffect } from "react";
+
 
 /**
  * It suppresses the useLayoutEffect warning when running in SSR mode
@@ -52,8 +57,55 @@ export default function CustomApp({
 }: CustomAppProps) {
   fixSSRLayout();
 
+
+  // ----------- Code for auto logout is start here -----------
+  // useJwtAutoLogout(); // ✅ no arguments
+  const TAB_COUNT_KEY = "app-open-tabs";
+
+function logout() {
+  console.log("Logging out because last tab closed");
+
+  document.cookie = `${process.env.NEXT_PUBLIC_APP_TOKEN_NAME}=; Max-Age=0; path=/`;
+  document.cookie = `${process.env.NEXT_PUBLIC_REFRESH_TOKEN_NAME}=; Max-Age=0; path=/`;
+
+  window.location.href = "/";
+}
+
+
+
+useEffect(() => {
+  // ✅ TAB OPENED
+  const addTab = () => {
+    const count = Number(localStorage.getItem(TAB_COUNT_KEY) || "0");
+    localStorage.setItem(TAB_COUNT_KEY, String(count + 1));
+  };
+
+  // ✅ TAB CLOSED
+  const removeTab = () => {
+    const count = Number(localStorage.getItem(TAB_COUNT_KEY) || "1");
+    const next = Math.max(count - 1, 0);
+    localStorage.setItem(TAB_COUNT_KEY, String(next));
+
+    // 🔥 LAST TAB CLOSED → LOGOUT
+    if (next === 0) {
+      logout();
+    }
+  };
+
+  addTab();
+
+  window.addEventListener("beforeunload", removeTab);
+
+  return () => {
+    removeTab();
+    window.removeEventListener("beforeunload", removeTab);
+  };
+}, []);
+    // ----------- Code for auto logout is end here -----------
   return (
     <Provider store={store}>
+       {/* <SessionConfirmProvider> */}
+       {/* <JwtAutoLogoutHandler /> */}
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <QueryClientProvider client={queryClient}>
           <CacheProvider value={emotionCache}>
@@ -66,6 +118,7 @@ export default function CustomApp({
           </CacheProvider>
         </QueryClientProvider>
       </LocalizationProvider>
+      {/* </SessionConfirmProvider> */}
     </Provider>
   );
 }

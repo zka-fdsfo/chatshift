@@ -254,6 +254,7 @@ export default function ShiftRelatedNotes({ shift }: { shift?: Shift }) {
                       }}
                     />
                   </Box>
+                  
                   <Box
                     sx={{
                       display: "flex",
@@ -264,14 +265,12 @@ export default function ShiftRelatedNotes({ shift }: { shift?: Shift }) {
                     <Typography sx={{ marginRight: 1 }}>
                       Clock In Time :
                     </Typography>
-                    <Typography
-                      sx={{ color: "#555" }}
-                      dangerouslySetInnerHTML={{
-                        __html: moment
-                          .unix(_data.employeeClockInTime)
-                          .format("LLL")
-                      }}
-                    />
+                    <Typography sx={{ color: "#555" }}>
+                      {_data.employeeClockInTime
+                        ? moment.unix(_data.employeeClockInTime).format("LLL")
+                        : "Not Clock In"}
+                    </Typography>
+
                   </Box>
                   <Box
                     sx={{
@@ -283,14 +282,12 @@ export default function ShiftRelatedNotes({ shift }: { shift?: Shift }) {
                     <Typography sx={{ marginRight: 1 }}>
                       Clock Out Time :
                     </Typography>
-                    <Typography
-                      sx={{ color: "#555" }}
-                      dangerouslySetInnerHTML={{
-                        __html: moment
-                          .unix(_data.employeeClockOutTime)
-                          .format("LLL")
-                      }}
-                    />
+                    <Typography sx={{ color: "#555" }}>
+                      {_data.employeeClockOutTime
+                        ? moment.unix(_data.employeeClockOutTime).format("LLL")
+                        : "Not Clock Out"}
+                    </Typography>
+
                   </Box>
 
                   {/* <Box dangerouslySetInnerHTML={{ __html: _data.notes }} /> */}

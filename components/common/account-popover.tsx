@@ -9,6 +9,7 @@ import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
 import Popover from "@mui/material/Popover";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { Theme, alpha } from "@mui/material/styles";
 import { useRouter } from "next/router";
@@ -19,7 +20,7 @@ const MENU_OPTIONS = [
   {
     label: "Home",
     icon: "eva:home-fill",
-    path: "/"
+    path: "/staff-roster"
   },
   {
     label: "Profile",
@@ -65,18 +66,46 @@ const AccountPopover: React.FC = () => {
           })
         }}
       >
-        <Avatar
-          src={user?.data?.data?.photoDownloadURL}
-          alt="test"
-          sx={{
-            width: 36,
-            height: 36,
-            border: (theme: Theme) =>
-              `solid 2px ${theme.palette.background.default}`
-          }}
-        >
-          {user?.data?.data?.name?.charAt(0)}
-        </Avatar>
+          {/* <Avatar
+            src={user?.data?.data?.photoDownloadURL}
+            alt="test"
+            sx={{
+              width: 36,
+              height: 36,
+              bgcolor: '#1e2a33', // avatar background color
+              color: '#fff',     // text color (recommended for contrast)
+              border: (theme: Theme) =>
+                `solid 2px ${theme.palette.background.default}`,
+            }}
+          >
+            {user?.data?.data?.name?.charAt(0)}
+          </Avatar> */}
+
+          <Tooltip title="Click here to view profile">
+            <Avatar
+              src={user?.data?.data?.photoDownloadURL}
+              alt="test"
+              sx={{
+                width: 36,
+                height: 36,
+                bgcolor: '#1e2a33',
+                color: '#fff',
+                cursor: 'pointer',               // 👈 key indicator
+                transition: '0.2s ease',
+                '&:hover': {
+                  boxShadow: 3,                  // subtle elevation
+                  transform: 'scale(1.05)',      // small zoom
+                  opacity: 0.9,
+                },
+                border: (theme: Theme) =>
+                  `solid 2px ${theme.palette.background.default}`,
+              }}
+            >
+              {user?.data?.data?.name?.charAt(0)}
+            </Avatar>
+          </Tooltip>
+
+
       </IconButton>
 
       <Popover

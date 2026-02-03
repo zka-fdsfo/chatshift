@@ -813,7 +813,10 @@ export default function ShiftNotesIndividualShift({
 
   const { mutate, isPending } = useMutation({
     mutationFn: addShiftNoteWithShift,
-    onSuccess: router.reload
+    onSuccess: () => {
+      onClose(); // 👈 same function call
+    }
+    // onSuccess: router.reload
   });
 
   const onSubmit = (

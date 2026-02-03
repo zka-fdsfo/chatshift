@@ -31,6 +31,8 @@ import React, { useEffect, useState } from "react";
 import PriceImport from "./price-import";
 import Iconify from "@/components/Iconify/Iconify";
 import { queryClient } from "pages/_app";
+import SamplePriceBook from "pages/sample-price-book";
+import Loader from "@/components/Loader";
 
 const StyledPage = styled(Box)`
   padding: 20px 10px;
@@ -87,6 +89,7 @@ export default function Prices() {
     }
   });
 
+
   const handleImport = () => {
     mutate(0);
     console.log("Import Buttom get clicked.");
@@ -135,6 +138,9 @@ export default function Prices() {
       );
     }
   }, [priceBookData, router.query.page]);
+  if (isPending) {
+    return <Loader />
+  }
 
   return (
     // <DashboardLayout isLoading={isLoading}>
@@ -179,6 +185,7 @@ export default function Prices() {
               }
               label="Hide Expired Date"
             />
+            <SamplePriceBook></SamplePriceBook>
             <Button variant="contained" size="large" onClick={handleImport}>
               Update October 2024 NDIS Price{" "}
               <Iconify icon="eva:download-outline" sx={{ ml: "5px" }} />

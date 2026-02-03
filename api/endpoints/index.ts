@@ -18,7 +18,8 @@ export const endpoints = {
     reset_password: "/auth/reset-password",
     change_password: "/auth/change-password",
     last_signin: (id: string) => `/auth/${id}/last-signin`,
-    resend_invite: "/auth/verification-link"
+    resend_invite: "/auth/verification-link",
+    update_token: '/auth/refreshToken',
   },
   admin: {
     admin_dashboard: (date: string) => `/admin/dashboard?month=${date}`,
@@ -59,7 +60,7 @@ export const endpoints = {
       subcategoryId: string,
       documentId: string
     ) =>
-      `/document/uploaded-documents/${employeeId}/${subcategoryId}/${documentId}`,
+      `/document/update-documents/${employeeId}/${subcategoryId}/${documentId}`,
     // time_sheet: (id: number) => `/timesheets/${id}`
     // timesheets: "/timesheets/employee"
     // gettimesheet: "/timesheets/employee",
@@ -81,7 +82,9 @@ export const endpoints = {
       "/shift/getAllActiveShiftAvailableForPickup/ForACarer",
     get_payroll_setting: (id: string) => `/payroll/forEmployee/${id}`,
     update_payroll_setting: (id: string) =>
-      `/payroll/payrollSettings/${id}/update`
+      `/payroll/payrollSettings/${id}/update`,
+    tracking_route_map: (employeeId: number,shiftId: number) => `/tracking/${employeeId}/${shiftId}/active-route`,
+    summary_route_map: (employeeId: number,shiftId: number) => `/location/trip-summary/${employeeId}/${shiftId}`,
   },
   client: {
     // get_all: "/client/by-company/active",
@@ -175,6 +178,9 @@ export const endpoints = {
       `/documents/consent/upload/client/${clientId}`,
     send_for_consent: (documentId: string,employeeId: string) =>
       `/documents/consent/${documentId}/sendForConsent/${employeeId}`,
+    resend_invite_participant: "/auth/verification-link",
+    last_signin_client: (clientId: string) =>
+      `auth/last-signIn/${clientId}/client`,
   },
   teams: {
     get_all: "/teams/allTeams",
@@ -213,7 +219,7 @@ export const endpoints = {
       `/shift/applications/${applicationId}`,
     get_applied_shift_list: (shiftId: number) => `/shift/${shiftId}/applicants`,
     swap_shift: "/shift/bulk-swap",
-    notes: {
+    notes: {   
       get_all_shift_notes: `/shiftNote/getAllShiftNotes`,
       get_all_shift_notes_with_shift: `/shiftNote/getAllNotesWithShift`,
       get_all_notes: (id?: string) => `/shiftNote/getAllForClient/${id}`,

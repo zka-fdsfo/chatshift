@@ -15,6 +15,7 @@ import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import StaffDocumentRow from "./staff-document-row";
 import { queryClient } from "pages/_app";
+import Loader from "@/components/Loader";
 
 const StyledPage = styled(Box)`
   padding: 20px 10px;
@@ -72,6 +73,10 @@ export default function Archived() {
     formData.append("file", data.file);
     mutate(formData);
   };
+
+    if (isLoading) {
+      return <Loader />
+    }
 
   return (
     <DashboardLayout isLoading={isLoading}>

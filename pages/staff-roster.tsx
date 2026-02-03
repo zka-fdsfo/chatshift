@@ -22,13 +22,14 @@ export default function StaffRoster() {
       })
   });
 
-  useEffect(() => {
-    console.log("--------------: is Pickup Test :--------------", data);
-  }, [data]);
+  // useEffect(() => {
+  //   console.log("--------------: Shift in Staff Roster :--------------", data);
+  // }, [data]);
 
   return (
     <DashboardLayout isLoading={isLoading}>
       <CalendarToolbar date={date} setDate={setDate} />
+      <br></br>
       <CalendarComponent date={date} shifts={data} />
     </DashboardLayout>
   );

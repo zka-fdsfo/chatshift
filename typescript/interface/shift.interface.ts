@@ -168,9 +168,13 @@ export interface Shift {
   funds: ClientFundsDto;
   payGroups: payGroupsDTO;
   priceBooks: priceBooksDTO;
+  isEmployeeClockedIn: boolean;
+  isEmployeeClockedOut: boolean;
   // payGroups: EmployeePayGroupDto[];
   // priceBooks: ClientPriceBookDto[];
 }
+
+
 // export interface ShiftPayPrice {
 //   id: number;
 //   startDate: number;

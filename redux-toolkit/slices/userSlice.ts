@@ -29,7 +29,7 @@ export const userSlice = createSlice({
       state.userData = null;
       state.accessToken = null;
       destroyCookie(null, "user", { path: "/" });
-      destroyCookie(null, process.env.NEXT_APP_TOKEN_NAME!, { path: "/" });
+      destroyCookie(null, process.env.NEXT_PUBLIC_APP_TOKEN_NAME!, { path: "/" });
       const role = sessionStorage.getItem("user_role");
       if (role === "ROLE_CLIENT") {
         window.location.href = "/auth/client/signin";

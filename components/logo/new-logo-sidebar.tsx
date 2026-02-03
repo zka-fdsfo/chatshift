@@ -1,0 +1,53 @@
+/* eslint-disable react/require-default-props */
+import Box, { BoxProps } from "@mui/material/Box";
+import Link from "next/link";
+import Image from "next/image";
+import { forwardRef } from "react";
+
+interface NewLogoProps extends BoxProps {
+  disabledLink?: boolean;
+}
+
+const NewLogoSidebar = forwardRef<HTMLAnchorElement, NewLogoProps>(
+  ({ disabledLink, sx, ...other }, ref) => {
+    const logo = (
+      <Box
+        ref={ref}
+        component="a"
+        sx={{
+          width: 140,
+          height: 46.67,
+          display: "inline-flex",
+          alignItems: "center",
+          cursor: "pointer",
+          ...sx
+        }}
+        {...other}
+      >
+        <Image
+          src="/assets/logo/ROSTR.png"
+          alt="ROSTR Logo"
+          width={140}
+          height={46.67}
+          priority
+          style={{ objectFit: "contain" }}
+        />
+      </Box>
+    );
+
+    if (disabledLink) {
+      return logo;
+    }
+
+    return (
+      <Link href="">
+        {logo}
+      </Link>
+    );
+  }
+);
+
+// ✅ ADD THIS LINE
+NewLogoSidebar.displayName = "NewLogoNewLogoSidebar";
+
+export default NewLogoSidebar;

@@ -45,6 +45,7 @@ import { applyShift } from "@/api/functions/shift.api";
 import { queryClient } from "pages/_app";
 import { toast } from "sonner";
 import AddNoteModal from "../add-shift/addNoteModal";
+import AddShiftView from "../add-shift/add-shift-view";
 // import { Grid } from "antd";
 
 const ShiftBox = styled(Box)<{ selected: boolean }>`
@@ -84,16 +85,24 @@ export default function Shift({
     return savedIds ? JSON.parse(savedIds) : [];
   });
 
-  const handleClick = (id: number) => {
+  // useEffect(()=>{
+  //   console.log("------------ shift in shift.tsx -----------",shift)
+  // },[shift])
+
+  const handleClick = (shift: any) => {
+    if (shift.shiftCategory === "PICKUP_SHIFT") {
+      toast.error("You are not allowed to cancel Pickup Shift");
+      return;
+    }
     setSelectedShiftId(selectedShiftId === shift.id ? null : shift.id);
     // Read the current array from session storage
     const savedIds = sessionStorage.getItem("shiftIds");
     const currentIds = savedIds ? JSON.parse(savedIds) : [];
 
     // Update the array based on the clicked ID
-    const updatedIds = currentIds.includes(id)
-      ? currentIds.filter((existingId: number) => existingId !== id)
-      : [...currentIds, id];
+    const updatedIds = currentIds.includes(shift.id)
+      ? currentIds.filter((existingId: number) => existingId !== shift.id)
+      : [...currentIds, shift.id];
 
     // Save the updated array to session storage
     sessionStorage.setItem("shiftIds", JSON.stringify(updatedIds));
@@ -107,9 +116,7 @@ export default function Shift({
   useEffect(() => {
     if (selectall) {
       // Retrieve the list of shift IDs from session storage
-      const shiftIdsList = JSON.parse(
-        sessionStorage.getItem("shiftIdsList") || "[]"
-      );
+      const shiftIdsList = JSON.parse(sessionStorage.getItem("shiftIdsList") || "[]");
 
       // Update the state with the shift IDs
       if (shiftIdsList !== "" || shiftIdsList !== null) {
@@ -119,10 +126,10 @@ export default function Shift({
           "All Selected Shift Ids shiftIdsList----------------------------",
           shiftIdsList
         );
-        console.log(
-          "All Selected Shift Ids shiftIds----------------------------",
-          shiftIds
-        );
+        // console.log(
+        //   "All Selected Shift Ids shiftIds----------------------------",
+        //   shiftIds
+        // );
       }
     } else {
       sessionStorage.removeItem("shiftIds");
@@ -232,6 +239,16 @@ export default function Shift({
       setJobForPickUpModal(false);
     }
   };
+
+  const today = moment().startOf("day");
+  const shiftDate = moment(shift.startDate).startOf("day");
+  
+  const bgColor = shiftDate.isSame(today, "day")
+    ? "#99cef6"      // today → light blue
+    : shiftDate.isAfter(today, "day")
+    ? "#b7e4c7"      // future → light green
+    : "#e0e0e0";     // past → light gray
+
 
   // console.log("----------------- Shift Details ----------------", shift);
   return (
@@ -343,13 +360,16 @@ export default function Shift({
                   paddingLeft: "10px"
                 }
           }
+
+          style={{ backgroundColor: bgColor }}
           // onClick={() =>
           //   bulkaction ? handleClick(shift.id) : setViewModal(true)
           // }
 
           onClick={() => {
             if (bulkaction) {
-              handleClick(shift.id);
+              // handleClick(shift.id);
+              handleClick(shift);
             } else {
               if (shift.isPickupJob && role === "ROLE_CARER") {
                 setSelectedShiftId(shift.id);
@@ -436,7 +456,19 @@ export default function Shift({
         </ShiftBox>
       )}
 
-      <AddShift
+      {/* <AddShift
+        view={viewModal}
+        edit={editModal}
+        onClose={() => {
+          setViewModal(false);
+          setEditModal(false);
+        }}
+        setViewModal={setViewModal}
+        setEditModal={setEditModal}
+        shift={shift}
+      /> */}
+
+      <AddShiftView
         view={viewModal}
         edit={editModal}
         onClose={() => {

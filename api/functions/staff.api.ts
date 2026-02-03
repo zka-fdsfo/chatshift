@@ -224,7 +224,7 @@ export const updateCompliance = async ({
   data: FormData;
 }) => {
   try {
-    const res = await axiosInstance.post(
+    const res = await axiosInstance.put(
       endpoints.staff.update_compliance(employeeId, subcategoryId, documentId),
       data
     );
@@ -417,4 +417,35 @@ export const updatePayrollSetting = async ({
   );
   return res.data;
 };
+
+
+export const getTrackingRoute = async ({ employeeId,shiftId }: { employeeId: number,shiftId: number }) => {
+  const res = await axiosInstance.get(
+    endpoints.staff.tracking_route_map(employeeId,shiftId)
+  );
+  return res.data;
+};
+
+
+export const getSummaryRoute = async ({ employeeId,shiftId }: { employeeId: number,shiftId: number }) => {
+  const res = await axiosInstance.get(
+    endpoints.staff.summary_route_map(employeeId,shiftId)
+  );
+  return res.data;
+};
+
+
+// export const getTrackingRoute = async ({
+//   employeeId,
+//   shiftId,
+// }: {
+//   employeeId: number;
+//   shiftId: number;
+// }) => {
+//   const res = await axiosInstance.get(
+//     `/tracking/${employeeId}/${shiftId}/active-route`
+//   );
+//   return res.data;
+// };
+
 

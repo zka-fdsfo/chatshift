@@ -60,10 +60,29 @@ export function getCookie(cname: string) {
   return null;
 }
 
+// export function setCookieClient(key: string, value: string) {
+//   setCookie(null, key, value, {
+//     path: "/"
+//   });
+// }
+
+// export function setCookieClient(key: string, value: string) {
+//   setCookie(null, key, value, {
+//     path: "/",
+//     secure: true,
+//     sameSite: "none",
+//   });
+// }
+
+
 export function setCookieClient(key: string, value: string) {
   setCookie(null, key, value, {
-    path: "/"
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   });
 }
+
+
 
 export { checkWindow };

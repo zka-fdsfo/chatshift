@@ -81,6 +81,8 @@ import { toast } from "sonner";
 import JobApplicant from "./jobapplicant";
 import NoteIcon from "@mui/icons-material/Note"; // Import NoteIcon
 import ShiftNotesIndividualShift from "pages/shift-notes-individualshift";
+import TrackingEmployee from "pages/staff/tracking";
+import Tracking from "pages/staff/tracking";
 
 interface DrawerInterface extends DrawerProps {
   open?: boolean;
@@ -660,6 +662,7 @@ export default function AddShift({
     mutationFn: createShift,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["all_shifts"] });
+      queryClient.invalidateQueries({ queryKey: ["shift_id_list"] });
       methods.reset();
       props.onClose();
     }
@@ -669,6 +672,7 @@ export default function AddShift({
     mutationFn: editShift,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["all_shifts"] });
+      queryClient.invalidateQueries({ queryKey: ["shift_id_list"] });
       methods.reset();
       props.onClose();
     }
@@ -743,12 +747,7 @@ export default function AddShift({
     rebook(shiftId);
   };
 
-  // useEffect(() => {
-  //   console.log(
-  //     "-------------: Shift Details in Add-shift page is as below :-------------",
-  //     shift
-  //   );
-  // }, []);
+
 
   // ---------------------------- Time Sheet Undo Start Here ----------------------------
   const { mutate: undoTimesheetMutation, isPending: ispendingUndo } =
@@ -770,6 +769,20 @@ export default function AddShift({
     }
   };
   // ---------------------------- Time Sheet Undo End Here ----------------------------
+
+
+  // useEffect(()=>{
+  //   if(shift)
+  //   {
+  //     console.log("---------:shift data for tracking : ---------", 
+  //        shift.id
+  //     );
+
+  //     console.log("---------:Employee ID tracking : ---------", 
+  //       shift.employee.id
+  //    );
+  //   }
+  // },[shift])
 
   return (
     <>
@@ -1030,81 +1043,73 @@ export default function AddShift({
                 //   </Button>
                 // </Stack>
                 <>
-                  {shift?.isPickupJob ? null : (
-                    <Stack direction="row" alignItems="center" gap={1}>
-                       {/* <Button
-                          variant="contained"
-                          startIcon={<NoteIcon />} 
-                          onClick={() => {
-                            handleCreateShiftNotes(shift?.id as number); 
-                          } }
-                          sx={{
-                            backgroundColor: "#00a65a",
-                            "&:hover": { backgroundColor: "#008d45" }
-                          }} 
-                        >
-                          Create Shift Notes
-                        </Button> */}
-                      <LoadingButton
-                        variant="contained"
-                        color="error"
-                        startIcon={
-                          <Iconify
-                            icon="iconamoon:trash-duotone"
-                            fontSize={14}
-                          />
-                        }
-                        loading={isShiftCancelling}
-                        onClick={() => cancelMutate(shift?.id as number)}
-                      >
-                        Cancel Shift
-                      </LoadingButton>
-                      {view &&
-                      <Button
-                          variant="contained"
-                          startIcon={<NoteIcon />} 
-                          onClick={() => {
-                            handleCreateShiftNotes(shift?.id as number); 
-                          } }
-                          sx={{
-                            backgroundColor: "#00a65a",
-                            "&:hover": { backgroundColor: "#008d45" }
-                          }} 
-                        >
-                          Shift Notes
-                        </Button> 
-                      }
-                      <Button
-                        variant="contained"
-                        startIcon={<RepeatIcon />}
-                        onClick={() => {
-                          handleRepeatShift(shift?.id as number); // Pass the ID here
-                          setRepeatShiftModal(true);
-                        }}
-                      >
-                        Repeat Shift
-                      </Button>
-                      <RepeatShift
-                        open={repeatshiftModal}
-                        onClose={() => setRepeatShiftModal(false)}
-                        id={selectedId}
-                      />
-                      <Button
-                        variant="contained"
-                        startIcon={
-                          <Iconify icon="basil:edit-outline" fontSize={14} />
-                        }
-                        onClick={() => {
-                          if (setEditModal && setViewModal) {
-                            setEditModal(true);
-                            setViewModal(false);
-                          }
-                        }}
-                      >
-                        Edit
-                      </Button>
-                    </Stack>
-                  )}
+                  {role === "ROLE_ADMIN" && !shift?.isPickupJob && (
+  <Stack direction="row" alignItems="center" gap={1}>
+    <LoadingButton
+      variant="contained"
+      color="error"
+      startIcon={
+        <Iconify
+          icon="iconamoon:trash-duotone"
+          fontSize={14}
+        />
+      }
+      loading={isShiftCancelling}
+      onClick={() => cancelMutate(shift?.id as number)}
+    >
+      Cancel Shift
+    </LoadingButton>
+
+    {view && (
+      <Button
+        variant="contained"
+        startIcon={<NoteIcon />}
+        onClick={() => {
+          handleCreateShiftNotes(shift?.id as number);
+        }}
+        sx={{
+          backgroundColor: "#00a65a",
+          "&:hover": { backgroundColor: "#008d45" }
+        }}
+      >
+        Shift Notes
+      </Button>
+    )}
+
+    <Button
+      variant="contained"
+      startIcon={<RepeatIcon />}
+      onClick={() => {
+        handleRepeatShift(shift?.id as number);
+        setRepeatShiftModal(true);
+      }}
+    >
+      Repeat Shift
+    </Button>
+
+    <RepeatShift
+      open={repeatshiftModal}
+      onClose={() => setRepeatShiftModal(false)}
+      id={selectedId}
+    />
+
+    <Button
+      variant="contained"
+      startIcon={
+        <Iconify icon="basil:edit-outline" fontSize={14} />
+      }
+      onClick={() => {
+        if (setEditModal && setViewModal) {
+          setEditModal(true);
+          setViewModal(false);
+        }
+      }}
+    >
+      Edit
+    </Button>
+  </Stack>
+)}
+
                 </>
               )}
             </>
@@ -1162,22 +1167,13 @@ export default function AddShift({
                   <InstructionSection view={view} edit={edit} shift={shift} />
                   {/* <TimeLocation view={view} edit={edit} shift={shift} /> */}
                  
-                  {view &&
-                   <>
-                        {/* <Button
-                          variant="contained"
-                          startIcon={<NoteIcon />} // Change to NoteIcon
-                          onClick={() => {
-                            handleCreateShiftNotes(shift?.id as number); // Pass the ID here
-                          } }
-                          sx={{
-                            backgroundColor: "#00a65a",
-                            "&:hover": { backgroundColor: "#008d45" }
-                          }} 
-                        >
-                          Create Shift Notes
-                        </Button> */}
-                        <ShiftRelatedNotes shift={shift} /></>}
+                  {shift?.id && (
+                           <>
+                           <Tracking employeeId={shift.employee.id} shiftId={shift.id} clockIn={shift.isEmployeeClockedIn}  clockOut={shift.isEmployeeClockedOut}  />
+                           </>
+                        )}
+
+                  {view && <ShiftRelatedNotes shift={shift} />}
                 </>
               )}
             </FormProvider>

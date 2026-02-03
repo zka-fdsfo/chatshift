@@ -1,0 +1,639 @@
+import { useEffect, useState } from "react";
+import { getStaffList } from "@/api/functions/staff.api";
+import { Shift } from "@/interface/shift.interface";
+import { IStaff } from "@/interface/staff.interfaces";
+import assets from "@/json/assets";
+import { getRole } from "@/lib/functions/_helpers.lib";
+import StyledPaper from "@/ui/Paper/Paper";
+import {
+  Card,
+  CardContent,
+  Checkbox,
+  CircularProgress,
+  Divider,
+  FormControlLabel,
+  FormHelperText,
+  Grid,
+  IconButton,
+  MenuItem,
+  Select,
+  Typography
+} from "@mui/material";
+import { Box, Stack } from "@mui/system";
+import { useQuery } from "@tanstack/react-query";
+import moment from "moment";
+import Image from "next/image";
+import Link from "next/link";
+import React from "react";
+import { Controller, useFormContext } from "react-hook-form";
+import { useRouter } from "next/router";
+import { getAllPayGroups } from "@/api/functions/paygroup.api";
+import CloseIcon from "@mui/icons-material/Close";
+
+export default function StaffSectionView({
+  view,
+  edit,
+  shift,
+  advanceShift
+}: {
+  view?: boolean;
+  edit?: boolean;
+  shift?: Shift;
+  advanceShift: boolean;
+}) {
+  const { control, watch, setValue, getValues } = useFormContext();
+  const role = getRole();
+  const isOpenShift = watch("isOpenShift");
+  const isPickupJob = watch("isPickupJob");
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["user_list"],
+    queryFn: getStaffList,
+    enabled: role === "ROLE_ADMIN"
+  });
+
+  useEffect(() => {
+
+    if (isOpenShift || isPickupJob) {
+      // Unselect all selected carers by resetting employeeIds
+      setValue("employeeIds", []);
+    }
+  }, [isOpenShift, setValue]);
+
+  // console.log("------------- Staff List --------------", data);
+  // console.log(
+  //   "-------------+++++++++++ Selected SHIFT +++++++++++ --------------",
+  //   shift
+  // );
+
+  // useEffect(()=>{
+  //   console.log("--------- SHIFT DATA ---------", shift)
+  // },[shift])
+
+  // console.log("============ SHIFT EDITABLE DATA =============", shift);
+  const router = useRouter();
+  const [staffId, setStaffId] = useState<string | null>(null);
+  const [selectedDisplayNames, setSelectedDisplayNames] = useState("");
+  const [preselectedNames, setPreselectedNames] = useState("");
+  const [selectedCarerId, setSelectedCarerId] = useState("");
+  const [open, setOpen] = React.useState(true);
+  const [openList, setOpenList] = React.useState(false);
+  const staffDisplayName = shift?.employee.displayName;
+  useEffect(() => {
+    if (staffDisplayName) {
+      setSelectedDisplayNames(staffDisplayName);
+    }
+  }, [shift?.client.displayName]);
+
+
+
+  useEffect(() => {
+    if (router.query.staff) {
+      // console.log("////////////////------ StaffId Content -------------",router.query.name);
+      setStaffId(router.query.name as string);
+    }
+  }, [router.query.name]);
+
+  // useEffect(()=>{
+  //   if(staffId)
+  //   {
+  //     console.log("=====+++++++++ Selected Staf Name ::::::", staffId)
+  //   }
+  // },[staffId])
+
+  // const { data: paygroup, isLoading: isloading } = useQuery({
+  //   queryKey: ["pay-groups", router.query.page],
+  //   queryFn: () => getAllPayGroups((router.query.page as string) || "1")
+  // });
+
+  // useEffect(()=>{
+
+  // },[])
+
+  // useEffect(() => {
+  //   console.log(
+  //     "-------------: Pay Group List in Carer Page :-------------",
+  //     paygroup
+  //   );
+  // }, [paygroup]);
+
+  const handleRemoveName = (namesToRemove: string) => {
+    // Remove the names from selectedDisplayNames
+    const updatedNames = selectedDisplayNames
+      .split(",")
+      .filter((name) => !namesToRemove.includes(name.trim())) // Filter out names to remove
+      .join(", ");
+
+    setSelectedDisplayNames(updatedNames);
+
+    // Find the employee IDs associated with the names to remove
+    const employeesToRemove = data.filter((client: any) =>
+      namesToRemove.includes(client.name)
+    );
+
+    if (employeesToRemove.length > 0) {
+      // Get the current employeeIds from the form
+      const currentEmployeeIds = getValues("employeeIds");
+
+      // Filter out the IDs of the employees to remove
+      const updatedEmployeeIds = currentEmployeeIds.filter(
+        (id: string) =>
+          !employeesToRemove.some((emp: { id: string }) => emp.id === id)
+      );
+
+      // Update the employeeIds field in the form
+      setValue("employeeIds", updatedEmployeeIds);
+    }
+  };
+
+  useEffect(() => {
+    setValue("isOpenShift", staffId === "OPEN SHIFT");
+    setValue("isPickupJob", staffId === "PICKUP SHIFT");
+  }, [staffId, setValue]);
+
+  return (
+    <>
+      <StyledPaper>
+        <Stack direction="row" alignItems="center" gap={2}>
+          <Image
+            src={assets.nurse}
+            alt="Carer"
+            width={512}
+            height={512}
+            className="icon"
+          />
+          <Typography variant="h6">Carer</Typography>
+        </Stack>
+        <Divider sx={{ marginBlock: "10px" }} />
+        {view ? (
+          <Grid container alignItems="center" rowSpacing={2}>
+
+            {role !== "ROLE_CARER" && role !== "ROLE_ADMIN" ? (
+              <>
+                <Grid item lg={8} md={6} sm={12} xs={12}>
+                  <Typography>Name</Typography>
+                </Grid>
+                <Grid item lg={4} md={6} sm={12} xs={12}>
+                  <Link
+                    href={`/participants/${shift?.employee.id}/view`}
+                    style={{ textDecoration: "none", color: "#333" }}
+                  >
+                    <Typography variant="body1" textAlign="right">
+                      {shift?.employee.displayName}
+                    </Typography>
+                  </Link>
+                </Grid>
+              </>
+            ) : (
+              <>
+                <Grid item lg={8} md={6} sm={12} xs={12}>
+                  <Typography>Name</Typography>
+                </Grid>
+                <Grid item lg={4} md={6} sm={12} xs={12}>
+                  <Link
+                    href={`/participants/${shift?.employee.id}/view`}
+                    style={{ textDecoration: "none", color: "#333" }}
+                  >
+                    <Typography variant="body1" textAlign="right">
+                      {shift?.employee.displayName}
+                    </Typography>
+                  </Link>
+                </Grid>
+
+                <Grid item lg={8} md={6} sm={12} xs={12}>
+                  <Typography>Time</Typography>
+                </Grid>
+                <Grid item lg={4} md={6} sm={12} xs={12}>
+                  <Typography variant="body1" textAlign="right">
+                    <strong>
+                      {moment(
+                        `${shift?.startTime[0]}:${shift?.startTime[1]}`,
+                        "HH:mm"
+                      ).format("hh:mm a")}{" "}
+                      to{" "}
+                      {moment(
+                        `${shift?.endTime[0]}:${shift?.endTime[1]}`,
+                        "HH:mm"
+                      ).format("hh:mm a")}
+                    </strong>
+                  </Typography>
+                </Grid>
+
+                <Grid item lg={8} md={6} sm={12} xs={12}>
+                  <Typography>
+                    Total hours scheduled on{" "}
+                    {moment(shift?.startDate).format("DD/MM/YYYY")}
+                  </Typography>
+                </Grid>
+                <Grid item lg={4} md={6} sm={12} xs={12}>
+                  <Typography variant="body1" textAlign="right">
+                    <strong>{shift?.shiftHours}</strong> hours
+                  </Typography>
+                </Grid>
+              </>
+            )}
+
+
+          </Grid>
+        ) : (
+          <Grid container alignItems="center">
+            {!isPickupJob && staffId !== "PICKUP SHIFT" && (
+              <Grid item lg={4} md={6} sm={12} xs={12}>
+                <Controller
+                  name="isOpenShift"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={<Checkbox size="small" />}
+                      checked={staffId === "OPEN SHIFT" ? true : field.value}
+                      {...field}
+                      label="Is Open Shift"
+                    />
+                  )}
+                />
+              </Grid>
+            )}
+            {/* {!isOpenShift && staffId !== "OPEN SHIFT" && (
+                        <Grid item lg={4} md={6} sm={12} xs={12}>
+                          <Controller
+                            name="isPickupJob"
+                            control={control}
+                            render={({ field }) => (
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    size="small"
+                                    checked={staffId === "PICKUP SHIFT" ? true : field.value} 
+                                    onChange={(e) => {
+                                      field.onChange(e.target.checked); 
+                                    }}
+                                  />
+                                }
+                                {...field}
+                                label="Is Pickup Job"
+                              />
+                            )}
+                          />
+                        </Grid>
+                    )} */}
+
+
+            {!isOpenShift && staffId !== "OPEN SHIFT" && (
+              <Grid item lg={4} md={6} sm={12} xs={12}>
+                <Controller
+                  name="isPickupJob"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControlLabel
+                      control={<Checkbox size="small" />}
+                      checked={
+                        staffId === "PICKUP SHIFT"
+                          ? true
+                          : field.value ?? true // 👈 precheck if undefined
+                      }
+                      {...field}
+                      label="Is Pickup Job"
+                    />
+                  )}
+                />
+              </Grid>
+            )}
+
+
+
+
+
+            {/* <Grid item lg={8} md={6} sm={12} xs={12}></Grid> */}
+            {/* {!isOpenShift && ( */}
+            {!isOpenShift &&
+              staffId !== "OPEN SHIFT" &&
+              staffId !== "PICKUP SHIFT" &&
+              !isPickupJob && (
+                <Grid container alignItems="center">
+                  <Grid container spacing={2}>
+                    <Grid item lg={4} md={6} sm={12} xs={12}>
+                      <Typography>Choose Carer </Typography>
+                    </Grid>
+                    <Grid item lg={8} md={6} sm={12} xs={12}>
+                      <Controller
+                        control={control}
+                        name="employeeIds"
+                        render={({ field, fieldState: { error, invalid } }) => {
+                          return (
+                            <Box>
+                              {/* <Select
+    fullWidth
+    size="small"
+    {...field}
+    value={Array.isArray(field.value) ? field.value : []}
+    onChange={(e) => {
+      const _value = e.target.value;
+      field.onChange(_value);
+
+      const selectedClients = data?.filter((client: any) =>
+        _value.includes(client.id)
+      );
+
+      const selectedNames = selectedClients
+        ?.map((client: any) => client.name)
+        .join(", ");
+      setSelectedDisplayNames(selectedNames);
+
+      const selectedId = selectedClients?.map((client: any) => client.id).join(", ");
+      if (selectedId) setSelectedCarerId(selectedId);
+
+      setOpen(!!selectedNames?.length);
+    }}
+    displayEmpty
+    renderValue={
+      field.value?.length
+        ? (selected) =>
+            data
+              ?.filter((client: any) => selected.includes(client.id))
+              .map((client: any) => client.name)
+              .join(", ")
+        : () => "Select Carer"
+    }
+    multiple
+  >
+    {isLoading ? (
+      <MenuItem disabled>Loading...</MenuItem>
+    ) : isPickupJob ? (
+      <MenuItem disabled>No carers available for pickup jobs</MenuItem>
+    ) : (
+      data?.slice(2).map((_data: IStaff) => (
+        <MenuItem value={_data.id} key={_data.id}>
+          <Checkbox
+            checked={field.value?.includes(_data.id)}
+            size="small"
+          />
+          {_data.name}
+        </MenuItem>
+      ))
+    )}
+  </Select> */}
+
+                              <Select
+                                fullWidth
+                                size="small"
+                                {...field}
+                                open={openList}
+                                onOpen={() => setOpenList(true)}
+                                onClose={() => setOpenList(false)}
+                                value={Array.isArray(field.value) ? field.value : []}
+                                multiple
+                                displayEmpty
+                                onChange={(e) => {
+                                  const _value = e.target.value;
+                                  field.onChange(_value);
+
+                                  // Map selected clients
+                                  const selectedClients = data?.filter((client: any) =>
+                                    _value.includes(client.id)
+                                  );
+
+                                  const selectedNames = selectedClients
+                                    ?.map((client: any) => client.name)
+                                    .join(", ");
+                                  setSelectedDisplayNames(selectedNames);
+
+                                  const selectedId = selectedClients
+                                    ?.map((client: any) => client.id)
+                                    .join(", ");
+                                  if (selectedId) setSelectedCarerId(selectedId);
+
+                                  // ❗ DO NOT auto-open/close based on selection
+                                }}
+                                renderValue={
+                                  field.value?.length
+                                    ? (selected) =>
+                                      data
+                                        ?.filter((client: any) => selected.includes(client.id))
+                                        .map((client: any) => client.name)
+                                        .join(", ")
+                                    : () => "Select Carer"
+                                }
+                              >
+                                {isLoading ? (
+                                  <MenuItem disabled>Loading...</MenuItem>
+                                ) : isPickupJob ? (
+                                  <MenuItem disabled>No carers available for pickup jobs</MenuItem>
+                                ) : (
+                                  data?.slice(2).map((_data: IStaff) => (
+                                    <MenuItem value={_data.id} key={_data.id}>
+                                      <Checkbox checked={field.value?.includes(_data.id)} size="small" />
+                                      {_data.name}
+                                    </MenuItem>
+                                  ))
+                                )}
+
+                                {/* Divider */}
+                                <MenuItem divider />
+
+                                {/* ⭐ Beautiful Close Button */}
+                                <MenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenList(false);
+                                  }}
+                                  sx={{
+                                    justifyContent: "center",
+                                    mt: 1,
+                                  }}
+                                >
+                                  <Box
+                                    sx={{
+                                      px: 2,
+                                      py: 1,
+                                      width: "100%",
+                                      textAlign: "center",
+                                      borderRadius: 2,
+                                      fontWeight: "bold",
+                                      bgcolor: "primary.main",
+                                      color: "white",
+                                      "&:hover": { bgcolor: "primary.dark" },
+                                    }}
+                                  >
+                                    Close
+                                  </Box>
+                                </MenuItem>
+                              </Select>
+
+
+                              {invalid && <FormHelperText>{error?.message}</FormHelperText>}
+                            </Box>
+
+                          );
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+                </Grid>
+              )}
+          </Grid>
+        )}
+      </StyledPaper>
+      {advanceShift && (
+        <>
+          {/* {open && selectedDisplayNames ? ( */}
+          {open ? (
+            selectedDisplayNames
+              .split(",")
+              .map((name: string, index: number) => {
+                const selectedCarerIdsArray = selectedCarerId
+                  .split(",")
+                  .map((id) => id.trim()); // Ensure trimming of whitespace
+
+                // Log to debug the split result and index
+                // console.log("Selected Carer IDs Array:", selectedCarerIdsArray);
+                // console.log("Selected Display Names:", selectedDisplayNames);
+
+                // Ensure proper handling for the first index
+                const carerId = selectedCarerIdsArray[index]?.trim() || "0"; // Check if index exists
+
+                console.log(
+                  `Index: ${index}, Name: ${name.trim()}, Carer ID: ${carerId}`
+                );
+                const prefilledPayGroupId = shift?.payGroups?.id;
+                return (
+                  <Card
+                    key={index}
+                    sx={{
+                      minWidth: 275,
+                      position: "relative",
+                      bgcolor: "#f5f5f5",
+                      border: "1px solid #ccc",
+                      boxShadow: 2,
+                      margin: "10px 0px 0px 6px"
+                    }}
+                  >
+                    <IconButton
+                      sx={{
+                        position: "absolute",
+                        top: -3,
+                        right: -3,
+                        border: "6px solid #ffffff",
+                        color: "white",
+                        width: "0.6em",
+                        height: "0.6em",
+                        bgcolor: "red",
+                        "&:hover": {
+                          bgcolor: "darkred"
+                        }
+                      }}
+                      onClick={() => handleRemoveName(name)}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                    <CardContent>
+                      <Grid container alignItems="center">
+                        <Divider
+                          style={{ marginTop: "20px", marginBottom: "20px" }}
+                        />
+                        <Grid container spacing={2}>
+                          {advanceShift && (
+                            <>
+                              <Grid item lg={4} md={6} sm={12} xs={12}>
+                                <Typography>Carer Name:</Typography>
+                              </Grid>
+                              <Grid item lg={8} md={6} sm={12} xs={12}>
+                                {name.trim()}
+                              </Grid>
+
+                              <Controller
+                                control={control}
+                                name={`employeePayGroups[${index}].employeeId`}
+                                defaultValue={carerId} // Ensure carerId is properly set for the first record
+                                render={({ field }) => (
+                                  <input
+                                    type="hidden"
+                                    {...field}
+                                    value={carerId}
+                                  />
+                                )}
+                              />
+
+                              {/* <Grid item lg={4} md={6} sm={12} xs={12}>
+                                <Typography>Choose Pay Group</Typography>
+                              </Grid>
+                              <Grid item lg={8} md={6} sm={12} xs={12}>
+                                <Controller
+                                  control={control}
+                                  name={`employeePayGroups[${index}].payGroupId`}
+                                  defaultValue={
+                                    prefilledPayGroupId
+                                      ? [prefilledPayGroupId]
+                                      : []
+                                  } // Initialize as an array
+                                  render={({
+                                    field,
+                                    fieldState: { error, invalid }
+                                  }) => (
+                                    <Box>
+                                      <Select
+                                        fullWidth
+                                        size="small"
+                                        {...field}
+                                        value={
+                                          field.value.length > 0
+                                            ? field.value[0]
+                                            : ""
+                                        } // Get the first element or default to empty
+                                        onChange={(e) => {
+                                          const _value = e.target.value;
+                                          field.onChange([_value]); // Wrap value in an array
+                                        }}
+                                        displayEmpty
+                                        renderValue={
+                                          field.value?.length > 0
+                                            ? undefined
+                                            : () => "Select Pay Group"
+                                        }
+                                      >
+                                        {isLoading ? (
+                                          <MenuItem disabled>
+                                            <CircularProgress size={20} />
+                                            Loading...
+                                          </MenuItem>
+                                        ) : paygroup?.payGroups?.length > 0 ? (
+                                          paygroup.payGroups.map(
+                                            (payGroup: any) => (
+                                              <MenuItem
+                                                value={payGroup.id}
+                                                key={payGroup.id}
+                                              >
+                                                {payGroup.payGroupName}
+                                              </MenuItem>
+                                            )
+                                          )
+                                        ) : (
+                                          <MenuItem disabled>
+                                            No Pay Groups Available
+                                          </MenuItem>
+                                        )}
+                                      </Select>
+                                      {invalid && (
+                                        <FormHelperText>
+                                          {error?.message}
+                                        </FormHelperText>
+                                      )}
+                                    </Box>
+                                  )}
+                                />
+                              </Grid> */}
+                            </>
+                          )}
+                        </Grid>
+                      </Grid>
+                    </CardContent>
+                  </Card>
+                );
+              })
+          ) : (
+            <Typography></Typography>
+          )}
+        </>
+      )}
+    </>
+  );
+}

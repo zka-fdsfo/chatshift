@@ -221,8 +221,20 @@ export const ShiftBoxParticipant = ({
   selectall?: boolean;
 }) => {
   const otherShifts = (
+  //   <Stack spacing={1.5} sx={{ padding: "10px 5px" }}>
+  //   {shifts.slice(1).map((_shift) => (
+  //     <Shift
+  //       shift={_shift}
+  //       key={_shift.id}
+  //       type={"comfortable"}
+  //       isClient={true}
+  //       bulkaction={bulkaction}
+  //       selectall={selectall}
+  //     />
+  //   ))}
+  // </Stack>
     <Stack spacing={1.5} sx={{ padding: "10px 5px" }}>
-      {shifts.slice(1).map((_shift) => (
+      {shifts.map((_shift) => (
         <Shift
           shift={_shift}
           key={_shift.id}
@@ -310,7 +322,7 @@ export default function TimeSheetTable({
   });
 
   const cookies = parseCookies();
-  const token: string = cookies[process.env.NEXT_APP_TOKEN_NAME!];
+  const token: string = cookies[process.env.NEXT_PUBLIC_APP_TOKEN_NAME!];
 
   // const { data: ShiftIdList } = useQuery({
   //   queryKey: ["shift_id_list"],

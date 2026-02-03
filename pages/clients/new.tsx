@@ -169,7 +169,7 @@ export default function Index() {
   return (
     <DashboardLayout>
       <StyledBox>
-        <Typography variant="h4">Add New Client</Typography>
+        <Typography variant="h4">Add New Participants</Typography>
         <Box className="inner-container">
           <Stack
             direction="row"
@@ -177,7 +177,7 @@ export default function Index() {
             justifyContent="space-between"
             className="header"
           >
-            <Typography variant="h5">Client detail</Typography>
+            <Typography variant="h5">Participants detail</Typography>
           </Stack>
           <Divider />
           <FormProvider {...methods}>

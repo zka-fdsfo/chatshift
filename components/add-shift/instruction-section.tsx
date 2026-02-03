@@ -35,13 +35,35 @@ export default function InstructionSection({
       {view ? (
         <Box dangerouslySetInnerHTML={{ __html: shift?.instruction || "" }} />
       ) : (
+        // <Controller
+        //   name="instruction"
+        //   control={control}
+        //   render={({ field }) => (
+        //     <RichTextEditor value={field.value} onChange={field.onChange} />
+        //   )}
+        // />
+
         <Controller
           name="instruction"
           control={control}
           render={({ field }) => (
-            <RichTextEditor value={field.value} onChange={field.onChange} />
+            <Box
+              sx={{
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+                padding: "12px",
+                // minHeight: "200px",
+                backgroundColor: "#fff",
+              }}
+            >
+              <RichTextEditor
+                value={field.value}
+                onChange={field.onChange}
+              />
+            </Box>
           )}
-        />
+          />
+
       )}
     </StyledPaper>
   );

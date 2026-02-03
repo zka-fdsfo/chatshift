@@ -54,10 +54,11 @@ if (typeof window !== "undefined") {
   role = localStorage.getItem("user_role");
 }
 
-console.log(
-  ":::::::::::::::::::::::::================= USER ROLE from Session Config Navigation ========================:::::::::::::::::",
-  role
-);
+// console.log(
+//   ":::::::::::::::::::::::::================= USER ROLE from Session Config Navigation ========================:::::::::::::::::",
+//   role
+// );
+
 const navConfig: NavItem[] = (() => {
   if (role === "ROLE_CARER") {
     return [
@@ -77,7 +78,7 @@ const navConfig: NavItem[] = (() => {
         hasChild: false
       },
       {
-        title: "Client",
+        title: "Participants",
         path: "/clients/list",
         icon: PeopleAltIcon,
         children: [
@@ -127,13 +128,13 @@ const navConfig: NavItem[] = (() => {
             children: [],
             hasChild: false
           },
-          {
-            title: "Teams",
-            path: "/staff/teams",
-            icon: GroupsIcon,
-            children: [],
-            hasChild: false
-          },
+          // {
+          //   title: "Teams",
+          //   path: "/staff/teams",
+          //   icon: GroupsIcon,
+          //   children: [],
+          //   hasChild: false
+          // },
           {
             title: "Archived ",
             path: "/staff/archived",
@@ -159,7 +160,7 @@ const navConfig: NavItem[] = (() => {
         hasChild: true
       },
       {
-        title: "Clients",
+        title: "Participants",
         path: "/clients/list",
         icon: PeopleAltIcon,
         children: [
@@ -206,7 +207,7 @@ const navConfig: NavItem[] = (() => {
             hasChild: false
           },
           {
-            title: "Client Notes",
+            title: "Participants Notes",
             path: "/client-notes",
             icon: TocIcon,
             children: [],
@@ -414,6 +415,28 @@ const navConfig: NavItem[] = (() => {
         children: [],
         hasChild: false
       }
+      // {
+      //   title: "Guidance",
+      //   path: "/web-guidance",
+      //   icon: MenuBookIcon,
+      //   children: [
+      //     {
+      //       title: "Web Guidance",
+      //       path: "/web-guidance",
+      //       icon: PersonAddIcon,
+      //       children: [],
+      //       hasChild: false
+      //     },
+      //     {
+      //       title: "Sample Price Book",
+      //       path: "/sample-price-book",
+      //       icon: TocIcon,
+      //       children: [],
+      //       hasChild: false
+      //     }
+      //   ],
+      //   hasChild: true
+      // },
     ];
   } else if (role === "ROLE_CLIENT") {
     return [
@@ -471,7 +494,7 @@ const navConfig: NavItem[] = (() => {
         hasChild: true
       },
       {
-        title: "Clients",
+        title: "Participants",
         path: "/clients/list",
         icon: PeopleAltIcon,
         children: [
@@ -518,7 +541,7 @@ const navConfig: NavItem[] = (() => {
             hasChild: false
           },
           {
-            title: "Client Notes",
+            title: "Participants Notes",
             path: "/client-notes",
             icon: TocIcon,
             children: [],
@@ -832,7 +855,7 @@ const navConfig: NavItem[] = (() => {
         hasChild: false
       },
       {
-        title: "Clients",
+        title: "Participants",
         path: "/clients/list",
         icon: PeopleAltIcon,
         children: [
@@ -879,7 +902,7 @@ const navConfig: NavItem[] = (() => {
             hasChild: false
           },
           {
-            title: "Client Notes",
+            title: "Participants Notes",
             path: "/client-notes",
             icon: TocIcon,
             children: [],
@@ -1045,13 +1068,13 @@ const navConfig: NavItem[] = (() => {
             children: [],
             hasChild: false
           },
-          {
-            title: "Teams",
-            path: "/staff/teams",
-            icon: GroupsIcon,
-            children: [],
-            hasChild: false
-          },
+          // {
+          //   title: "Teams",
+          //   path: "/staff/teams",
+          //   icon: GroupsIcon,
+          //   children: [],
+          //   hasChild: false
+          // },
           {
             title: "Archived ",
             path: "/staff/archived",
@@ -1077,7 +1100,7 @@ const navConfig: NavItem[] = (() => {
         hasChild: true
       },
       {
-        title: "Clients",
+        title: "Participants",
         path: "/clients/list",
         icon: PeopleAltIcon,
         children: [
@@ -1124,7 +1147,7 @@ const navConfig: NavItem[] = (() => {
             hasChild: false
           },
           {
-            title: "Client Notes",
+            title: "Participants Notes",
             path: "/client-notes",
             icon: TocIcon,
             children: [],
@@ -1308,7 +1331,7 @@ const navConfig: NavItem[] = (() => {
       //   default: true
       // },
       {
-        title: "Client",
+        title: "Participants",
         path: "/clients/list",
         icon: PeopleAltIcon,
         children: [

@@ -9,13 +9,14 @@ import DataGridTable from "@/components/Table/DataGridTable";
 import SimpleBar from "simplebar-react";
 import DataTable from "@/components/Table/DataTable";
 import UserTableRow from "pages/staff/staff-table-row";
-import Loader from "@/ui/Loader/Loder";
+// import Loader from "@/ui/Loader/Loder";
 import {
   getAllClients,
   getAllTemporaryClients
 } from "@/api/functions/client.api";
 import { IClient } from "@/interface/client.interface";
 import ClientTableRow from "./client-table.row";
+import Loader from "@/components/Loader";
 
 
 const StyledClientPage = styled(Box)`

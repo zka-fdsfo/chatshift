@@ -43,23 +43,34 @@ export default function Header({ onOpenNav }: HeaderProps) {
   );
 
   return (
-    <AppBar
-      sx={{
-        boxShadow: "none",
-        height: HEADER.H_MOBILE,
-        zIndex: theme.zIndex.appBar + 1,
-        ...bgBlur({
-          color: theme.palette.background.default
-        }),
-        transition: theme.transitions.create(["height"], {
-          duration: theme.transitions.duration.shorter
-        }),
-        ...(lgUp && {
-          width: `calc(100% - ${NAV.WIDTH + 1}px)`,
-          height: HEADER.H_DESKTOP
-        })
-      }}
-    >
+<AppBar
+  elevation={2}
+  sx={{
+    height: 63,
+    minHeight: 63, // important for MUI AppBar
+    zIndex: theme.zIndex.appBar + 1,
+
+    backgroundColor: "rgba(247, 250, 252, 0.55)",
+    backdropFilter: "blur(20px) saturate(180%)",
+    WebkitBackdropFilter: "blur(20px) saturate(180%)",
+
+    boxShadow: `
+      0 1px 0 rgba(0, 0, 0, 0.04),
+      0 8px 24px rgba(0, 0, 0, 0.06)
+    `,
+
+    ...(lgUp && {
+      width: `calc(100% - ${NAV.WIDTH + 1}px)`,
+      height: 63,
+      minHeight: 63
+    })
+  }}
+>
+
+
+
+
+  
       <Toolbar
         sx={{
           height: 1,

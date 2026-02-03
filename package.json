@@ -58,6 +58,7 @@
     "eventemitter3": "^5.0.1",
     "file-extension": "^4.0.5",
     "jspdf": "^2.5.2",
+    "jwt-decode": "^4.0.0",
     "language-list": "^0.0.3",
     "lodash": "^4.17.21",
     "lottie-react": "^2.3.1",

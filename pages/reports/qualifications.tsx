@@ -14,6 +14,7 @@ import {
 import { Cancel, CheckCircle } from "@mui/icons-material";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
+import Loader from "@/components/Loader";
 
 export default function Compliance() {
   const {
@@ -32,18 +33,9 @@ export default function Compliance() {
     );
   }, [reportCompliance]);
 
-  if (reportIsLoading) {
-    return (
-      <DashboardLayout>
-        <Container>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Qualifications
-          </Typography>
-          <CircularProgress />
-        </Container>
-      </DashboardLayout>
-    );
-  }
+    if (reportIsLoading) {
+      return <Loader />
+    }
 
   if (reportListError) {
     return (
