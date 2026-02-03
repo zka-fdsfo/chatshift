@@ -83,6 +83,8 @@ export default function LoginView() {
   const { mutate, isPending } = useMutation({
     mutationFn: loginMutation,
     onSuccess: (data: any) => {
+
+      if (data.message === "Logged In Successfully") {
       console.log("----------:EMPLOYEE SIGN IN DATA:----------",data);
       setCookieClient(process.env.NEXT_APP_TOKEN_NAME!, data.jwtToken);
       setCookieClient(process.env.NEXT_REFRESH_TOKEN_NAME!, data.refreshToken);
@@ -99,6 +101,7 @@ export default function LoginView() {
       else if (data.role[0].name === "ROLE_CARER") window.location.href = "/staff-roster";
       else if (data.role[0].name === "ROLE_KIOSK") window.location.href = "/kiosk_scheduler";
       else window.location.href = "/home";
+      }
     },
   });
 
