@@ -59,7 +59,7 @@ export function useJwtAutoLogout() {
 
   // Check token immediately
   const checkNow = () => {
-    const token = getCookie(process.env.NEXT_APP_TOKEN_NAME!);
+    const token = getCookie(process.env.NEXT_PUBLIC_APP_TOKEN_NAME!);
     if (!token) return;
 
     try {
@@ -75,7 +75,7 @@ export function useJwtAutoLogout() {
   // Timer for exact expiry
   const startTimer = () => {
     clearTimer();
-    const token = getCookie(process.env.NEXT_APP_TOKEN_NAME!);
+    const token = getCookie(process.env.NEXT_PUBLIC_APP_TOKEN_NAME!);
     if (!token) return;
 
     try {
@@ -130,8 +130,8 @@ export function useJwtAutoLogout() {
 
     try {
       const data = await updateToken();
-      setCookieClient(process.env.NEXT_APP_TOKEN_NAME!, data.jwtToken);
-      setCookieClient(process.env.NEXT_REFRESH_TOKEN_NAME!, data.refreshToken);
+      setCookieClient(process.env.NEXT_PUBLIC_APP_TOKEN_NAME!, data.jwtToken);
+      setCookieClient(process.env.NEXT_PUBLIC_REFRESH_TOKEN_NAME!, data.refreshToken);
 
       isRefreshingRef.current = false;
       startTimer(); // restart timer safely
@@ -145,8 +145,8 @@ function logout() {
   if (typeof window === "undefined") return;
 
   console.log("🚪 Logging out...");
-  document.cookie = `${process.env.NEXT_APP_TOKEN_NAME}=; Max-Age=0; path=/`;
-  document.cookie = `${process.env.NEXT_REFRESH_TOKEN_NAME}=; Max-Age=0; path=/`;
+  document.cookie = `${process.env.NEXT_PUBLIC_APP_TOKEN_NAME}=; Max-Age=0; path=/`;
+  document.cookie = `${process.env.NEXT_PUBLIC_REFRESH_TOKEN_NAME}=; Max-Age=0; path=/`;
 
   window.location.href = "/";
 }

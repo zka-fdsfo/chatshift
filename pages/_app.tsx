@@ -65,8 +65,8 @@ export default function CustomApp({
 function logout() {
   console.log("Logging out because last tab closed");
 
-  document.cookie = `${process.env.NEXT_APP_TOKEN_NAME}=; Max-Age=0; path=/`;
-  document.cookie = `${process.env.NEXT_REFRESH_TOKEN_NAME}=; Max-Age=0; path=/`;
+  document.cookie = `${process.env.NEXT_PUBLIC_APP_TOKEN_NAME}=; Max-Age=0; path=/`;
+  document.cookie = `${process.env.NEXT_PUBLIC_REFRESH_TOKEN_NAME}=; Max-Age=0; path=/`;
 
   window.location.href = "/";
 }

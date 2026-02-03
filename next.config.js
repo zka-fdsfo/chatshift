@@ -25,7 +25,7 @@ module.exports = {
   env: {
     NEXT_APP_BASE_URL: process.env.NEXT_APP_BASE_URL,
     NEXT_APP_ENCRYPTION_KEY: process.env.NEXT_APP_ENCRYPTION_KEY,
-    NEXT_APP_TOKEN_NAME: process.env.NEXT_APP_TOKEN_NAME
+    NEXT_PUBLIC_APP_TOKEN_NAME: process.env.NEXT_PUBLIC_APP_TOKEN_NAME
   },
   typescript: { ignoreBuildErrors: false }
   // async redirects() {

@@ -322,7 +322,7 @@ export default function TimeSheetTable({
   });
 
   const cookies = parseCookies();
-  const token: string = cookies[process.env.NEXT_APP_TOKEN_NAME!];
+  const token: string = cookies[process.env.NEXT_PUBLIC_APP_TOKEN_NAME!];
 
   // const { data: ShiftIdList } = useQuery({
   //   queryKey: ["shift_id_list"],

@@ -9,7 +9,7 @@ import { useAppSelector } from "../redux/useAppSelector";
 
 const useUser = () => {
   const cookies = parseCookies();
-  const token: string = cookies[process.env.NEXT_APP_TOKEN_NAME!];
+  const token: string = cookies[process.env.NEXT_PUBLIC_APP_TOKEN_NAME!];
   const dispatch = useAppDispatch();
   const { userData } = useAppSelector((s) => s.userSlice);
 

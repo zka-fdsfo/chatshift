@@ -10,7 +10,7 @@ export const getAdminDashboard = async(date: string) => {
 
 
 // export const updateToken = async () => {
-//      const refreshToken = getCookie(process.env.NEXT_REFRESH_TOKEN_NAME!) as string | undefined;
+//      const refreshToken = getCookie(process.env.NEXT_PUBLIC_REFRESH_TOKEN_NAME!) as string | undefined;
 //     if (!refreshToken) throw new Error('No refresh token found');
   
 //     const res = await axiosInstance.post(
@@ -28,7 +28,7 @@ export const getAdminDashboard = async(date: string) => {
 
 export const updateToken = async () => {
     const refreshToken = getCookie(
-      process.env.NEXT_REFRESH_TOKEN_NAME!
+      process.env.NEXT_PUBLIC_REFRESH_TOKEN_NAME!
     ) as string | undefined;
   
     if (!refreshToken) throw new Error("No refresh token found");

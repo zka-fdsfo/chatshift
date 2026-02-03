@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 // If the incoming request has the "token" cookie
 export function middleware(request: NextRequest) {
-  const has_token = request.cookies.get(process.env.NEXT_APP_TOKEN_NAME!);
+  const has_token = request.cookies.get(process.env.NEXT_PUBLIC_APP_TOKEN_NAME!);
   const auth_routes = [
     "/",
     "/auth/signin",
