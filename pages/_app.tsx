@@ -73,34 +73,34 @@ function logout() {
 
 
 
-useEffect(() => {
-  // ✅ TAB OPENED
-  const addTab = () => {
-    const count = Number(localStorage.getItem(TAB_COUNT_KEY) || "0");
-    localStorage.setItem(TAB_COUNT_KEY, String(count + 1));
-  };
+// useEffect(() => {
+//   // ✅ TAB OPENED
+//   const addTab = () => {
+//     const count = Number(localStorage.getItem(TAB_COUNT_KEY) || "0");
+//     localStorage.setItem(TAB_COUNT_KEY, String(count + 1));
+//   };
 
-  // ✅ TAB CLOSED
-  const removeTab = () => {
-    const count = Number(localStorage.getItem(TAB_COUNT_KEY) || "1");
-    const next = Math.max(count - 1, 0);
-    localStorage.setItem(TAB_COUNT_KEY, String(next));
+//   // ✅ TAB CLOSED
+//   const removeTab = () => {
+//     const count = Number(localStorage.getItem(TAB_COUNT_KEY) || "1");
+//     const next = Math.max(count - 1, 0);
+//     localStorage.setItem(TAB_COUNT_KEY, String(next));
 
-    // 🔥 LAST TAB CLOSED → LOGOUT
-    if (next === 0) {
-      logout();
-    }
-  };
+//     // 🔥 LAST TAB CLOSED → LOGOUT
+//     if (next === 0) {
+//       logout();
+//     }
+//   };
 
-  addTab();
+//   addTab();
 
-  window.addEventListener("beforeunload", removeTab);
+//   window.addEventListener("beforeunload", removeTab);
 
-  return () => {
-    removeTab();
-    window.removeEventListener("beforeunload", removeTab);
-  };
-}, []);
+//   return () => {
+//     removeTab();
+//     window.removeEventListener("beforeunload", removeTab);
+//   };
+// }, []);
     // ----------- Code for auto logout is end here -----------
   return (
     <Provider store={store}>
