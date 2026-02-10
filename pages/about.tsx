@@ -1,6 +1,6 @@
 // AboutPage.tsx
 import React from "react";
-import { Box, Typography, Container, Stack } from "@mui/material";
+import { Box, Container, Stack,Typography } from "@mui/material";
 import RostrHeader from "@/layout/dashboard/header/rostrheader";
 import RostrFooter from "@/layout/dashboard/footer/rostrfooter";
 

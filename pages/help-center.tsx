@@ -2,10 +2,10 @@ import React from "react";
 import {
   Box,
   Container,
-  Stack,
-  Typography,
   Grid,
   Paper,
+  Stack,
+  Typography,
 } from "@mui/material";
 
 import SchoolIcon from "@mui/icons-material/School";
