@@ -9,22 +9,30 @@ import {
   Grid,
   Stack,
   Typography,
-
 } from "@mui/material";
 import { useRouter } from "next/router";
-import { useRef } from "react";
+
+/* ===== ICONS ===== */
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import GroupsIcon from "@mui/icons-material/Groups";
+import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import BusinessIcon from "@mui/icons-material/Business";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import SupportAgentIcon from "@mui/icons-material/SupportAgent";
+import PersonIcon from "@mui/icons-material/Person";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 export default function Home() {
   const router = useRouter();
-  const trustSectionRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <>
       <RostrHeader />
 
       {/* ================= HERO ================= */}
-     {/* ================= HERO ================= */}
-     <Box
+      <Box
         sx={{
           minHeight: "90vh",
           display: "flex",
@@ -32,14 +40,14 @@ export default function Home() {
           backgroundImage:
             "linear-gradient(rgba(29,42,51,0.7), rgba(29,42,51,0.7)), url('/assets/background/bg1.jpg')",
           backgroundSize: "cover",
-          backgroundPosition: "center"
+          backgroundPosition: "center",
         }}
       >
         <Container maxWidth="lg">
           <Grid container spacing={6}>
-            <Grid item xs={12} md={7}>
+            <Grid item xs={12} md={8}>
               <Typography variant="h2" fontWeight={700} color="#F7FAFC" mb={2}>
-                Empowering NDIS Care Across Australia
+                Human-centred scheduling, built for NDIS realities
               </Typography>
 
               <Typography
@@ -47,73 +55,106 @@ export default function Home() {
                 sx={{ color: "rgba(247,250,252,0.85)" }}
                 mb={4}
               >
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                Vestibulum id ligula porta felis euismod semper.
+                RostR is a rostering and shift-management platform designed to
+                support NDIS providers in managing their day-to-day operations
+                with clarity, care, and confidence. Reduce administrative load,
+                improve visibility across your team, and spend more time focused
+                on what matters most — delivering quality support to participants.
               </Typography>
 
               <Stack direction="row" spacing={2}>
                 <Button
                   size="large"
                   variant="contained"
+                  startIcon={<ArrowForwardIcon />}
                   sx={{
                     bgcolor: "#67D085",
                     color: "#1D2A33",
-                    "&:hover": { bgcolor: "#5BC47A" }
+                    "&:hover": { bgcolor: "#5BC47A" },
                   }}
                   onClick={() => router.push("/auth/signup")}
                 >
-                  Get Started
+                  Request Access
                 </Button>
 
                 <Button
                   size="large"
                   variant="outlined"
+                  startIcon={<InfoOutlinedIcon />}
                   sx={{
                     borderColor: "#F7FAFC",
                     color: "#F7FAFC",
-                    "&:hover": { backgroundColor: "rgba(247,250,252,0.1)" }
+                    "&:hover": { backgroundColor: "rgba(247,250,252,0.1)" },
                   }}
-                  onClick={() =>
-                    trustSectionRef.current?.scrollIntoView({
-                      behavior: "smooth",
-                      block: "start"
-                    })
-                  }
+                  onClick={() => router.push("/about")}
                 >
                   Learn More
                 </Button>
-
               </Stack>
             </Grid>
           </Grid>
         </Container>
       </Box>
 
-      {/* ================= TRUST ================= */}
-      <Box  ref={trustSectionRef} sx={{ py: 10, bgcolor: "#F7FAFC" }}>
+      {/* ================= VALUE PROPOSITIONS ================= */}
+      <Box sx={{ py: 10, bgcolor: "#F7FAFC" }}>
         <Container maxWidth="lg">
+          <Typography
+            variant="h4"
+            fontWeight={700}
+            color="#1D2A33"
+            textAlign="center"
+            mb={6}
+          >
+            Why RostR
+          </Typography>
+
           <Grid container spacing={4}>
             {[
-              "NDIS Compliant Services",
-              "Secure & Confidential Data",
-              "Supporting Australians Nationwide"
-            ].map((title, i) => (
-              <Grid item xs={12} md={4} key={i}>
+              {
+                title: "Built with providers, for providers",
+                desc: "Designed around real NDIS workflows, RostR supports operational needs without adding unnecessary complexity.",
+                icon: <GroupsIcon sx={{ fontSize: 40, color: "#67D085" }} />,
+              },
+              {
+                title: "Clearer scheduling, fewer gaps",
+                desc: "Manage shifts, availability, and approvals in one place, helping teams stay aligned and reducing avoidable errors.",
+                icon: <AccessTimeIcon sx={{ fontSize: 40, color: "#67D085" }} />,
+              },
+              {
+                title: "Supports good compliance practices",
+                desc: "RostR provides tools that assist with record-keeping, evidence capture, and documentation — while keeping responsibility where it belongs, with the provider.",
+                icon: <VerifiedUserIcon sx={{ fontSize: 40, color: "#67D085" }} />,
+              },
+              {
+                title: "Human by design",
+                desc: "From language choices to user experience, RostR is designed to feel approachable and intuitive for admins, workers, and participants alike.",
+                icon: <FavoriteIcon sx={{ fontSize: 40, color: "#67D085" }} />,
+              },
+            ].map((item, i) => (
+              <Grid item xs={12} md={6} key={i}>
                 <Card
                   sx={{
                     p: 4,
                     height: "100%",
                     bgcolor: "white",
-                    border: "1px solid rgba(90,122,140,0.15)"
+                    border: "1px solid rgba(90,122,140,0.15)",
                   }}
                 >
-                  <Typography variant="h6" fontWeight={600} color="#1D2A33" mb={1}>
-                    {title}
-                  </Typography>
-                  <Typography color="#5A7A8C">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    Maecenas sed diam eget risus varius blandit.
-                  </Typography>
+                  <Stack direction="row" spacing={2} alignItems="flex-start">
+                    {item.icon}
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        fontWeight={600}
+                        color="#1D2A33"
+                        mb={1}
+                      >
+                        {item.title}
+                      </Typography>
+                      <Typography color="#5A7A8C">{item.desc}</Typography>
+                    </Box>
+                  </Stack>
                 </Card>
               </Grid>
             ))}
@@ -121,34 +162,64 @@ export default function Home() {
         </Container>
       </Box>
 
-      {/* ================= PORTALS ================= */}
+      {/* ================= WHO IT'S FOR ================= */}
       <Box sx={{ py: 10 }}>
         <Container maxWidth="lg">
-          <Typography variant="h4" fontWeight={700} color="#1D2A33" textAlign="center" mb={6}>
-            Access Your Portal
+          <Typography
+            variant="h4"
+            fontWeight={700}
+            color="#1D2A33"
+            textAlign="center"
+            mb={6}
+          >
+            Who It’s For
           </Typography>
 
           <Grid container spacing={4}>
             {[
-              { title: "Participants", path: "/auth/client/signin" },
-              { title: "Employees", path: "/auth/employee/signin" },
-              { title: "Administrators", path: "/auth/signup" }
+              {
+                title: "NDIS providers of all sizes",
+                icon: <BusinessIcon sx={{ fontSize: 40, color: "#67D085" }} />,
+              },
+              {
+                title: "Support coordinators and admin teams",
+                icon: (
+                  <AdminPanelSettingsIcon
+                    sx={{ fontSize: 40, color: "#67D085" }}
+                  />
+                ),
+              },
+              {
+                title: "Support workers and frontline staff",
+                icon: (
+                  <SupportAgentIcon sx={{ fontSize: 40, color: "#67D085" }} />
+                ),
+              },
+              {
+                title: "Participants accessing their schedules and information",
+                icon: <PersonIcon sx={{ fontSize: 40, color: "#67D085" }} />,
+              },
             ].map((item, i) => (
-              <Grid item xs={12} md={4} key={i}>
+              <Grid item xs={12} md={3} key={i}>
                 <Card
                   sx={{
                     height: "100%",
                     bgcolor: "#F7FAFC",
-                    border: "1px solid rgba(90,122,140,0.2)"
+                    border: "1px solid rgba(90,122,140,0.2)",
                   }}
                 >
-                  <CardActionArea sx={{ p: 4 }} onClick={() => router.push(item.path)}>
-                    <Typography variant="h6" fontWeight={600} color="#1D2A33" mb={1}>
-                      {item.title}
-                    </Typography>
-                    <Typography color="#5A7A8C">
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                    </Typography>
+                  <CardActionArea sx={{ p: 4 }}>
+                    <Stack spacing={2} alignItems="center">
+                      {item.icon}
+                      <Typography
+                        variant="h6"
+                        fontWeight={600}
+                        color="#1D2A33"
+                        textAlign="center"
+                      >
+                        {item.title}
+                      </Typography>
+                    </Stack>
                   </CardActionArea>
                 </Card>
               </Grid>
@@ -156,39 +227,38 @@ export default function Home() {
           </Grid>
         </Container>
       </Box>
-   {/* ================= CTA ================= */}
-   <Box
+
+      {/* ================= CTA ================= */}
+      <Box
         sx={{
           py: 10,
           bgcolor: "#D8EFFE",
-          textAlign: "center"
+          textAlign: "center",
         }}
       >
         <Container maxWidth="md">
-          <Typography variant="h4" fontWeight={700} color="#1D2A33" mb={2}>
-            Ready to Transform NDIS Care?
-          </Typography>
-
-          <Typography color="#5A7A8C" mb={4}>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-            Integer posuere erat a ante venenatis dapibus.
+          <Typography variant="h4" fontWeight={700} color="#1D2A33" mb={3}>
+            RostR helps simplify the operational side of care, so providers can
+            focus on delivering it.
           </Typography>
 
           <Button
             size="large"
             variant="contained"
+            endIcon={<ArrowForwardIcon />}
             sx={{
               bgcolor: "#67D085",
               color: "#1D2A33",
               px: 5,
-              "&:hover": { bgcolor: "#5BC47A" }
+              "&:hover": { bgcolor: "#5BC47A" },
             }}
-            onClick={() => router.push("/contact")}
+            onClick={() => router.push("/auth/signup")}
           >
-            Contact Us
+            Get Started with RostR
           </Button>
         </Container>
       </Box>
+
       <RostrFooter />
     </>
   );
