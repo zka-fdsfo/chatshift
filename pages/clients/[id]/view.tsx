@@ -141,13 +141,13 @@ export default function Index() {
     mutationFn: resendInviteParticipant
   });
 
-  useEffect(() => {
-    console.log(
-      "-------------: Client Fund :-------------",
-      // data.funds[0]?.funds
-      data
-    );
-  }, [data]);
+  // useEffect(() => {
+  //   console.log(
+  //     "-------------: Client Fund :-------------",
+  //     // data.funds[0]?.funds
+  //     data
+  //   );
+  // }, [data]);
 
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl((prev) => (prev ? null : event.currentTarget));

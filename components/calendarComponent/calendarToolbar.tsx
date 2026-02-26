@@ -97,7 +97,7 @@ export default function CalendarToolbar({
     {moment(date).format("MMMM YYYY")}
   </Typography>
 
-  <Button
+  {/* <Button
     variant="outlined"
     size="small"
     sx={{
@@ -162,7 +162,71 @@ export default function CalendarToolbar({
     onClick={() => setDate(prev => moment(prev).add(1, "month"))}
   >
     <ArrowForwardIosIcon fontSize="small" />
-  </Button>
+  </Button> */}
+
+<Button
+  variant="outlined"
+  size="small"
+  sx={{
+    backgroundColor: "#D8EFFE",
+    color: "#1D2A33",
+    fontWeight: 600,
+    borderRadius: "22px",
+    minWidth: 70,
+    height: 34,
+    textTransform: "none",
+    fontSize: 13,
+    "&:hover": {
+      backgroundColor: "#BEE6FC",
+    },
+  }}
+  onClick={() => setDate(prev => moment(prev).subtract(1, "month"))}
+>
+  <ArrowBackIosNewIcon fontSize="small" />
+</Button>
+
+<Button
+  variant="contained"
+  size="small"
+  sx={{
+    backgroundColor: "#D8EFFE",
+    color: "#1D2A33",
+    fontWeight: 600,
+    borderRadius: "22px",
+    minWidth: 110,
+    height: 34,
+    textTransform: "none",
+    fontSize: 13,
+    "&:hover": {
+      backgroundColor: "#BEE6FC",
+    },
+  }}
+  onClick={() => setDate(moment())}
+>
+  This Month
+</Button>
+
+<Button
+  variant="outlined"
+  size="small"
+  sx={{
+    backgroundColor: "#D8EFFE",
+    color: "#1D2A33",
+    fontWeight: 600,
+    borderRadius: "22px",
+    minWidth: 70,
+    height: 34,
+    textTransform: "none",
+    fontSize: 13,
+    "&:hover": {
+      backgroundColor: "#BEE6FC",
+    },
+  }}
+  onClick={() => setDate(prev => moment(prev).add(1, "month"))}
+>
+  <ArrowForwardIosIcon fontSize="small" />
+</Button>
+  
 
   {role === "ROLE_ADMIN" && (
     <Button

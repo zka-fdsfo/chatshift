@@ -20,6 +20,7 @@ import useUser from "@/hooks/react-query/useUser";
 import NewLogo from "@/components/logo/new-logo";
 import { Paper } from "@mui/material";
 import NewLogoSidebar from "@/components/logo/new-logo-sidebar";
+import { useRouter } from "next/router"; // pages router
 
 interface SidebarProps {
   openNav: boolean;
@@ -39,17 +40,21 @@ export default function Sidebar({ openNav, onCloseNav }: SidebarProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
+  const router = useRouter();
+
   const renderAccount = (
     <Box
+    onClick={() => router.push("/user/profile")}
       sx={{
         my: 3,
-        mx: 2,
+        mx: 2,   
         py: 2,
         px: 2.5,
         display: "flex",
         borderRadius: 1.5,
         alignItems: "center",
-        bgcolor:'#1D2A33'
+        bgcolor:'#1D2A33',
+        cursor: "pointer",
         // bgcolor: (theme) => alpha(theme.palette.grey[500], 0.12)
       }}
     >

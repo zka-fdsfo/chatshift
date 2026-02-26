@@ -989,9 +989,6 @@ export default function ShiftNotes({ clients }: { clients: IClient[] }) {
               }
               size="small"
               displayEmpty
-              // renderValue={
-              //   !clientFilter ? () => "Filter Participant" : undefined
-              // }
               sx={{ backgroundColor: "#fff" }}
             >
               <MenuItem>Filter Participant</MenuItem>
@@ -1012,7 +1009,6 @@ export default function ShiftNotes({ clients }: { clients: IClient[] }) {
               }
               size="small"
               displayEmpty
-              // renderValue={!staffFilter ? () => "Filter Staff" : undefined}
               sx={{ backgroundColor: "#fff" }}
             >
               <MenuItem>Filter Staff</MenuItem>
@@ -1065,7 +1061,7 @@ export default function ShiftNotes({ clients }: { clients: IClient[] }) {
                 )
               );
             })}
-          <Box paddingLeft={8} paddingRight={5} id="add-notes">
+          {/* <Box paddingLeft={8} paddingRight={5} id="add-notes">
             <FormProvider {...methods}>
               <Grid container spacing={2}>
                 <Grid item lg={6} md={6} sm={12} xs={12}>
@@ -1130,14 +1126,13 @@ export default function ShiftNotes({ clients }: { clients: IClient[] }) {
                                 : undefined
                             }
                           >
-                            {/* Dynamic options */}
+
                             {clients?.map((_client) => (
                               <MenuItem value={_client.id} key={_client.id}>
                                 {_client.displayName}
                               </MenuItem>
                             ))}
 
-                            {/* Static option */}
                             <MenuItem value="001">Other</MenuItem>
                           </Select>
                         );
@@ -1145,7 +1140,6 @@ export default function ShiftNotes({ clients }: { clients: IClient[] }) {
                     />
                   </Grid>
 
-                  {/* Conditionally display input field if "Other" is selected */}
                   {isOtherSelected && (
                     <>
                       <Grid item lg={6} md={6} sm={12} xs={12}>
@@ -1189,15 +1183,6 @@ export default function ShiftNotes({ clients }: { clients: IClient[] }) {
                         <Typography></Typography>
                       </Grid>
                       <Grid item lg={6} md={6} sm={12} xs={12}>
-                        {/* <Link
-                          href="/participants/new"
-                          passHref
-                          style={{ textDecoration: "none" }}
-                        >
-                          <Typography style={{ color: "#00a9a9" }}>
-                            Add Temporary Employee
-                          </Typography>
-                        </Link> */}
                         <Link
                           href="/participants/new"
                           passHref
@@ -1212,7 +1197,6 @@ export default function ShiftNotes({ clients }: { clients: IClient[] }) {
                           >
                             <TouchAppIcon style={{ marginLeft: "4px" }} /> Add
                             Temporary Employee
-                            {/* Add the icon */}
                           </Typography>
                         </Link>
                       </Grid>
@@ -1264,7 +1248,7 @@ export default function ShiftNotes({ clients }: { clients: IClient[] }) {
                 </LoadingButton>
               </Tooltip>
             </Stack>
-          </Box>
+          </Box> */}
         </StyledPaper>
       </StyledBox>
     </DashboardLayout>

@@ -24,10 +24,10 @@ import { getRole } from "@/lib/functions/_helpers.lib";
 import { getCookie } from "@/lib/functions/storage.lib";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import NoteAltIcon from "@mui/icons-material/NoteAlt";
-
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-
 import { useEffect, useState } from "react";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
 
 
 export interface NavItem {
@@ -96,6 +96,13 @@ const navConfig: NavItem[] = (() => {
         title: "Web Guidance",
         path: "/web-guidance",
         icon: MenuBookIcon,
+        children: [],
+        hasChild: false
+      },
+      {
+        title: "Availability",
+        path: "/staff/availability",
+        icon: EventAvailableIcon,
         children: [],
         hasChild: false
       }
@@ -210,6 +217,13 @@ const navConfig: NavItem[] = (() => {
             title: "Participants Notes",
             path: "/client-notes",
             icon: TocIcon,
+            children: [],
+            hasChild: false
+          },
+          {
+            title: "Pending Profile",
+            path: "/clients/pending-profile",
+            icon: PendingActionsIcon,
             children: [],
             hasChild: false
           }

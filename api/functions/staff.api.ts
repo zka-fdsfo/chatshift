@@ -1,4 +1,5 @@
 import {
+  EmployeeAvailabilityRequestDto,
   IDocumentSubCategory,
   ISettings,
   IUpdateSettings,
@@ -430,6 +431,40 @@ export const getTrackingRoute = async ({ employeeId,shiftId }: { employeeId: num
 export const getSummaryRoute = async ({ employeeId,shiftId }: { employeeId: number,shiftId: number }) => {
   const res = await axiosInstance.get(
     endpoints.staff.summary_route_map(employeeId,shiftId)
+  );
+  return res.data;
+};
+
+
+export const addStaffAvailability= async (
+  body: EmployeeAvailabilityRequestDto
+) => {
+  const res = await axiosInstance.post(
+    endpoints.staff.add_staff_availability,
+    body
+  );
+  return res.data;
+};
+
+
+export const getAvailability = async (id: any) => {
+  const res = await axiosInstance.get(
+    endpoints.staff.get_staff_availability(id)
+  );
+  return res.data;
+};
+
+
+
+export const getStaffAvailableSlots = async (
+  employeeId: string,
+  date: string
+) => {
+  const res = await axiosInstance.get(
+    endpoints.staff.get_staff_available_slots(employeeId),
+    {
+      params: { date },
+    }
   );
   return res.data;
 };

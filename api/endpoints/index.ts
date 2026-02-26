@@ -85,6 +85,11 @@ export const endpoints = {
       `/payroll/payrollSettings/${id}/update`,
     tracking_route_map: (employeeId: number,shiftId: number) => `/tracking/${employeeId}/${shiftId}/active-route`,
     summary_route_map: (employeeId: number,shiftId: number) => `/location/trip-summary/${employeeId}/${shiftId}`,
+    add_staff_availability:"/employee-availability/save",
+    get_staff_availability: (employeeId: string) =>
+      `/employee-availability/${employeeId}`,
+    get_staff_available_slots: (employeeId: string) =>
+      `/employee-availability/getAvailableSlot/forEmployee/${employeeId}`,
   },
   client: {
     // get_all: "/client/by-company/active",
@@ -181,6 +186,11 @@ export const endpoints = {
     resend_invite_participant: "/auth/verification-link",
     last_signin_client: (clientId: string) =>
       `auth/last-signIn/${clientId}/client`,
+    get_client_profile:  `/client/myProfile`,
+    get_client_documents_profile: `/api/document/client/view`,
+    update_profile_client:  `/client/client/request-update`,
+    get_pending_profile: (clientId: string) => `/client/admin/get/client-update/pending/new/${clientId}`,
+    approve_reject_pending_profile: "/client/admin/client-update/approve-reject",
   },
   teams: {
     get_all: "/teams/allTeams",

@@ -29,7 +29,7 @@ export function middleware(request: NextRequest) {
     "/ndis-guidelines",
     "/blog",
     "/faqs",
-
+    "/test",
   ];
 
   const pathname = request.nextUrl.pathname;

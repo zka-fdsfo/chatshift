@@ -177,10 +177,10 @@ export default function TemplateSubsection({
     documentSubCategory: string | null;
   }
 
-  console.log(
-    "--------------------- staffalldocuments --------------------------",
-    templates
-  );
+  // console.log(
+  //   "--------------------- staffalldocuments --------------------------",
+  //   templates
+  // );
 
   const role = getRole();
 
@@ -581,12 +581,12 @@ export default function TemplateSubsection({
     ]
   });
 
-  useEffect(() => {
-    console.log(
-      "-------------: category and Subcategory :-------------",
-      results
-    );
-  }, [results]);
+  // useEffect(() => {
+  //   console.log(
+  //     "-------------: category and Subcategory :-------------",
+  //     results
+  //   );
+  // }, [results]);
 
   const [categoryResult, subCategoryResult] = results;
 
@@ -603,12 +603,12 @@ export default function TemplateSubsection({
     queryFn: () => getClientDocumentsCategory() // pass the id as an object
   });
 
-  useEffect(() => {
-    console.log(
-      "-----------------: Client Document Category :-----------------",
-      data
-    );
-  }, [data]);
+  // useEffect(() => {
+  //   console.log(
+  //     "-----------------: Client Document Category :-----------------",
+  //     data
+  //   );
+  // }, [data]);
 
   useEffect(() => {
     // Your reload logic here

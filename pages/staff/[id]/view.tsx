@@ -300,6 +300,14 @@ export default function Index() {
             </MenuItem>
             <MenuItem
               onClick={() => {
+                router.push(`/staff/${id}/availability`);
+                handlePopoverClose();
+              }}
+            >
+              Set Availability
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
                 handleModal();
                 handlePopoverClose();
               }}

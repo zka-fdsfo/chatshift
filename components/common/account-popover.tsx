@@ -26,7 +26,14 @@ const MENU_OPTIONS = [
     label: "Profile",
     icon: "eva:person-fill",
     path: "/user/profile"
-  }
+  },
+  
+  // {
+  //   label: "Set Availability",
+  //   icon: "eva:person-fill",
+  //   path: "/staff/availability"
+  // }
+
   // {
   //   label: "Settings",
   //   icon: "eva:settings-2-fill"

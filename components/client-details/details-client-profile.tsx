@@ -1,8 +1,9 @@
 import {
   updateClientProfile,
-  updateClientProfilePhoto
+  updateClientProfilePhoto,
+  updateProfileClient
 } from "@/api/functions/client.api";
-import { ClientBody, IClient } from "@/interface/client.interface";
+import { ClientBody, ClientBodyNew, IClient } from "@/interface/client.interface";
 import validationText from "@/json/messages/validationText";
 import CustomInput from "@/ui/Inputs/CustomInput";
 import VisuallyHiddenInput from "@/ui/VisuallyHiddenInput/VisuallyHiddenInput";
@@ -17,10 +18,6 @@ import {
   Badge,
   Button,
   Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Divider,
   FormControlLabel,
   FormHelperText,
@@ -47,7 +44,7 @@ import { getRole } from "@/lib/functions/_helpers.lib";
 import LanguageSelect from "../LanguageSelect";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/material.css";
-import PendingProfile from "./pending-profile";
+import { toast } from "sonner";
 
 const StyledDetailsBox = styled(Paper)`
   box-shadow: rgba(145, 158, 171, 0.2) 0px 5px 5px -3px,
@@ -124,7 +121,7 @@ const schema = yup.object().shape({
   address: yup.string().trim().required(validationText.error.address),
   contactNumber: yup.string().trim().required(validationText.error.phone),
   mobileNumber: yup.string().trim(),
-  email: yup.string().email().trim().required(validationText.error.enter_email),
+  // email: yup.string().email().trim().required(validationText.error.enter_email),
   religion: yup.string().trim().required(validationText.error.religion),
   maritalStatus: yup
     .string()
@@ -135,14 +132,22 @@ const schema = yup.object().shape({
   isTemporary: yup.boolean()
 });
 
-export default function Details({ client }: { client: IClient }) {
+export default function DetailsClientProfile(
+  
+  {client,
+    handleCloseMod
+  }: {
+    client: IClient,
+    handleCloseMod: () => void;
+  }) {
   const role = getRole();
   const [edit, setEdit] = useState(false);
   const [salutation, setSalutation] = useState(Boolean(client?.salutation));
 
   const language_list = languages();
 
-  const { id } = useParams();
+// const id: string = String(client.id);
+const id = String(client.id);
 
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -157,12 +162,12 @@ export default function Details({ client }: { client: IClient }) {
       address: client.address,
       contactNumber: client.contactNumber,
       mobileNumber: client.mobileNumber,
-      email: client.email,
+      // email: client.email,
       religion: client.religion,
       maritalStatus: client.maritalStatus,
       nationality: client.nationality,
       language: client.language || [],
-      isTemporary: client.isTemporary
+      // isTemporary: client.isTemporary
     }
   });
 
@@ -185,30 +190,26 @@ export default function Details({ client }: { client: IClient }) {
     mutate({ file: formData, id: id.toString() });
   };
 
-  const onSubmit = (
-    data: Omit<ClientBody, "dateOfBirth" | "prospect"> & {
-      dateOfBirth: Dayjs | null;
+  
+  const onSubmit = async (data: any) => {
+    try {
+      const payload = {
+        ...data,
+        dateOfBirth: dayjs(data.dateOfBirth).toISOString(),
+      };
+      
+      const result = await updateProfileClient(payload);
+      console.log("Success:", result);
+      toast.success(result.message);
+      handleCloseMod()
+    } catch (error) {
+      console.error("Submission failed:", error);
+      // Add a notification here like toast.error("Network error")
     }
-  ) => {
-    updateProfile({
-      id: id as string,
-      data: { ...data, dateOfBirth: dayjs(data.dateOfBirth).toISOString() }
-    });
-  };
-
-
-  const [openModal, setModal] = useState(false);
-
-  const handleModal = () => {
-    setModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setModal(false);
   };
 
   return (
-    <StyledDetailsBox style={{ marginLeft: 0 }}>
+    <StyledDetailsBox style={{marginLeft:0}}>
       <Stack
         direction="row"
         alignItems="center"
@@ -221,17 +222,9 @@ export default function Details({ client }: { client: IClient }) {
             Edit
           </Button>
         )} */}
-        {role === "ROLE_ADMIN" && !edit && (
-          <Stack direction="row" spacing={1}>
-            <Button size="small" onClick={() => handleModal()}>
-              Pending Profile
-            </Button>
-
-            <Button size="small" onClick={() => setEdit(true)}>
-              Edit
-            </Button>
-          </Stack>
-        )}
+          <Button size="small" onClick={() => setEdit(true)}>
+            Edit
+          </Button>
       </Stack>
       <Divider />
       {edit ? (
@@ -442,7 +435,7 @@ export default function Details({ client }: { client: IClient }) {
                         )
                       }}
                     /> */}
-
+                    
                     <Controller
                       control={methods.control}
                       name="contactNumber"
@@ -484,7 +477,7 @@ export default function Details({ client }: { client: IClient }) {
                         )
                       }}
                     /> */}
-                    <Controller
+                     <Controller
                       control={methods.control}
                       name="mobileNumber"
                       render={({ field: { onChange, value }, fieldState: { error } }) => (
@@ -513,7 +506,7 @@ export default function Details({ client }: { client: IClient }) {
                   </Grid>
                 </Grid>
               </Grid>
-              <Grid item lg={3} md={12} sm={12} xs={12}>
+              {/* <Grid item lg={3} md={12} sm={12} xs={12}>
                 <Typography variant="body1">Email:</Typography>
               </Grid>
               <Grid item lg={9} md={12} sm={12} xs={12}>
@@ -529,7 +522,7 @@ export default function Details({ client }: { client: IClient }) {
                     )
                   }}
                 />
-              </Grid>
+              </Grid> */}
               <Grid item lg={3} md={12} sm={12} xs={12}>
                 <Typography variant="body1">Religion:</Typography>
               </Grid>
@@ -662,7 +655,7 @@ export default function Details({ client }: { client: IClient }) {
                   )}
                 />
               </Grid>
-              <Grid item lg={3} md={12} sm={12} xs={12}>
+              {/* <Grid item lg={3} md={12} sm={12} xs={12}>
                 Client is temporary:
               </Grid>
               <Grid item lg={9} md={12} sm={12} xs={12}>
@@ -678,7 +671,7 @@ export default function Details({ client }: { client: IClient }) {
                     />
                   )}
                 />
-              </Grid>
+              </Grid> */}
             </Grid>
           </FormProvider>
         </Box>
@@ -844,33 +837,6 @@ export default function Details({ client }: { client: IClient }) {
           </Stack>
         </>
       )}
-
-<Dialog
-            open={openModal}
-            onClose={handleCloseModal}
-            fullWidth
-            maxWidth="sm"
-          >
-            <DialogTitle>Pending Profile</DialogTitle>
-            <Divider />
-            <DialogContent>
-             <PendingProfile clientId={id} onClickClose={handleCloseModal}></PendingProfile>
-            </DialogContent>
-            {/* <DialogActions>
-              <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-                <Button
-                  variant="contained"
-                  color="error"
-                  onClick={handleCloseModal}
-                >
-                  Close
-                </Button>
-                <Button variant="contained" color="success">
-                  Update
-                </Button>
-              </Box>
-            </DialogActions> */}
-          </Dialog>
     </StyledDetailsBox>
   );
 }

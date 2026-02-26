@@ -123,3 +123,31 @@ export interface IDocumentSubCategory {
   name: string;
 }
 
+
+
+export interface EmployeeAvailabilityRequestDto {
+  employeeId: number;
+  availabilities: EmployeeAvailabilityDto[];
+}
+
+export interface EmployeeAvailabilityDto {
+  id?: number; // Optional for update
+  dayOfWeek: DayOfWeek;
+  isAvailable: boolean;
+  timeSlots: AvailabilityTimeSlotDto[];
+}
+
+export interface AvailabilityTimeSlotDto {
+  id?: number; 
+  startTime: string; 
+  endTime: string;
+}
+
+export type DayOfWeek =
+  | 'MONDAY'
+  | 'TUESDAY'
+  | 'WEDNESDAY'
+  | 'THURSDAY'
+  | 'FRIDAY'
+  | 'SATURDAY'
+  | 'SUNDAY';

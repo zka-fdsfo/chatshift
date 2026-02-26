@@ -100,9 +100,9 @@ import CloseIcon from "@mui/icons-material/Close";
     queryFn: () => getPriceBooksListAll((router.query.page as string) || "1")
   });
     
-  useEffect(() => {
-    console.log("-------------- Price Book ^^^^^^^^^^^ --------------", price);
-  }, [price]);
+  // useEffect(() => {
+  //   console.log("-------------- Price Book ^^^^^^^^^^^ --------------", price);
+  // }, [price]);
 
   const handleRemoveName = (namesToRemove: string) => {
     // Remove the names from selectedDisplayNames

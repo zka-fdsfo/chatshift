@@ -1,6 +1,8 @@
 import {
+  ClientBodyNew,
   ClientContactBody,
-  ClientFundsList
+  ClientFundsList,
+  PendingProfile
 } from "./../../typescript/interface/client.interface";
 import {
   ClientBody,
@@ -870,5 +872,51 @@ export const resendInviteParticipant = async (body: { email: string }) => {
 
 export const getLastSigninClient = async (id: string) => {
   const res = await axiosInstance.get(endpoints.client.last_signin_client(id));
+  return res.data;
+};
+
+export const getClientProfile = async () => {
+  const res = await axiosInstance.get(endpoints.client.get_client_profile);
+  return res.data;
+};
+
+
+export const getClientDocumentsProfile = async () => {
+  const res = await axiosInstance.get(
+    endpoints.client.get_client_documents_profile
+  );
+  return res.data;
+};
+
+// export const updateProfileClient = async (data: ClientBodyNew) => {
+//   const res = await axiosInstance.post(
+//     endpoints.client.update_profile_client,
+//     body.file
+//   );
+//   return res.data;
+// };
+
+// export const updateProfileClient = async (body: ClientBodyNew) => {
+//   const res = await axiosInstance.post(endpoints.client.update_profile_client, body);
+//   return res.data;
+// };
+
+export const updateProfileClient = async (body: ClientBodyNew) => {
+  const res = await axiosInstance.post(
+    endpoints.client.update_profile_client,
+    body
+  );
+  return res.data;
+};
+
+export const getPendingProfile = async (id: string) => {
+  const res = await axiosInstance.get(
+    endpoints.client.get_pending_profile(id)
+  );
+  return res.data;
+};
+
+export const pendingProfileApproveReject = async (body: PendingProfile) => {
+  const res = await axiosInstance.put(endpoints.client.approve_reject_pending_profile, body);
   return res.data;
 };

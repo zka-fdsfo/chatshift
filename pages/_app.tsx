@@ -102,10 +102,11 @@ function logout() {
 //   };
 // }, []);
     // ----------- Code for auto logout is end here -----------
+    
   return (
     <Provider store={store}>
-       {/* <SessionConfirmProvider> */}
-       {/* <JwtAutoLogoutHandler /> */}
+       <SessionConfirmProvider>
+       <JwtAutoLogoutHandler />
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <QueryClientProvider client={queryClient}>
           <CacheProvider value={emotionCache}>
@@ -118,7 +119,7 @@ function logout() {
           </CacheProvider>
         </QueryClientProvider>
       </LocalizationProvider>
-      {/* </SessionConfirmProvider> */}
+      </SessionConfirmProvider>
     </Provider>
   );
 }

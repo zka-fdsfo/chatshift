@@ -1,6 +1,8 @@
 "use client"; // To make this component from server to client
 
 import {
+  Avatar,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -32,7 +34,7 @@ import { Box, Stack } from "@mui/system";
 import AddIcon from "@mui/icons-material/Add";
 import AddShift from "../add-shift/add-shift";
 import { useRouter } from "next/router";
-import { getStaffList } from "@/api/functions/staff.api";
+import { getStaffAvailableSlots, getStaffList } from "@/api/functions/staff.api";
 import { IStaff } from "@/interface/staff.interfaces";
 // import Loader from "@/ui/Loader/Loder";
 import { getAllClients } from "@/api/functions/client.api";
@@ -51,6 +53,10 @@ import { getAllShiftsIdList } from "@/api/functions/shift.api";
 import { parseCookies } from "nookies";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import Loader from "../Loader";
+import dayjs from "dayjs";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import EventBusyIcon from "@mui/icons-material/EventBusy";
 
 const StyledTable = styled(Table)`
   border: 1px solid #ddd;
@@ -274,6 +280,10 @@ export default function TimeSheetTable({
   view: string;
   shifts: IShift[];
 }) {
+  const [selectedCarerName, setSelectedCarerName] = useState("");
+  const [openModalMessage, setModalMessage] = useState(false);
+  const [selectedCarerIdAvailable, setSelectedCarerIdAvailable] = useState<string | null>(null);
+  const [selectedDateAvailable, setSelectedDateAvailable] = useState<any>(null);
   const [error, setError] = useState("");
   const [employeeId, setEmployeeId] = useState("");
   const [selectedDate, setSelectedDate] = useState<Moment | null>(null);
@@ -291,6 +301,55 @@ export default function TimeSheetTable({
     setEmployeeId(event.target.value);
     setError(""); // Clear any previous error
   };
+
+
+  // --------------------------- Staff Available Slot code start here -------------------------
+  const formatDateTime = (arr: number[]) =>
+    dayjs(new Date(arr[0], arr[1] - 1, arr[2], arr[3], arr[4]));
+  const handleCloseModalMessage = () => {
+    setModalMessage(false);
+  };
+
+  const handleCarerClick = (carer: any, date: any) => {
+    router.replace(
+      {
+        query: {
+          staff: carer.id,
+          name: carer.name,
+        },
+      },
+      undefined,
+      { shallow: true }
+    );
+
+    setSelectedDate(date);
+    // console.log("=======================",date)
+
+    setSelectedCarerIdAvailable(carer.id);
+    setSelectedDateAvailable(date);
+    setSelectedCarerName(carer.name);
+  };
+
+  const { data: staffAvailableData, isLoading: loadingAvailable, isError } = useQuery({
+    queryKey: ["staff available slots", selectedCarerIdAvailable, selectedDate],
+    queryFn: () =>
+      getStaffAvailableSlots(
+        selectedCarerIdAvailable!,
+        dayjs(selectedDateAvailable).format("YYYY-MM-DD")
+      ),
+    enabled: !!selectedCarerIdAvailable && !!selectedDate, // ✅ runs only when ready
+  });
+
+  // useEffect(() => {
+  //   if (
+  //     staffAvailableData &&
+  //     staffAvailableData.length > 0 &&
+  //     selectedDateAvailable
+  //   ) {
+  //     setSelectedDate(selectedDateAvailable);
+  //   }
+  // }, [staffAvailableData, selectedDateAvailable]);
+  // --------------------------- Staff Available Slot code end here -------------------------
 
 
 
@@ -493,8 +552,6 @@ export default function TimeSheetTable({
       });
 
 
-
-
       return (
         // ------------------ ROSTER ROW START HERE -----------------
         <TableRow key={_carer.id}>
@@ -642,14 +699,8 @@ export default function TimeSheetTable({
                     <Box
                       className="add-shift-box"
                       onClick={() => {
-                        router.replace(
-                          {
-                            query: { staff: _carer.id, name: _carer.name, },
-                          },
-                          undefined,
-                          { shallow: true }
-                        );
-                        setSelectedDate(_date);
+                        setModalMessage(true);
+                        handleCarerClick(_carer, _date);
                       }}
                     >
                       <Typography variant="body1" className="add-shift-text">
@@ -1230,6 +1281,170 @@ export default function TimeSheetTable({
             </Button>
           </DialogActions>
         </form>
+      </Dialog>
+
+      <Dialog
+        open={openModalMessage}
+        onClose={handleCloseModalMessage}
+        maxWidth="xs"
+        fullWidth
+        sx={{
+          zIndex: 3001,
+          "& .MuiDialog-paper": {
+            borderRadius: 3,
+            backgroundColor: "#F7FAFC",
+            px: 1,
+          },
+        }}
+      >
+        {/* ========= HEADER ========= */}
+        <DialogTitle
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            pb: 1,
+          }}
+        >
+          <Box
+            sx={{
+              bgcolor: "#D8EFFE",
+              borderRadius: 2,
+              p: 1,
+              display: "flex",
+            }}
+          >
+            <EventAvailableIcon sx={{ color: "#1D2A33" }} />
+          </Box>
+
+          <Typography
+            fontWeight={700}
+            fontSize={16}
+            color="#1D2A33"
+          >
+            Carer Availability
+          </Typography>
+        </DialogTitle>
+
+        <Divider sx={{ borderColor: "#E6EEF3" }} />
+
+        {/* ========= CONTENT ========= */}
+        <DialogContent sx={{ py: 2.5 }}>
+          {staffAvailableData?.length > 0 ? (
+            <Stack spacing={1.8}>
+              {staffAvailableData.map((slot: any, index: number) => {
+                const start = formatDateTime(slot.start);
+                const end = formatDateTime(slot.end);
+
+                return (
+                  <Box
+                    key={index}
+                    sx={{
+                      p: 1.8,
+                      borderRadius: 2,
+                      backgroundColor: "#FFFFFF",
+                      border: "1px solid #E6EEF3",
+                      transition: "0.2s",
+                      "&:hover": {
+                        backgroundColor: "#D8EFFE",
+                      },
+                    }}
+                  >
+                    <Typography
+                      fontWeight={600}
+                      fontSize={14}
+                      color="#1D2A33"
+                    >
+                      {selectedCarerName}
+                    </Typography>
+
+                    <Typography
+                      fontSize={13}
+                      color="#5A7A8C"
+                      mt={0.5}
+                    >
+                      {start.format("DD MMM YYYY")}
+                    </Typography>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.8,
+                        mt: 0.5,
+                      }}
+                    >
+                      <AccessTimeIcon
+                        sx={{ fontSize: 16, color: "#67D085" }}
+                      />
+
+                      <Typography
+                        fontSize={13}
+                        fontWeight={500}
+                        color="#1D2A33"
+                      >
+                        {start.format("hh:mm A")} —{" "}
+                        {end.format("hh:mm A")}
+                      </Typography>
+                    </Box>
+                  </Box>
+                );
+              })}
+            </Stack>
+          ) : (
+            <Box
+              textAlign="center"
+              py={3}
+              sx={{
+                color: "#5A7A8C",
+              }}
+            >
+              <EventBusyIcon
+                sx={{
+                  fontSize: 36,
+                  color: "#D8EFFE",
+                  mb: 1,
+                }}
+              />
+
+              <Typography fontWeight={600} color="#1D2A33">
+                Sorry!
+              </Typography>
+
+              <Typography fontSize={13}>
+                No available slot on{" "}
+                <strong>
+                  {dayjs(selectedDateAvailable).format("DD/MM/YYYY")}
+                </strong>
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+
+        <Divider sx={{ borderColor: "#E6EEF3" }} />
+
+        {/* ========= ACTION ========= */}
+        <DialogActions sx={{ py: 1.5, px: 2 }}>
+          <Button
+            onClick={handleCloseModalMessage}
+            variant="contained"
+            fullWidth
+            sx={{
+              bgcolor: "#67D085",
+              color: "#1D2A33",
+              fontWeight: 700,
+              borderRadius: 2,
+              textTransform: "none",
+              boxShadow: "none",
+              "&:hover": {
+                bgcolor: "#58c07a",
+                boxShadow: "none",
+              },
+            }}
+          >
+            OK
+          </Button>
+        </DialogActions>
       </Dialog>
     </>
   );
