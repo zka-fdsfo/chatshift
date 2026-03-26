@@ -3,13 +3,13 @@
 
 import React from "react";
 import {
+  Box,
   Dialog,
-  DialogTitle,
-  DialogContent,
   DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   Typography,
-  Box,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
