@@ -26,12 +26,15 @@ import NewLogo from "@/components/logo/new-logo";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import ParticipantProfile from "./clients/profile";
 import CloseIcon from "@mui/icons-material/Close";
+import AddIcon from "@mui/icons-material/Add";
+import ShiftRequest from "@/components/add-shift/shift-request";
 
 interface HeaderProps {
   onOpenNav: () => void;
 }
 
 export default function StaffRoster({ onOpenNav }: HeaderProps) {
+  const [shiftModal, setShiftModal] = useState(false);
   const [date, setDate] = useState(moment());
   const [open, setOpen] = useState<HTMLElement | null>(null);
   // const user = useUser();
@@ -179,6 +182,19 @@ export default function StaffRoster({ onOpenNav }: HeaderProps) {
     </>
   );
 
+  const renderShiftRequest = (
+    <>
+      <Tooltip title="Create Shift Request">
+        <IconButton
+          color="primary"
+          onClick={() => setShiftModal(true)}
+        >
+          <AddIcon />
+        </IconButton>
+      </Tooltip>
+    </>
+  );
+
   setCookieClient("firstLoad", "false");
   const [isFirstLoadComplete, setIsFirstLoadComplete] = useState(false);
   // console.log("-------------- First Load --------------");
@@ -242,8 +258,9 @@ export default function StaffRoster({ onOpenNav }: HeaderProps) {
           }}
         >
 
+          {/* {renderShiftRequest} */}
           {renderContent}
-          {renderDocument}
+          {/* {renderDocument} */}
           {renderProfile}
           {renderLogout}
         </Box>
@@ -300,7 +317,7 @@ export default function StaffRoster({ onOpenNav }: HeaderProps) {
               top: 8,
               color: "grey.500",
               transition: "transform 1.0s ease, color 0.3s ease",
-            
+
               "&:hover": {
                 color: "error.main",
                 transform: "rotate(90deg)",
@@ -317,6 +334,7 @@ export default function StaffRoster({ onOpenNav }: HeaderProps) {
           <ParticipantProfile handleCloseModal={handleCloseModal} />
         </DialogContent>
       </Dialog>
+        <ShiftRequest open={shiftModal} onClose={() => setShiftModal(false)} />
     </>
   );
 }

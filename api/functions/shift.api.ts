@@ -1,4 +1,4 @@
-import { ShiftRepeat, ShiftType, SwapShift } from "@/interface/shift.interface";
+import { ShiftExtensionActionDto, ShiftExtensionBody, ShiftRepeat, ShiftRequestShiftBody, ShiftType, SwapShift } from "@/interface/shift.interface";
 import axiosInstance from "../axiosInstance";
 import { endpoints } from "../endpoints";
 
@@ -209,4 +209,20 @@ export const swapShift = async (body: SwapShift) => {
   const res = await axiosInstance.put(endpoints.shift.swap_shift, body);
   return res.data;
 };
+
+export const requestShiftByParticipant = async (body: ShiftRequestShiftBody) => {
+  const res = await axiosInstance.post(endpoints.shift.request_shift_by_participant, body);
+  return res.data;
+};
+
+export const ExtendShiftByParticipant = async (body: ShiftExtensionBody) => {
+  const res = await axiosInstance.post(endpoints.shift.extend_shift_by_participant, body);
+  return res.data;
+};
+
+export const ExtentionActions = async (body: ShiftExtensionActionDto) => {
+  const res = await axiosInstance.post(endpoints.shift.extention_actions, body);
+  return res.data;
+};
+
 

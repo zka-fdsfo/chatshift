@@ -307,3 +307,36 @@ export interface SwapShift {
   shiftIds: string[];
   employeeId: string;
 }
+
+export interface ShiftRequestShiftBody {
+  clientId: number;
+  startDate: Dayjs;
+  isShiftEndsNextDay: boolean;
+  startTime: Dayjs;
+  endTime: Dayjs;
+  breakTimeInMins: number;
+  address: string;
+  apartmentNumber: string;
+  shiftType: string;
+  instruction: string;
+  isDropOffAddress: boolean;
+  dropOffAddress: string;
+  dropOffApartmentNumber: string;
+  tasks: Task[];
+  isRepeated: boolean;
+  recurrance: string;
+  endDate: Dayjs;
+}
+
+export interface ShiftExtensionBody {
+  shiftId: number;
+  newStartTime: string; // format: "HH:mm:ss"
+  newEndTime: string;   // format: "HH:mm:ss"
+  reason: string;
+}
+
+export interface ShiftExtensionActionDto {
+  requestId: number;
+  approve: boolean;
+  adminRemark: string;
+}

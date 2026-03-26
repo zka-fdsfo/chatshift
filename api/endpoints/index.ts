@@ -243,7 +243,10 @@ export const endpoints = {
       shiftNotesExport: (clientId: number) =>
         `/shiftNote/exportNotesWithShiftToPdf/email/${clientId}`,
       exportpdf: (id: number) => `/shiftNote/exportShiftNotes/ToPdf/${id}`
-    }
+    },
+    request_shift_by_participant: "/shift/client/request-shift",
+    extend_shift_by_participant: "/shift/request-extension",
+    extention_actions: "/shift/extension/action",
   },
   settings: {
     pricebook: {

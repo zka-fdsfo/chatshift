@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { getAdminDashboard } from '@/api/functions/admin.api';
-import { Card, Chip, CircularProgress, Container, Grid, MenuItem, Paper, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
+import { Button, Card, Chip, CircularProgress, Container, Grid, MenuItem, Paper, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography } from '@mui/material';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Box, Stack } from '@mui/system';
 import AdminDashboardGraph from './AdminDashboardBarGraph';
 import Loader from '../Loader';
@@ -14,9 +14,23 @@ import {
   AccordionSummary
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Tooltip from "@mui/material/Tooltip";
+import IconButton from "@mui/material/IconButton";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import CommonModal from '../commonModal/modal';
+import { toast } from "sonner";
+import { ExtentionActions } from '@/api/functions/shift.api';
+import { ShiftExtensionActionDto } from '@/interface/shift.interface';
+import { queryClient } from 'pages/_app';
 
 
 const Cockpit = () => {
+  const [requestId, setRequestId] = useState<string>("");
+  const [status, setStatus] = useState<boolean>(false);
+  const [remark, setRemark] = useState<string>("");
+  const [open, setOpen] = useState(false);
+
   // const [filterByShiftGraph, setFilterByShiftGraph] = useState("yearly");
   const router = useRouter();
   const today = new Date();
@@ -30,7 +44,19 @@ const Cockpit = () => {
     queryFn: () => getAdminDashboard(date)
   });
 
-  console.log("Dashboard data===================>", data)
+  const { mutate, isPending } = useMutation({
+    mutationFn: ExtentionActions,
+    onSuccess: (data) => {
+      toast.success(data.message || "Successful");
+      setOpen(false);
+      setRemark(""); // optional reset
+      queryClient.invalidateQueries({
+        queryKey: ["admin_dashboard"],
+      });
+    },
+  });      
+
+  // console.log("Dashboard data===================>", data)
 
   if (isLoading) {
     return <Loader />
@@ -70,6 +96,52 @@ const Cockpit = () => {
         return "/";
     }
   };
+
+  const formatDate = (dateArr?: number[]) => {
+    if (!dateArr) return "-";
+    const [year, month, day] = dateArr;
+    return `${day}/${month}/${year}`;
+  };
+
+  const formatTime = (timeArr?: number[] | null) => {
+    if (!timeArr) return "-";
+    const [hour, minute] = timeArr;
+    return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+  };
+
+
+
+  const handleApprove = (id: number) => {
+    setRequestId(id.toString());
+    setOpen(true);
+    setRemark("")
+    // console.log("Approved:", id);
+    // call API here
+  };
+
+  const handleReject = (id: number) => {
+    setRequestId(id.toString());
+    setOpen(true);
+    setRemark("")
+    // console.log("Rejected:", id);
+    // call API here
+  };
+
+
+
+  const handleSave = () => {
+    const payload: ShiftExtensionActionDto = {
+      requestId: Number(requestId),
+      approve: status,
+      adminRemark: remark,
+    };
+
+    console.log("Payload:", payload);
+
+    mutate(payload);
+    setStatus(false);
+  };
+
   return (
     <Container>
       <Typography variant='h5' mb={2} style={{ color: '#1D2A33' }}>Dashboard</Typography>
@@ -296,7 +368,7 @@ const Cockpit = () => {
           }}
         >
           <Typography variant="h6" sx={{ color: "#1D2A33", fontWeight: 600 }}>
-            SHIFT
+            Shift
           </Typography>
         </AccordionSummary>
 
@@ -364,6 +436,143 @@ const Cockpit = () => {
       </Accordion>
 
 
+      {/* Pending Shift Request */}
+      <Accordion sx={{ mb: 2, boxShadow: 2, borderRadius: 2 }}>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={{
+            backgroundColor: "#D8EFFE", // Calm Accent
+            borderRadius: "8px",
+            "& .MuiAccordionSummary-content": { alignItems: "center" },
+          }}
+        >
+          <Box>
+            <Typography variant="h6" sx={{ color: "#1D2A33", fontWeight: 600 }}>
+              Pending Shift Request
+            </Typography>
+          </Box>
+        </AccordionSummary>
+
+        <AccordionDetails sx={{ backgroundColor: "#F7FAFC", p: 2 }}>
+          <Box
+            sx={{
+              p: 2,
+              width: "100%",
+              backgroundColor: "#FFFFFF", // white card for heatmap
+              borderRadius: 2,
+              boxShadow: "0 4px 12px rgba(0,0,0,0.08)", // subtle shadow
+            }}
+          >
+            <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+              <TableContainer component={Paper} sx={{ borderRadius: 2, maxHeight: 400 }}>
+                <Table stickyHeader>
+                  <TableHead sx={{ backgroundColor: "#EEF6FB" }}>
+                    <TableRow>
+                      <TableCell><b>Client</b></TableCell>
+                      <TableCell><b>Employee</b></TableCell>
+                      <TableCell><b>Date</b></TableCell>
+                      <TableCell><b>Current Time</b></TableCell>
+                      <TableCell><b>Requested Time</b></TableCell>
+                      <TableCell><b>Type</b></TableCell>
+                      <TableCell><b>Reason</b></TableCell>
+                      <TableCell align="center"><b>Actions</b></TableCell>
+                    </TableRow>
+                  </TableHead>
+
+                  <TableBody>
+                    {data?.pendingShiftRequests?.length ? (
+                      data.pendingShiftRequests.map((item: any) => (
+                        <TableRow key={item.requestId} hover>
+                          <TableCell>{item.clientName}</TableCell>
+                          <TableCell>{item.employeeName}</TableCell>
+                          <TableCell>{formatDate(item.shiftDate)}</TableCell>
+
+                          <TableCell>
+                            {formatTime(item.currentStartTime)} -{" "}
+                            {formatTime(item.currentEndTime)}
+                          </TableCell>
+
+                          <TableCell>
+                            {formatTime(item.requestedStartTime)} -{" "}
+                            {formatTime(item.requestedEndTime)}
+                          </TableCell>
+
+                          <TableCell>
+                            <Chip
+                              label={item.changeType}
+                              color={
+                                item.changeType === "BOTH"
+                                  ? "primary"
+                                  : item.changeType === "START_ONLY"
+                                    ? "warning"
+                                    : "default"
+                              }
+                              size="small"
+                            />
+                          </TableCell>
+
+                          <TableCell>{item.reason}</TableCell>
+
+                          {/* ✅ Actions Column */}
+                          <TableCell align="center">
+                            <Stack direction="row" spacing={1} justifyContent="center">
+
+                              {/* ✅ Approve */}
+                              <Tooltip title="Approve Request" arrow>
+                                <IconButton
+                                  color="success"
+                                  onClick={() => {
+                                    setStatus(true);
+                                    handleApprove(item.requestId);
+                                  }}
+                                  sx={{
+                                    backgroundColor: "rgba(76, 175, 80, 0.1)",
+                                    "&:hover": {
+                                      backgroundColor: "rgba(76, 175, 80, 0.2)",
+                                    },
+                                  }}
+                                >
+                                  <CheckCircleIcon />
+                                </IconButton>
+                              </Tooltip>
+
+                              {/* ❌ Reject */}
+                              <Tooltip title="Reject Request" arrow>
+                                <IconButton
+                                  color="error"
+                                  onClick={() => {
+                                    setStatus(false);
+                                    handleReject(item.requestId);
+                                  }}
+                                  sx={{
+                                    backgroundColor: "rgba(244, 67, 54, 0.1)",
+                                    "&:hover": {
+                                      backgroundColor: "rgba(244, 67, 54, 0.2)",
+                                    },
+                                  }}
+                                >
+                                  <CancelIcon />
+                                </IconButton>
+                              </Tooltip>
+
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={9} align="center">
+                          No pending requests
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </TableContainer>
+          </Box>
+        </AccordionDetails>
+      </Accordion>
 
       {/* ======================== */}
       {/* <Accordion>
@@ -414,7 +623,7 @@ const Cockpit = () => {
           }}
         >
           <Typography variant="h6" sx={{ color: "#1D2A33", fontWeight: 600 }}>
-            ROLES
+            Roles
           </Typography>
         </AccordionSummary>
 
@@ -519,7 +728,7 @@ const Cockpit = () => {
           }}
         >
           <Typography variant="h6" sx={{ color: "#1D2A33", fontWeight: 600 }}>
-            EXTRA
+            Extra
           </Typography>
         </AccordionSummary>
 
@@ -630,7 +839,7 @@ const Cockpit = () => {
           }}
         >
           <Typography variant="h6" sx={{ color: "#1D2A33", fontWeight: 600 }}>
-            TOP EMPLOYEE OF THE MONTH
+            Top Employee Of The Month
           </Typography>
         </AccordionSummary>
 
@@ -690,7 +899,7 @@ const Cockpit = () => {
 
       <Box mb={0} mt={2} pl={2}>
         <Typography variant="h6" mb={2} sx={{ color: "#5A7A8C" }}>
-          ANALYTICS
+          Analytics
         </Typography>
       </Box>
 
@@ -732,7 +941,7 @@ const Cockpit = () => {
         >
           <Box>
             <Typography variant="h6" sx={{ color: "#1D2A33", fontWeight: 600 }}>
-              Shifts by Yearly
+              Shifts By Yearly
             </Typography>
             <Typography variant="body2" sx={{ color: "#5A7A8C" }}>
               {today.getFullYear()}
@@ -796,7 +1005,7 @@ const Cockpit = () => {
         >
           <Box>
             <Typography variant="h6" sx={{ color: "#1D2A33", fontWeight: 600 }}>
-              Shifts by Monthly
+               Shifts By Monthly
             </Typography>
             <Typography variant="body2" sx={{ color: "#5A7A8C" }}>
               {today.toLocaleString("default", { month: "long" })}
@@ -818,7 +1027,36 @@ const Cockpit = () => {
           </Box>
         </AccordionDetails>
       </Accordion>
-
+      <CommonModal
+        open={open}
+        onClose={() => setOpen(false)}
+        title={
+          status === true
+            ? "Approval Remark"
+            : status === false
+              ? "Rejection Remark"
+              : "Remark"
+        }
+        actions={
+          <>
+            <Button onClick={() => setOpen(false)}>Cancel</Button>
+            <Button variant="contained"
+              onClick={handleSave}
+              disabled={!remark.trim() || isPending}>
+              Save
+            </Button>
+          </>
+        }
+      >
+        <TextField
+          fullWidth
+          multiline
+          rows={4}
+          placeholder="Enter your remark..."
+          value={remark}
+          onChange={(e) => setRemark(e.target.value)}
+        />
+      </CommonModal>
 
     </Container>
   )

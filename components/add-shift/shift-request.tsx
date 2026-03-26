@@ -59,9 +59,10 @@ import {
   Shift,
   ShiftBody,
   ShiftBodyS,
+  ShiftRequestShiftBody,
   Task
 } from "@/interface/shift.interface";
-import { cancelShift, createShift, editShift } from "@/api/functions/shift.api";
+import { cancelShift, createShift, editShift, requestShiftByParticipant } from "@/api/functions/shift.api";
 import { LoadingButton } from "@mui/lab";
 import { useCurrentEditor } from "@tiptap/react";
 import { Moment } from "moment";
@@ -69,7 +70,6 @@ import ClientSection from "./client-section";
 import StaffSection from "./staff-section";
 import TaskSection from "./task-section";
 import InstructionSection from "./instruction-section";
-import TimeLocation from "./time-location";
 import { queryClient } from "pages/_app";
 import ShiftRelatedNotes from "./shift-related-notes";
 import { getRole } from "@/lib/functions/_helpers.lib";
@@ -83,18 +83,14 @@ import NoteIcon from "@mui/icons-material/Note"; // Import NoteIcon
 import ShiftNotesIndividualShift from "pages/shift-notes-individualshift";
 import TrackingEmployee from "pages/staff/tracking";
 import Tracking from "pages/staff/tracking";
-import ClientSectionView from "./client-section-view";
-import StaffSectionView from "./staff-section-view";
-import TimeLocationView from "./time-location-view";
-import moment from "moment";
-import CommonModal from "../commonModal/modal";
-import ShiftExtension from "pages/clients/shift-extension";
+import ShiftRequestTimeLocation from "./shift-request-time-location";
+import { getCookie } from "@/lib/functions/storage.lib";
 
 interface DrawerInterface extends DrawerProps {
   open?: boolean;
 }
 
-export const StyledDrawer = styled(Drawer) <DrawerInterface>`
+export const StyledDrawer = styled(Drawer)<DrawerInterface>`
   z-index: 3000;
   > .drawer {
     width: 700px;
@@ -512,22 +508,14 @@ const schema = yup.object().shape({
     })
   ),
   instruction: yup.string(),
-  clientIds: yup
-    .array()
-    .of(yup.number())
-    .required("Please Select a Paricipant"),
-  employeeIds: yup.array().of(yup.number()).required("Please Select a Carer"),
+  clientId: yup
+  .number()
+  .required("Please Select a Participant"),
   isOpenShift: yup.boolean()
 });
 
-clientPriceBooks: yup.array().of(
-  yup.object().shape({
-    clientId: yup.number(),
-    priceBookIds: yup.array().of(yup.string())
-  })
-);
 
-export default function AddShiftView({
+export default function ShiftRequest({
   // onSelectId,
   view,
   edit,
@@ -537,11 +525,9 @@ export default function AddShiftView({
   shift,
   ...props
 }: AddShiftProps) {
-  const [open, setOpen] = useState(false);
-  const [selectedShiftId, setSelectedShiftId] = useState("");
   const [selectedClientAddress, setSelectedClientAddress] = useState("");
   const router = useRouter();
-  const { id } = useParams();
+  // const { id } = useParams();
   const role = getRole();
   const { staff, client } = router.query;
   const [repeatshiftModal, setRepeatShiftModal] = useState(false);
@@ -552,11 +538,9 @@ export default function AddShiftView({
     enabled: Boolean(client) && role === "ROLE_ADMINS"
   });
 
-  const userRoll = localStorage.getItem("user_role");
-
-  // useEffect(()=>{
-  //   console.log('-------------*****: role :*****-------------',userRoll);
-  // },[userRoll])
+  const userCookie = getCookie("client");
+  const user = userCookie ? JSON.parse(userCookie) : null;
+  const id = Number(user?.id) ? Number(user?.id) : user?.id;
 
   // --------- Parent to child access start here ----------
   const clientSectionRef = useRef<any>(null);
@@ -602,16 +586,15 @@ export default function AddShiftView({
         }
       ],
       instruction: "",
-      clientIds: router.pathname.includes("participants")
-        ? [parseInt(id as string)]
-        : client
-          ? [parseInt(client as string)]
-          : [],
-      employeeIds: router.pathname.includes("staff")
-        ? [parseInt(id as string)]
-        : staff
-          ? [parseInt(staff as string)]
-          : [],
+      clientId: router.pathname.includes("participants")
+      ? parseInt(id as string)
+      : client
+      ? parseInt(client as string)
+      : 0,
+      //   ? [parseInt(id as string)]
+      //   : staff
+      //   ? [parseInt(staff as string)]
+      //   : [],
       isOpenShift: false,
       clientPriceBooks: [
         { clientId: 0, priceBookIds: "" } // Initialize with an empty object for the first entry
@@ -622,15 +605,12 @@ export default function AddShiftView({
   useEffect(() => {
     if (client) {
       // methods.setValue("clientId", client as string);
-      methods.setValue("clientIds", [parseInt(client as string)]);
+      methods.setValue("clientId", Number(client));
       const _client: IClient = clients.find(
         (_data: IClient) => _data.id === parseInt(client as string)
       );
       methods.setValue("address", _client.address);
       methods.setValue("apartmentNumber", _client.apartmentNumber);
-    }
-    if (staff) {
-      methods.setValue("employeeIds", [parseInt(staff as string)]);
     }
     if (props.selectedDate) {
       methods.setValue("startDate", dayjs(props.selectedDate?.toDate()));
@@ -665,68 +645,59 @@ export default function AddShiftView({
         dropOffApartmentNumber: shift?.dropOffApartmentNumber,
         tasks: shift?.tasks,
         instruction: shift?.instruction,
-        clientIds: [shift?.client.id],
-        employeeIds: [shift?.employee.id],
+        clientId: shift?.client?.id,
         isOpenShift: shift?.isOpenShift
       });
     }
   }, [edit]);
 
   const { mutate, isPending } = useMutation({
-    mutationFn: createShift,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["all_shifts"] });
-      queryClient.invalidateQueries({ queryKey: ["shift_id_list"] });
+    mutationFn: requestShiftByParticipant,
+    onSuccess: (data) => {
+      toast.success(data.message);
+      // queryClient.invalidateQueries({ queryKey: ["all_shifts"] });
+      // queryClient.invalidateQueries({ queryKey: ["shift_id_list"] });
       methods.reset();
       props.onClose();
     }
   });
 
-  const { mutate: editMutate, isPending: isEditPending } = useMutation({
-    mutationFn: editShift,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["all_shifts"] });
-      queryClient.invalidateQueries({ queryKey: ["shift_id_list"] });
-      methods.reset();
-      props.onClose();
-    }
-  });
+  // const { mutate: editMutate, isPending: isEditPending } = useMutation({
+  //   mutationFn: editShift,
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ["all_shifts"] });
+  //     queryClient.invalidateQueries({ queryKey: ["shift_id_list"] });
+  //     methods.reset();
+  //     props.onClose();
+  //   }
+  // });
 
-  const { mutate: cancelMutate, isPending: isShiftCancelling } = useMutation({
-    mutationFn: cancelShift,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["all_shifts"] });
-      methods.reset();
-      props.onClose();
-    }
-  });
+  // const { mutate: cancelMutate, isPending: isShiftCancelling } = useMutation({
+  //   mutationFn: cancelShift,
+  //   onSuccess: () => {
+  //     queryClient.invalidateQueries({ queryKey: ["all_shifts"] });
+  //     methods.reset();
+  //     props.onClose();
+  //   }
+  // });
 
-  const onSubmit = (data: ShiftBodyS) => {
-    const selectedClientIdsArray = data.clientIds;
+
+  const onSubmit = (data: ShiftRequestShiftBody) => {
     const newData = {
       ...data,
+      clientId:id,
       startDate: dayjs(data.startDate).format("YYYY-MM-DD"),
       endDate: dayjs(data.endDate).format("YYYY-MM-DD"),
-      // shiftEndDate: data.isShiftEndsNextDay
-      //   ? dayjs(data.startDate).add(1, "day").format("YYYY-MM-DD")
-      //   : dayjs(data.startDate).format("YYYY-MM-DD"),
       breakTimeInMins: data.breakTimeInMins || 0,
       startTime: dayjs(data.startTime).format("HH:mm"),
       endTime: dayjs(data.endTime).format("HH:mm"),
-      clientIds: data.clientIds,
-      id: shift?.id,
-      clientPriceBooks: data.clientPriceBooks?.map((group, index) => ({
-        ...group,
-        clientId: selectedClientIdsArray[index]?.toString() || "0" // Assign clientId from clientIds array
-      }))
-      // instruction: JSON.stringify(editor?.getJSON(), null, 2)
     };
-    console.log(
-      "-------------------- Form Data ------------------------",
-      newData
-    );
-    if (edit) editMutate(newData);
-    else mutate(newData);
+    // console.log(
+    //   "-------------------- Form Data ------------------------",
+    //   newData
+    // );
+    // mutate(newData as any);
+    mutate(newData as any);
   };
 
   const handleRepeatShift = (id: any) => {
@@ -784,19 +755,6 @@ export default function AddShiftView({
   };
   // ---------------------------- Time Sheet Undo End Here ----------------------------
 
-  // --------------- Shift Extension start here ---------------
-  const handleShiftExtension = (shift_id: string) => {
-    if (typeof shift_id === "string") {
-      setSelectedShiftId(shift_id);
-      handleClearAll();
-      props.onClose();
-      setOpen(true)
-      // console.log("Shift Id:-------------", shift_id);
-    } else {
-      console.error("Invalid id type. Expected a string.");
-    }
-  };
-  // --------------- Shift Extension end here -----------------
 
   // useEffect(()=>{
   //   if(shift)
@@ -811,11 +769,6 @@ export default function AddShiftView({
   //   }
   // },[shift])
 
-  const today = moment().startOf("day");
-  const shiftDate = moment(shift?.startDate).startOf("day");
-
-  const isTodayOrFuture = shiftDate.isSameOrAfter(today, "day");
-
   return (
     <>
       <AdvanceShift
@@ -828,10 +781,10 @@ export default function AddShiftView({
           setEditAdvanceModal(false);
         }}
         shift={shift}
-      // open={shiftModalAdvance}
-      // onClose={() => {
-      //   setShiftModalAdvance(false);
-      // }}
+        // open={shiftModalAdvance}
+        // onClose={() => {
+        //   setShiftModalAdvance(false);
+        // }}
       />
       <StyledDrawer
         anchor="right"
@@ -850,49 +803,19 @@ export default function AddShiftView({
           className="header"
         >
           {!edit ? (
-            <>
-              <Button
-                variant="outlined"
-                startIcon={<Iconify icon="mingcute:close-fill" />}
-                // onClick={props.onClose}
-                onClick={() => {
-                  handleClearAll();
-                  props.onClose();
-                }}
-
-                disabled={isPending}
-              >
-                Close
-              </Button>
-              {/* {userRoll === "ROLE_CLIENT" && (
-              <Stack direction="row" alignItems="center" gap={1}>
-                <Button
-                  variant="contained"
-                  sx={{ backgroundColor: "#65cb81", color: "#ffffff" }}
-                  startIcon={
-                    <Iconify icon="mdi:clock-plus-outline" fontSize={16} />
-                  }
-                  onClick={() => handleShiftExtension(String(shift?.id))}
-                >
-                  Extend Shift
-                </Button>
-              </Stack>
-            )} */}
-              {userRoll === "ROLE_CLIENT" && isTodayOrFuture && (
-                <Stack direction="row" alignItems="center" gap={1}>
-                  <Button
-                    variant="contained"
-                    sx={{ backgroundColor: "#65cb81", color: "#ffffff" }}
-                    startIcon={
-                      <Iconify icon="mdi:clock-plus-outline" fontSize={16} />
-                    }
-                    onClick={() => handleShiftExtension(String(shift?.id))}
-                  >
-                    Extend Shift
-                  </Button>
-                </Stack>
-              )}
-            </>
+            <Button
+              variant="outlined"
+              startIcon={<Iconify icon="mingcute:close-fill" />}
+              // onClick={props.onClose}
+              onClick={() => {
+                handleClearAll();
+                props.onClose();
+              }}
+              
+              disabled={isPending}
+            >
+              Close
+            </Button>
           ) : (
             <Button
               variant="outlined"
@@ -922,24 +845,11 @@ export default function AddShiftView({
               {!edit ? (
                 <>
                   <Stack direction="row" alignItems="center" gap={1}>
-                    <Button
-                      variant="contained"
-                      startIcon={
-                        <Iconify icon="basil:edit-outline" fontSize={14} />
-                      }
-                      onClick={() => {
-                        setShiftModalAdvance(true);
-                        setEditAdvanceModal(false);
-                        setViewAdvanceModal(false);
-                      }}
-                    >
-                      Advance Shift
-                    </Button>
                     <LoadingButton
                       variant="contained"
                       startIcon={<Iconify icon="ic:baseline-save" />}
                       onClick={methods.handleSubmit(onSubmit)}
-                      loading={isPending || isEditPending}
+                      loading={isPending}
                     >
                       Save
                     </LoadingButton>
@@ -947,196 +857,156 @@ export default function AddShiftView({
                 </>
               ) : (
                 <Stack direction="row" alignItems="center" gap={1}>
-                  <Button
-                    variant="contained"
-                    startIcon={
-                      <Iconify icon="basil:edit-outline" fontSize={14} />
-                    }
-                    onClick={() => {
-                      setShiftModalAdvance(true);
-                      setEditAdvanceModal(true);
-                      setViewAdvanceModal(false);
-                    }}
-                  >
-                    Advance Edit
-                  </Button>
-                  <LoadingButton
+                  {/* <LoadingButton
                     variant="contained"
                     startIcon={<Iconify icon="ic:baseline-save" />}
                     onClick={methods.handleSubmit(onSubmit)}
                     loading={isPending || isEditPending}
                   >
                     Save
-                  </LoadingButton>
+                  </LoadingButton> */}
                 </Stack>
               )}
             </>
-          ) : (
-            // <>
-            //   {shift?.deleted ? (
-            //     // <Typography>Shift Deleted</Typography>
-            //     <Stack direction="row" alignItems="center" gap={1}>
-            //       <Button
-            //         variant="contained"
-            //         startIcon={<RepeatIcon />}
-            //         onClick={() => {
-            //           handleRebookShift(shift?.id as number); // Pass the ID here
-            //         }}
-            //       >
-            //         Rebook
-            //       </Button>
-            //     </Stack>
-            //   ) : (
-            //     // <Typography>Shift Not Deleted</Typography>
-            //     <Stack direction="row" alignItems="center" gap={1}>
-            //       <LoadingButton
-            //         variant="contained"
-            //         color="error"
-            //         startIcon={
-            //           <Iconify icon="iconamoon:trash-duotone" fontSize={14} />
-            //         }
-            //         loading={isShiftCancelling}
-            //         onClick={() => cancelMutate(shift?.id as number)}
-            //       >
-            //         Cancel Shift
-            //       </LoadingButton>
-            //       <Button
-            //         variant="contained"
-            //         startIcon={<RepeatIcon />}
-            //         onClick={() => {
-            //           handleRepeatShift(shift?.id as number); // Pass the ID here
-            //           setRepeatShiftModal(true);
-            //         }}
-            //       >
-            //         Repeat Shift
-            //       </Button>
-            //       <RepeatShift
-            //         open={repeatshiftModal}
-            //         onClose={() => setRepeatShiftModal(false)}
-            //         id={selectedId}
-            //       />
-            //       <Button
-            //         variant="contained"
-            //         startIcon={
-            //           <Iconify icon="basil:edit-outline" fontSize={14} />
-            //         }
-            //         onClick={() => {
-            //           if (setEditModal && setViewModal) {
-            //             setEditModal(true);
-            //             setViewModal(false);
-            //           }
-            //         }}
-            //       >
-            //         Edit
-            //       </Button>
-            //     </Stack>
-            //   )}
-            // </>
-
+          ) : (          
             <>
               {shift?.deleted ? (
-                <>
-                  {role === "ROLE_ADMIN" && (
-                    <Stack direction="row" alignItems="center" gap={1}>
-                      <Button
-                        variant="contained"
-                        startIcon={<RepeatIcon />}
-                        onClick={() => {
-                          handleRebookShift(shift?.id as number); // Pass the ID here
-                        }}
-                      >
-                        Rebook
-                      </Button>
-                    </Stack>
-                  )}
-                </>
+                <Stack direction="row" alignItems="center" gap={1}>
+                  <Button
+                    variant="contained"
+                    startIcon={<RepeatIcon />}
+                    onClick={() => {
+                      handleRebookShift(shift?.id as number); // Pass the ID here
+                    }}
+                  >
+                    Rebook
+                  </Button>
+                </Stack>
               ) : shift?.isTimesheetApproved ? (
-                <>
-                  {role === "ROLE_ADMIN" && (
-                    <Stack direction="row" alignItems="center" gap={1}>
-                      <Button
-                        variant="contained"
-                        // color="warning"
-                        sx={{ backgroundColor: "#b4ceff", color: "#000000" }}
-                        startIcon={
-                          <Iconify icon="mdi:undo-variant" fontSize={14} />
-                        }
-                        // onClick={() => handleUnapproveShift(shift?.id as number)} // Handle unapprove logic here
-                        onClick={() => handleUndoTimesheet(String(shift.id))}
-                      >
-                        Unapprove
-                      </Button>
-                    </Stack>
-                  )}
-                </>
+                <Stack direction="row" alignItems="center" gap={1}>
+                  <Button
+                    variant="contained"
+                    // color="warning"
+                    sx={{ backgroundColor: "#b4ceff", color: "#000000" }}
+                    startIcon={
+                      <Iconify icon="mdi:undo-variant" fontSize={14} />
+                    }
+                    // onClick={() => handleUnapproveShift(shift?.id as number)} // Handle unapprove logic here
+                    onClick={() => handleUndoTimesheet(String(shift.id))}
+                  >
+                    Unapprove
+                  </Button>
+                </Stack>
               ) : (
+                // <Stack direction="row" alignItems="center" gap={1}>
+                //   <LoadingButton
+                //     variant="contained"
+                //     color="error"
+                //     startIcon={
+                //       <Iconify icon="iconamoon:trash-duotone" fontSize={14} />
+                //     }
+                //     loading={isShiftCancelling}
+                //     onClick={() => cancelMutate(shift?.id as number)}
+                //   >
+                //     Cancel Shift
+                //   </LoadingButton>
+                //   <Button
+                //     variant="contained"
+                //     startIcon={<RepeatIcon />}
+                //     onClick={() => {
+                //       handleRepeatShift(shift?.id as number); // Pass the ID here
+                //       setRepeatShiftModal(true);
+                //     }}
+                //   >
+                //     Repeat Shift
+                //   </Button>
+                //   <RepeatShift
+                //     open={repeatshiftModal}
+                //     onClose={() => setRepeatShiftModal(false)}
+                //     id={selectedId}
+                //   />
+                //   <Button
+                //     variant="contained"
+                //     startIcon={
+                //       <Iconify icon="basil:edit-outline" fontSize={14} />
+                //     }
+                //     onClick={() => {
+                //       if (setEditModal && setViewModal) {
+                //         setEditModal(true);
+                //         setViewModal(false);
+                //       }
+                //     }}
+                //   >
+                //     Edit
+                //   </Button>
+                // </Stack>
                 <>
-                  {role === "ROLE_ADMIN" && !shift?.isPickupJob && isTodayOrFuture && (
-                    <Stack direction="row" alignItems="center" gap={1}>
-                      <LoadingButton
-                        variant="contained"
-                        color="error"
-                        startIcon={
-                          <Iconify
-                            icon="iconamoon:trash-duotone"
-                            fontSize={14}
-                          />
-                        }
-                        loading={isShiftCancelling}
-                        onClick={() => cancelMutate(shift?.id as number)}
-                      >
-                        Cancel Shift
-                      </LoadingButton>
+                  {role === "ROLE_ADMIN" && !shift?.isPickupJob && (
+  <Stack direction="row" alignItems="center" gap={1}>
+    {/* <LoadingButton
+      variant="contained"
+      color="error"
+      startIcon={
+        <Iconify
+          icon="iconamoon:trash-duotone"
+          fontSize={14}
+        />
+      }
+      loading={isShiftCancelling}
+      onClick={() => cancelMutate(shift?.id as number)}
+    >
+      Cancel Shift
+    </LoadingButton> */}
 
-                      {view && (
-                        <Button
-                          variant="contained"
-                          startIcon={<NoteIcon />}
-                          onClick={() => {
-                            handleCreateShiftNotes(shift?.id as number);
-                          }}
-                          sx={{
-                            backgroundColor: "#00a65a",
-                            "&:hover": { backgroundColor: "#008d45" }
-                          }}
-                        >
-                          Shift Notes
-                        </Button>
-                      )}
+    {view && (
+      <Button
+        variant="contained"
+        startIcon={<NoteIcon />}
+        onClick={() => {
+          handleCreateShiftNotes(shift?.id as number);
+        }}
+        sx={{
+          backgroundColor: "#00a65a",
+          "&:hover": { backgroundColor: "#008d45" }
+        }}
+      >
+        Shift Notes
+      </Button>
+    )}
 
-                      <Button
-                        variant="contained"
-                        startIcon={<RepeatIcon />}
-                        onClick={() => {
-                          handleRepeatShift(shift?.id as number);
-                          setRepeatShiftModal(true);
-                        }}
-                      >
-                        Repeat Shift
-                      </Button>
+    <Button
+      variant="contained"
+      startIcon={<RepeatIcon />}
+      onClick={() => {
+        handleRepeatShift(shift?.id as number);
+        setRepeatShiftModal(true);
+      }}
+    >
+      Repeat Shift
+    </Button>
 
-                      <RepeatShift
-                        open={repeatshiftModal}
-                        onClose={() => setRepeatShiftModal(false)}
-                        id={selectedId}
-                      />
+    <RepeatShift
+      open={repeatshiftModal}
+      onClose={() => setRepeatShiftModal(false)}
+      id={selectedId}
+    />
 
-                      <Button
-                        variant="contained"
-                        startIcon={
-                          <Iconify icon="basil:edit-outline" fontSize={14} />
-                        }
-                        onClick={() => {
-                          if (setEditModal && setViewModal) {
-                            setEditModal(true);
-                            setViewModal(false);
-                          }
-                        }}
-                      >
-                        Edit
-                      </Button>
-                    </Stack>
-                  )}
+    <Button
+      variant="contained"
+      startIcon={
+        <Iconify icon="basil:edit-outline" fontSize={14} />
+      }
+      onClick={() => {
+        if (setEditModal && setViewModal) {
+          setEditModal(true);
+          setViewModal(false);
+        }
+      }}
+    >
+      Edit
+    </Button>
+  </Stack>
+)}
 
                 </>
               )}
@@ -1155,123 +1025,57 @@ export default function AddShiftView({
             }
           }}
         >
-
-          {/* ====================================== */}
-          <FormProvider {...methods}>
-            {role === "ROLE_CARER" ? (
-              // 🔹 CARER
-              shift?.isPickupJob ? (
+          {role === "ROLE_CARER" ? (
+            <FormProvider {...methods}>
+              {shift?.isPickupJob ? (
+                // <JobApplicant view={view} edit={edit} shift={shift} />
                 <Typography></Typography>
               ) : (
                 <>
-                  <ClientSectionView
-                    setSelectedClientAddress={setSelectedClientAddress}
-                    view={!!view}
-                    edit={!!edit}
-                    shift={shift!}
-                  />
-                  <StaffSectionView
+                  {/* <ClientSection setSelectedClientAddress={setSelectedClientAddress} view={!!view} edit={!!edit} shift={shift!}  /> */}
+                  {/* <StaffSection
                     view={view}
                     edit={edit}
                     shift={shift}
                     advanceShift={advanceShift}
-                  />
-                  <TimeLocationView
-                    selectedClientAddress={selectedClientAddress}
-                    view={view}
-                    edit={edit}
-                    shift={shift}
-                  />
-                  {!view && <TaskSection edit={edit} />}
-                  <InstructionSection view={view} edit={edit} shift={shift} />
+                  /> */}
+                  {/* <TimeLocation selectedClientAddress={selectedClientAddress} view={view} edit={edit} shift={shift} /> */}
+                  {/* {!view && <TaskSection edit={edit} />} */}
+                  {/* <InstructionSection view={view} edit={edit} shift={shift} /> */}
+                  {/* <TimeLocation view={view} edit={edit} shift={shift} /> */}
+                  {/* {view && <ShiftRelatedNotes shift={shift} />} */}
                 </>
-              )
-            ) : role === "ROLE_ADMIN" ? (
-              // 🔹 ADMIN
-              shift?.isPickupJob ? (
+              )}
+            </FormProvider>
+          ) : (
+            <FormProvider {...methods}>
+              {shift?.isPickupJob ? (
                 <JobApplicant view={view} edit={edit} shift={shift} />
               ) : (
                 <>
-                  <ClientSectionView
-                    ref={clientSectionRef}
-                    setSelectedClientAddress={setSelectedClientAddress}
-                    view={!!view}
-                    edit={!!edit}
-                    shift={shift!}
-                  />
-                  <StaffSectionView
+                  {/* <ClientSection setSelectedClientAddress={setSelectedClientAddress} view={!!view} edit={!!edit} shift={shift!} ref={clientSectionRef}/> */}
+                  {/* <StaffSection
                     view={view}
                     edit={edit}
                     shift={shift}
                     advanceShift={advanceShift}
-                  />
-                  <TimeLocationView
-                    selectedClientAddress={selectedClientAddress}
-                    view={view}
-                    edit={edit}
-                    shift={shift}
-                  />
+                  /> */}
+                  <ShiftRequestTimeLocation selectedClientAddress={selectedClientAddress} view={view} edit={edit} shift={shift} />
                   {!view && <TaskSection edit={edit} />}
                   <InstructionSection view={view} edit={edit} shift={shift} />
-
+                  {/* <TimeLocation view={view} edit={edit} shift={shift} /> */}
+                 
                   {shift?.id && (
-                    <Tracking
-                      employeeId={shift.employee.id}
-                      shiftId={shift?.id}
-                      clockIn={shift.isEmployeeClockedIn}
-                      clockOut={shift.isEmployeeClockedOut}
-                    />
-                  )}
+                           <>
+                           <Tracking employeeId={shift.employee.id} shiftId={shift.id} clockIn={shift.isEmployeeClockedIn}  clockOut={shift.isEmployeeClockedOut}  />
+                           </>
+                        )}
 
                   {view && <ShiftRelatedNotes shift={shift} />}
                 </>
-              )
-            ) : (
-              // 🔹 DEFAULT (any other role)
-              shift?.isPickupJob ? (
-                <JobApplicant view={view} edit={edit} shift={shift} />
-              ) : (
-                <>
-                  <ClientSectionView
-                    ref={clientSectionRef}
-                    setSelectedClientAddress={setSelectedClientAddress}
-                    view={!!view}
-                    edit={!!edit}
-                    shift={shift!}
-                  />
-                  <StaffSectionView
-                    view={view}
-                    edit={edit}
-                    shift={shift}
-                    advanceShift={advanceShift}
-                  />
-                  <TimeLocationView
-                    selectedClientAddress={selectedClientAddress}
-                    view={view}
-                    edit={edit}
-                    shift={shift}
-                  />
-                  {!view && <TaskSection edit={edit} />}
-                  <InstructionSection view={view} edit={edit} shift={shift} />
-
-                  {shift?.id && (
-                    <Tracking
-                      employeeId={shift.employee.id}
-                      shiftId={shift?.id}
-                      clockIn={shift.isEmployeeClockedIn}
-                      clockOut={shift.isEmployeeClockedOut}
-                    />
-                  )}
-
-                  {/* {view && <ShiftRelatedNotes shift={shift} />} */}
-                </>
-              )
-            )}
-          </FormProvider>
-          {/* ====================================== */}
-
-
-
+              )}
+            </FormProvider>
+          )}
           {/* <FormProvider {...methods}>
             <ClientSection view={view} edit={edit} shift={shift} />
             <StaffSection
@@ -1305,7 +1109,7 @@ export default function AddShiftView({
         <Divider />
         <DialogContent>
           <ShiftNotesIndividualShift
-            onClose={handleCloseModalShiftNotes}
+           onClose={handleCloseModalShiftNotes}
             clients={[]}
             id={selectedId}
           ></ShiftNotesIndividualShift>
@@ -1322,19 +1126,6 @@ export default function AddShiftView({
           </Box>
         </DialogActions> */}
       </Dialog>
-      <CommonModal
-        open={open}
-        onClose={() => setOpen(false)}
-        title="Shift Extension"
-      // actions={
-      //   <>
-      //     <Button onClick={() => setOpen(false)}>Cancel</Button>
-      //     <Button variant="contained">Save</Button>
-      //   </>
-      // }
-      >
-        <ShiftExtension shiftId={selectedShiftId} setOpen={setOpen} />
-      </CommonModal>
     </>
   );
 }

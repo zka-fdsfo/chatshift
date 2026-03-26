@@ -436,7 +436,7 @@ import React, { forwardRef, useEffect, useImperativeHandle, useState } from "rea
                   />
                   <Grid container spacing={2}>
                     <Grid item lg={4} md={6} sm={12} xs={12}>
-                      <Typography>Participant Name</Typography>
+                      <Typography>Participant Name --</Typography>
                     </Grid>
                     <Grid item lg={8} md={6} sm={12} xs={12}>
                       {name.trim()}
