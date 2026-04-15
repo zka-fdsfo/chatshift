@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <title>BuildHub - AI Drawing Assistant</title>
+    <!-- Tailwind + Google Fonts + basic styles -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM & React Router -->
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-router-dom@6.14.2/umd/react-router-dom.development.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Custom font & smooth -->
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap');
+      * { font-family: 'Inter', sans-serif; }
+      .chat-scroll::-webkit-scrollbar { width: 5px; }
+      .chat-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+      .chat-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+      .glass-card { transition: all 0.2s ease; }
+      .hover-lift:hover { transform: translateY(-2px); box-shadow: 0 12px 20px -12px rgba(0,0,0,0.1); }
+      button:active { transform: scale(0.97); }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script>
+      // --------------------- React & Router Aliases -------------------------
+      const { useState, useRef, useEffect } = React;
+      const { createRoot } = ReactDOM;
+      const { BrowserRouter, Routes, Route, Link, useNavigate } = ReactRouterDOM;
+
+      // ---------- Helper: chat mock bot logic (capabilities aware) ----------
+      const getBotReply = (userMsg) => {
+        const msg = userMsg.toLowerCase();
+        if (msg.includes('supplier') || msg.includes('suppliers') || msg.includes('best price')) {
+          return "🔍 Searching our supplier network... We'll find the best prices for materials like bricks, concrete, or wood. Tell me your required material and quantity!";
+        } else if (msg.includes('material') || msg.includes('select material') || msg.includes('ai select')) {
+          return "🧠 OpenAI integration active! Based on your house drawing goals, AI Builder recommends eco-friendly bricks, insulated panels, or smart glass. Share your project style!";
+        } else if (msg.includes('cost') || msg.includes('calculation') || msg.includes('price') || msg.includes('budget')) {
+          return "💰 Cost calculation engine: Provide drawing dimensions (sqft) and materials, I'll give a structural price breakdown + labor estimate. Try uploading a sketch!";
+        } else if (msg.includes('drawing') || msg.includes('analyze') || msg.includes('house')) {
+          return "🏠 Great! Which house drawing would you like to analyze? Upload a plan or describe the layout. I can recommend materials, suppliers & cost forecast.";
+        } else {
+          return "👋 Hi Alex! I'm your AI assistant. I can help you **search for suppliers**, **select materials via OpenAI**, or **calculate project cost**. What do you need today?";
+        }
+      };
+
+      // ----------------------- Chat Window Component -------------------------
+      const ChatWindow = () => {
+        const [messages, setMessages] = useState([
+          { id: '1', role: 'bot', text: "Hello Alex! 👋 I'm BuildHub AI. Which house drawing would you like to analyze today? I can help with suppliers, material selection, and cost calculation.", timestamp: new Date() }
+        ]);
+        const [input, setInput] = useState('');
+        const messagesEndRef = useRef(null);
+        const inputRef = useRef(null);
+
+        const scrollToBottom = () => {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        };
+
+        useEffect(() => {
+          scrollToBottom();
+        }, [messages]);
+
+        const sendMessage = () => {
+          if (!input.trim()) return;
+          const userMsg = input.trim();
+          const newUserMsg = { id: Date.now().toString(), role: 'user', text: userMsg, timestamp: new Date() };
+          setMessages(prev => [...prev, newUserMsg]);
+          setInput('');
+
+          // Simulate bot thinking
+          setTimeout(() => {
+            const botReplyText = getBotReply(userMsg);
+            const botMsg = { id: (Date.now() + 1).toString(), role: 'bot', text: botReplyText, timestamp: new Date() };
+            setMessages(prev => [...prev, botMsg]);
+          }, 400);
+        };
+
+        const handleKeyPress = (e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+          }
+        };
+
+        const suggestionChips = ["🔍 Find suppliers", "🧠 Select materials", "💰 Calculate cost", "🏠 Analyze my drawing"];
+
+        return (
+          <div className="flex flex-col h-full bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
+            {/* Chat Header */}
+            <div className="bg-gradient-to-r from-indigo-700 to-purple-800 px-5 py-4 text-white">
+              <div className="flex items-center gap-2">
+                <div className="bg-white/20 p-1.5 rounded-full">
+                  <i data-lucide="bot" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg">AI Assistant · BuildHub</h3>
+                  <p className="text-xs text-indigo-100">Online · ready to analyze drawings</p>
+                </div>
+              </div>
+            </div>
+            {/* Messages area */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 chat-scroll" style={{ maxHeight: 'calc(100% - 130px)', minHeight: '380px' }}>
+              {messages.map((msg) => (
+                <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 shadow-sm ${msg.role === 'user' ? 'bg-indigo-600 text-white rounded-br-sm' : 'bg-gray-100 text-gray-800 rounded-bl-sm'}`}>
+                    <div className="text-sm whitespace-pre-wrap">{msg.text}</div>
+                    <div className={`text-[10px] mt-1 ${msg.role === 'user' ? 'text-indigo-200' : 'text-gray-400'}`}>
+                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute:'2-digit' })}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+            {/* suggestion chips */}
+            <div className="px-4 pt-2 pb-1 flex flex-wrap gap-2 border-t border-gray-100">
+              {suggestionChips.map((chip, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setInput(chip.slice(2))}
+                  className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full px-3 py-1.5 transition"
+                >
+                  {chip}
+                </button>
+              ))}
+            </div>
+            {/* Input area */}
+            <div className="p-3 border-t border-gray-200 bg-gray-50">
+              <div className="flex gap-2">
+                <textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  placeholder="Ask about suppliers, materials, cost..."
+                  rows="1"
+                  className="flex-1 resize-none rounded-xl border border-gray-300 px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                />
+                <button
+                  onClick={sendMessage}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-4 py-2 transition flex items-center gap-1"
+                >
+                  <i data-lucide="send" class="w-4 h-4"></i>
+                  <span className="hidden sm:inline text-sm">Send</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // ----------------------- Capabilities Card (left) ------------------------
+      const CapabilitiesCard = () => {
+        useEffect(() => {
+          if (window.lucide) lucide.createIcons();
+        }, []);
+        return (
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover-lift transition-all">
+            <h3 className="font-bold text-xl text-gray-800 flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-5 h-5 text-indigo-500"></i> 
+              Tell us about your capabilities
+            </h3>
+            <div className="mt-4 space-y-4">
+              <div className="flex gap-3 items-start">
+                <div className="bg-indigo-50 p-2 rounded-xl"><i data-lucide="truck" class="w-5 h-5 text-indigo-600"></i></div>
+                <div><p className="font-semibold text-gray-800">Search for suppliers</p><p className="text-sm text-gray-500">We will find suppliers with the best prices.</p></div>
+              </div>
+              <div className="flex gap-3 items-start">
+                <div className="bg-emerald-50 p-2 rounded-xl"><i data-lucide="microscope" class="w-5 h-5 text-emerald-600"></i></div>
+                <div><p className="font-semibold text-gray-800">Open AI · Select materials</p><p className="text-sm text-gray-500">Depending on the goal and wishes, AI Builder will select the best materials.</p></div>
+              </div>
+              <div className="flex gap-3 items-start">
+                <div className="bg-amber-50 p-2 rounded-xl"><i data-lucide="calculator" class="w-5 h-5 text-amber-600"></i></div>
+                <div><p className="font-semibold text-gray-800">Calculation of the cost</p><p className="text-sm text-gray-500">Our AI will help you to quickly and structurally summarize the price.</p></div>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // ----------------------- History List (Today / Yesterday etc) -----------
+      const HistorySection = () => {
+        const historyDates = [
+          { label: "Today", dateKey: "today" },
+          { label: "Yesterday", dateKey: "yesterday" },
+          { label: "3 days ago", dateKey: "3d" },
+          { label: "7 days ago", dateKey: "7d" },
+          { label: "Last 30 days", dateKey: "30d" },
+          { label: "31.10.2025", dateKey: "2025-10-31" },
+          { label: "01.11.2025", dateKey: "2025-11-01" },
+          { label: "01.12.2025", dateKey: "2025-12-01" }
+        ];
+        useEffect(() => { if(window.lucide) lucide.createIcons(); }, []);
+        return (
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-2 mb-3">
+              <i data-lucide="clock" class="w-5 h-5 text-gray-500"></i>
+              <h3 className="font-semibold text-gray-700">Recent conversations</h3>
+            </div>
+            <div className="space-y-3">
+              {historyDates.map((item, idx) => (
+                <div key={idx} className="flex items-center justify-between border-b border-gray-100 pb-2 last:border-0">
+                  <div className="flex items-center gap-2">
+                    <i data-lucide="message-circle" class="w-4 h-4 text-gray-400"></i>
+                    <span className="text-sm font-medium text-gray-600 w-28">{item.label}</span>
+                  </div>
+                  <div className="flex-1 text-right text-sm text-gray-500 truncate ml-2">Tell us about your capabilities</div>
+                  <i data-lucide="chevron-right" class="w-4 h-4 text-gray-300 ml-1"></i>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      };
+
+      // ----------------------- Subscription Banner ----------------------------
+      const SubscriptionCard = () => {
+        const handleSubscribe = () => {
+          alert("✨ Upgrade demo: Unlock 15+ advanced features like 3D drawing, real supplier API, and priority AI support!");
+        };
+        useEffect(() => { if(window.lucide) lucide.createIcons(); }, []);
+        return (
+          <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-200 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="bg-amber-200 p-2 rounded-full"><i data-lucide="crown" class="w-5 h-5 text-amber-700"></i></div>
+              <div className="flex-1">
+                <h4 className="font-bold text-amber-800">Purchase a subscription</h4>
+                <p className="text-sm text-amber-700 mt-1">to unlock over 15 new features → real-time bids, AI design, export analysis.</p>
+                <button onClick={handleSubscribe} className="mt-3 bg-amber-600 hover:bg-amber-700 text-white text-sm font-medium px-4 py-2 rounded-xl transition">Upgrade now</button>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // ----------------------- LEFT COLUMN (BuildHub UI exactly from description) ---
+      const LeftDashboard = () => {
+        useEffect(() => { if(window.lucide) lucide.createIcons(); }, []);
+        return (
+          <div className="space-y-5">
+            {/* Header + welcome */}
+            <div className="bg-white rounded-2xl p-5 shadow-sm border-l-4 border-indigo-500">
+              <div className="flex items-center justify-between flex-wrap">
+                <h1 className="text-3xl font-extrabold bg-gradient-to-r from-indigo-700 to-purple-600 bg-clip-text text-transparent">BuildHub</h1>
+                <div className="flex items-center gap-1 text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full"><i data-lucide="user" class="w-3.5 h-3.5"></i><span>Alex</span></div>
+              </div>
+              <p className="text-gray-700 mt-2 text-lg font-medium">Welcome back Alex! <span className="text-indigo-600">🏠 Which house drawing do you want to analyze today?</span></p>
+            </div>
+            {/* Capabilities card */}
+            <CapabilitiesCard />
+            {/* History timeline (Today, Yesterday ...) */}
+            <HistorySection />
+            {/* Subscription banner */}
+            <SubscriptionCard />
+          </div>
+        );
+      };
+
+      // ----------------------- HOME PAGE (Chatbot UI + left panel) --------------
+      const HomePage = () => {
+        useEffect(() => { if(window.lucide) lucide.createIcons(); }, []);
+        return (
+          <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
+            <div className="flex flex-col lg:flex-row gap-6">
+              {/* left side: exact image content */}
+              <div className="lg:w-5/12 w-full">
+                <LeftDashboard />
+              </div>
+              {/* right side: interactive chatbot UI */}
+              <div className="lg:w-7/12 w-full">
+                <div className="h-full flex flex-col" style={{ minHeight: '550px' }}>
+                  <ChatWindow />
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // ----------------------- MAIN ELEMENT PAGE (second page: drawing analyzer core) ----
+      const MainElementPage = () => {
+        const [houseType, setHouseType] = useState('modern');
+        const [squareFeet, setSquareFeet] = useState(1850);
+        const [analysisResult, setAnalysisResult] = useState(null);
+        const [loading, setLoading] = useState(false);
+        
+        const handleAnalyze = () => {
+          setLoading(true);
+          setTimeout(() => {
+            // Mock AI analysis based on house type & dimensions
+            let materialRec = "";
+            let costEstimate = 0;
+            let suppliers = "";
+            if (houseType === 'modern') {
+              materialRec = "Glass panels, steel frames, eco-insulation (OpenAI recommended)";
+              costEstimate = squareFeet * 185;
+              suppliers = "SteelCo, GreenBuild Supplies, GlassTech";
+            } else if (houseType === 'cottage') {
+              materialRec = "Wood logs, stone cladding, natural wool insulation";
+              costEstimate = squareFeet * 145;
+              suppliers = "TimberCraft, NaturalStone Ltd, EcoMaterials";
+            } else {
+              materialRec = "Brick veneer, concrete slabs, standard drywall";
+              costEstimate = squareFeet * 130;
+              suppliers = "BrickHouse Supply, ConcreMax, Local Depot";
+            }
+            setAnalysisResult({
+              materials: materialRec,
+              estimatedCost: `$${costEstimate.toLocaleString()}`,
+              bestSuppliers: suppliers,
+              aiTip: houseType === 'modern' ? "Use smart glass for energy saving" : "Consider recycled materials for sustainability"
+            });
+            setLoading(false);
+          }, 800);
+        };
+
+        useEffect(() => { if(window.lucide) lucide.createIcons(); }, [analysisResult, houseType, squareFeet]);
+
+        return (
+          <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
+            <div className="mb-5 flex flex-wrap justify-between items-center gap-3">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2"><i data-lucide="ruler" class="w-7 h-7 text-indigo-500"></i> Main Element · House Drawing Analyzer</h1>
+                <p className="text-gray-500 mt-1">Upload or configure drawing parameters — AI suggests materials, cost & suppliers</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* interactive drawing configurator */}
+              <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+                <h2 className="text-xl font-semibold flex items-center gap-2"><i data-lucide="home" class="w-5 h-5"></i> Drawing parameters</h2>
+                <div className="mt-5 space-y-5">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 block mb-1">House style</label>
+                    <select value={houseType} onChange={(e) => setHouseType(e.target.value)} className="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-indigo-400">
+                      <option value="modern">🏢 Modern / Minimalist</option>
+                      <option value="cottage">🏡 Cottage / Rustic</option>
+                      <option value="traditional">🏠 Traditional Family Home</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 block mb-1">Total area (sqft)</label>
+                    <input type="range" min="800" max="4500" step="50" value={squareFeet} onChange={(e) => setSquareFeet(Number(e.target.value))} className="w-full accent-indigo-600" />
+                    <div className="flex justify-between text-sm text-gray-600 mt-1"><span>800 sqft</span><span className="font-bold">{squareFeet} sqft</span><span>4500 sqft</span></div>
+                  </div>
+                  <button onClick={handleAnalyze} disabled={loading} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2">
+                    {loading ? <i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> : <i data-lucide="brain-circuit" class="w-5 h-5"></i>}
+                    {loading ? "AI Analyzing drawing..." : "Analyze house drawing"}
+                  </button>
+                </div>
+                {/* Mini sketch representation */}
+                <div className="mt-6 bg-gray-50 p-4 rounded-xl flex justify-center">
+                  <svg width="180" height="120" viewBox="0 0 200 130" className="drop-shadow-md">
+                    <rect x="30" y="50" width="100" height="70" fill="#E2E8F0" stroke="#475569" strokeWidth="2" />
+                    <polygon points="80,20 20,50 140,50" fill="#94A3B8" stroke="#334155" strokeWidth="2" />
+                    <rect x="70" y="85" width="25" height="35" fill="#CBD5E1" stroke="#475569" strokeWidth="1.5" />
+                    <rect x="110" y="70" width="20" height="20" fill="#BCD0F7" stroke="#334155" strokeWidth="1.5" />
+                    <circle cx="150" cy="90" r="6" fill="#FDE047" stroke="#A16207" strokeWidth="1.5" />
+                  </svg>
+                </div>
+              </div>
+              {/* AI results panel */}
+              <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl shadow-md p-6 border border-gray-200">
+                <h2 className="text-xl font-semibold flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5 text-amber-500"></i> AI Analysis & Recommendations</h2>
+                {analysisResult ? (
+                  <div className="mt-5 space-y-4">
+                    <div className="bg-indigo-50 p-3 rounded-xl"><span className="font-bold text-indigo-800">🧱 Selected materials:</span> <span className="text-gray-700">{analysisResult.materials}</span></div>
+                    <div className="bg-emerald-50 p-3 rounded-xl"><span className="font-bold text-emerald-800">💰 Estimated cost:</span> <span className="text-gray-700">{analysisResult.estimatedCost}</span> (AI structural price)</div>
+                    <div className="bg-amber-50 p-3 rounded-xl"><span className="font-bold text-amber-800">🏭 Supplier network:</span> <span className="text-gray-700">{analysisResult.bestSuppliers}</span></div>
+                    <div className="bg-gray-100 p-3 rounded-xl text-sm"><span className="font-semibold">💡 AI Tip:</span> {analysisResult.aiTip}</div>
+                    <button className="mt-2 w-full border border-indigo-300 text-indigo-700 hover:bg-indigo-50 py-2 rounded-xl transition text-sm font-medium">Export full report →</button>
+                  </div>
+                ) : (
+                  <div className="mt-8 text-center text-gray-400 flex flex-col items-center gap-3">
+                    <i data-lucide="file-search" class="w-12 h-12 text-gray-300"></i>
+                    <p>Configure drawing style & area, then press "Analyze house drawing". AI will recommend materials, suppliers & cost.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+            {/* extra row with recent templates */}
+            <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="bg-white p-4 rounded-xl shadow-sm border flex items-center gap-3"><i data-lucide="upload" class="text-indigo-500"></i><span className="text-sm">Upload your house sketch (PDF/PNG)</span></div>
+              <div className="bg-white p-4 rounded-xl shadow-sm border flex items-center gap-3"><i data-lucide="layers" class="text-indigo-500"></i><span className="text-sm">3D material visualizer (Pro)</span></div>
+              <div className="bg-white p-4 rounded-xl shadow-sm border flex items-center gap-3"><i data-lucide="file-text" class="text-indigo-500"></i><span className="text-sm">Export BOQ + Supplier list</span></div>
+            </div>
+          </div>
+        );
+      };
+
+      // ----------------------- Layout with Navigation Bar ----------------------
+      const Layout = () => {
+        useEffect(() => { if(window.lucide) lucide.createIcons(); }, []);
+        return (
+          <div className="min-h-screen bg-gray-50">
+            <nav className="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center flex-wrap">
+                <div className="flex items-center gap-2">
+                  <i data-lucide="hard-hat" class="w-7 h-7 text-indigo-600"></i>
+                  <span className="font-bold text-xl text-gray-800">Build<span className="text-indigo-600">Hub</span></span>
+                </div>
+                <div className="flex gap-3">
+                  <Link to="/" className="px-4 py-2 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition">🤖 Chat Dashboard</Link>
+                  <Link to="/main-element" className="px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition">🏠 Main Analyzer</Link>
+                </div>
+                <div className="text-xs text-gray-400 hidden sm:block">AI powered · v2.0</div>
+              </div>
+            </nav>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/main-element" element={<MainElementPage />} />
+            </Routes>
+          </div>
+        );
+      };
+
+      // ----------------------- App Render --------------------------------------
+      const App = () => {
+        return (
+          <BrowserRouter>
+            <Layout />
+          </BrowserRouter>
+        );
+      };
+
+      const root = createRoot(document.getElementById('root'));
+      root.render(<App />);
+
+      // re-trigger lucide icons after each render (use effect on components but also global)
+      setTimeout(() => {
+        if (window.lucide) lucide.createIcons();
+      }, 100);
+    </script>
+  </body>
+</html>

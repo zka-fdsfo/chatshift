@@ -1,36 +1,36 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  Box,
-  IconButton,
-  TextField,
-  Button,
-  Typography,
-  Drawer,
+  alpha,
   AppBar,
-  Toolbar,
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  Container,
+  createTheme,
+  CssBaseline,
+  Divider,
+  Drawer,
+  Grid,
+  Hidden,
+  IconButton,
   List,
   ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Divider,
   Paper,
-  Chip,
   Stack,
-  Avatar,
-  alpha,
-  useTheme,
+  TextField,
   ThemeProvider,
-  createTheme,
-  CssBaseline,
-  Card,
-  CardContent,
+  Toolbar,
   Tooltip,
-  Hidden,
-  Container,
-  Grid,
+  Typography,
+  useTheme,
 } from '@mui/material';
-import { styled, keyframes } from '@mui/material/styles';
+import { keyframes, styled } from '@mui/material/styles';
 
 // Icons
 import AddIcon from '@mui/icons-material/Add';
@@ -52,9 +52,64 @@ import EditIcon from '@mui/icons-material/Edit';
 import CancelIcon from '@mui/icons-material/Cancel';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
-import { useQueryClient } from "@tanstack/react-query";
-import { useMutation } from "@tanstack/react-query";
+
+import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { conversation } from '@/api/functions/chat.api';
+
+// Types (defined before usage)
+interface ShiftDto {
+  id?: number;
+  startDate?: number[];
+  startTime?: number[];
+  endTime?: number[];
+  breakTimeInMins?: number;
+  shiftHours?: number;
+  address?: string;
+  apartmentNumber?: string;
+  clientIds?: number[];
+  employeeIds?: number[];
+  isOpenShift?: boolean;
+  isPickupJob?: boolean;
+  isRepeated?: boolean;
+  recurrance?: string;
+  shiftType?: string;
+  company?: string;
+}
+
+interface Question {
+  field: string;
+  question: string;
+  example: string;
+  options?: string[];
+}
+
+interface Message {
+  id: string;
+  text: string;
+  sender: 'user' | 'bot';
+  timestamp: Date;
+  proposedShift?: ShiftDto;
+  followUpQuestions?: Question[];
+  needsMoreInfo?: boolean;
+  missingFields?: string[];
+}
+
+interface ChatbotResponse {
+  message: string;
+  sessionId: string;
+  needsMoreInfo: boolean;
+  missingFields?: string[];
+  proposedShift?: ShiftDto;
+  followUpQuestions?: Question[];
+  conversationState?: string;
+}
+
+interface ChatHistory {
+  id: string;
+  title: string;
+  sessionId: string;
+  createdAt: Date;
+}
 
 // Animations
 const floatAnimation = keyframes`
@@ -131,64 +186,8 @@ const TypingIndicator = styled(Box)(({ theme }) => ({
 // API Configuration
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
 
-// Types
-interface Message {
-  id: string;
-  text: string;
-  sender: 'user' | 'bot';
-  timestamp: Date;
-  proposedShift?: ShiftDto;
-  followUpQuestions?: Question[];
-  needsMoreInfo?: boolean;
-  missingFields?: string[];
-}
-
-interface ShiftDto {
-  id?: number;
-  startDate?: number[];
-  startTime?: number[];
-  endTime?: number[];
-  breakTimeInMins?: number;
-  shiftHours?: number;
-  address?: string;
-  apartmentNumber?: string;
-  clientIds?: number[];
-  employeeIds?: number[];
-  isOpenShift?: boolean;
-  isPickupJob?: boolean;
-  isRepeated?: boolean;
-  recurrance?: string;
-  shiftType?: string;
-  company?: string;
-}
-
-interface Question {
-  field: string;
-  question: string;
-  example: string;
-  options?: string[];
-}
-
-interface ChatbotResponse {
-  message: string;
-  sessionId: string;
-  needsMoreInfo: boolean;
-  missingFields?: string[];
-  proposedShift?: ShiftDto;
-  followUpQuestions?: Question[];
-  conversationState?: string;
-}
-
-interface ChatHistory {
-  id: string;
-  title: string;
-  sessionId: string;
-  createdAt: Date;
-}
-
 // Helper functions
 const getAuthToken = (): string => localStorage.getItem('authToken') || '';
-
 const generateSessionId = (): string =>
   `session_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
 
@@ -203,20 +202,117 @@ const lightTheme = createTheme({
       paper: 'rgba(255, 255, 255, 0.6)',
     },
   },
-  customShadows: undefined as any
+  customShadows: undefined as any,
 });
 
+// Sidebar Content Component (defined before Chat)
+interface SidebarContentProps {
+  chatSessions: ChatHistory[];
+  sessionId: string;
+  onNewConversation: () => void;
+  onLoadConversation: (chat: ChatHistory) => void;
+  onDeleteConversation: (id: string, e: React.MouseEvent) => void;
+  onClose: () => void;
+}
+
+const SidebarContent: React.FC<SidebarContentProps> = ({
+  chatSessions,
+  sessionId,
+  onNewConversation,
+  onLoadConversation,
+  onDeleteConversation,
+  onClose,
+}) => (
+  <>
+    <Box
+      sx={{
+        p: 3,
+        borderBottom: 1,
+        borderColor: 'divider',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+      }}
+    >
+      <Box>
+        <Typography variant="h6" fontWeight="bold">
+          Shift AI
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          Shift Creation Assistant
+        </Typography>
+      </Box>
+      <IconButton onClick={onClose} sx={{ display: { lg: 'none' } }}>
+        <CloseIcon />
+      </IconButton>
+    </Box>
+
+    <Box sx={{ p: 2 }}>
+      <Button
+        fullWidth
+        variant="outlined"
+        startIcon={<AddIcon />}
+        onClick={onNewConversation}
+        sx={{ borderRadius: 2 }}
+      >
+        New Conversation
+      </Button>
+    </Box>
+
+    <Typography variant="caption" sx={{ px: 2, pb: 1, color: 'text.secondary' }}>
+      Recent Conversations
+    </Typography>
+
+    <List sx={{ flex: 1, overflowY: 'auto', px: 1 }}>
+      {chatSessions.map((chat) => (
+        <ListItem key={chat.id} disablePadding sx={{ position: 'relative', '&:hover .delete-btn': { opacity: 1 } }}>
+          <ListItemButton
+            selected={chat.sessionId === sessionId}
+            onClick={() => onLoadConversation(chat)}
+            sx={{ borderRadius: 2, mb: 0.5 }}
+          >
+            <ListItemIcon>
+              <HistoryIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText primary={chat.title} primaryTypographyProps={{ variant: 'body2', noWrap: true }} />
+          </ListItemButton>
+          <IconButton
+            className="delete-btn"
+            size="small"
+            onClick={(e) => onDeleteConversation(chat.id, e)}
+            sx={{ position: 'absolute', right: 8, opacity: { xs: 1, sm: 0 }, transition: 'opacity 0.2s' }}
+          >
+            <DeleteOutlineIcon fontSize="small" />
+          </IconButton>
+        </ListItem>
+      ))}
+      {chatSessions.length === 0 && (
+        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
+          No conversations yet
+        </Typography>
+      )}
+    </List>
+
+    <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+      <Button fullWidth startIcon={<SettingsIcon />} sx={{ justifyContent: 'flex-start', borderRadius: 2 }}>
+        Settings
+      </Button>
+    </Box>
+  </>
+);
+
+// Main Chat Component
 const Chat: React.FC = () => {
   const theme = useTheme();
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       text: "👋 Hello! I'm your Shift Creation Assistant.\n\nI can help you create shifts using natural language. Try saying something like:\n\n📝 **Examples:**\n• Create shift for client Jane Doe on 2026-06-15 from 9:00 AM to 5:00 PM with employee John\n• Jane khan Doe on 2026-06-15 starting time 9:00 AM ending time 5:00 PM with fareed\n• Create pickup job for client Mary on tomorrow from 10 AM to 2 PM",
-      sender: "bot",
-      timestamp: new Date()
-    }
+      sender: 'bot',
+      timestamp: new Date(),
+    },
   ]);
-  const [input, setInput] = useState<string>("");
+  const [input, setInput] = useState<string>('');
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [sessionId, setSessionId] = useState<string>(generateSessionId);
@@ -243,18 +339,18 @@ const Chat: React.FC = () => {
       {
         id: Date.now().toString(),
         text: "👋 Hello! I'm your Shift Creation Assistant.\n\nI can help you create shifts using natural language. Try saying something like:\n\n📝 **Examples:**\n• Create shift for client Jane Doe on 2026-06-15 from 9:00 AM to 5:00 PM with employee John\n• Jane khan Doe on 2026-06-15 starting time 9:00 AM ending time 5:00 PM with fareed\n• Create pickup job for client Mary on tomorrow from 10 AM to 2 PM",
-        sender: "bot",
-        timestamp: new Date()
-      }
+        sender: 'bot',
+        timestamp: new Date(),
+      },
     ]);
 
     const newHistory: ChatHistory = {
       id: newSessionId,
       title: `Chat ${chatSessions.length + 1}`,
       sessionId: newSessionId,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
-    setChatSessions(prev => [newHistory, ...prev]);
+    setChatSessions((prev) => [newHistory, ...prev]);
   }, [chatSessions.length]);
 
   // Load conversation
@@ -264,24 +360,27 @@ const Chat: React.FC = () => {
       {
         id: Date.now().toString(),
         text: `Loading conversation: ${history.title}\n\nHow can I help you with shifts today?`,
-        sender: "bot",
-        timestamp: new Date()
-      }
+        sender: 'bot',
+        timestamp: new Date(),
+      },
     ]);
     setIsSidebarOpen(false);
   }, []);
 
   // Delete conversation
-  const deleteConversation = useCallback((historyId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setChatSessions(prev => prev.filter(h => h.id !== historyId));
-    if (sessionId === historyId) {
-      startNewConversation();
-    }
-  }, [sessionId, startNewConversation]);
+  const deleteConversation = useCallback(
+    (historyId: string, e: React.MouseEvent) => {
+      e.stopPropagation();
+      setChatSessions((prev) => prev.filter((h) => h.id !== historyId));
+      if (sessionId === historyId) {
+        startNewConversation();
+      }
+    },
+    [sessionId, startNewConversation]
+  );
 
   const scrollToBottom = useCallback((): void => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
   useEffect(() => {
@@ -297,9 +396,9 @@ const Chat: React.FC = () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ sessionId, action })
+      body: JSON.stringify({ sessionId, action }),
     });
 
     if (response.status === 401) {
@@ -315,72 +414,67 @@ const Chat: React.FC = () => {
     return await response.json();
   };
 
-  // --------------------------------- Conversation Code Start Here ----------------------------
+  // Conversation mutation
   const queryClient = useQueryClient();
   const { mutate, isPending } = useMutation({
     mutationFn: conversation,
     onSuccess: (response: ChatbotResponse) => {
       queryClient.invalidateQueries({
-        queryKey: ["conversations"],
+        queryKey: ['conversations'],
       });
-      console.log("------------- Response of the Conversation API:------------", response);
-      
-      // Process the successful response
+      console.log('------------- Response of the Conversation API:------------', response);
+
       const botMsgObj: Message = {
         id: (Date.now() + 1).toString(),
         text: response.message,
-        sender: "bot",
+        sender: 'bot',
         timestamp: new Date(),
         proposedShift: response.proposedShift,
         followUpQuestions: response.followUpQuestions,
         needsMoreInfo: response.needsMoreInfo,
-        missingFields: response.missingFields
+        missingFields: response.missingFields,
       };
 
-      setMessages(prev => [...prev, botMsgObj]);
+      setMessages((prev) => [...prev, botMsgObj]);
 
-      // Update session ID if it changed
       if (response.sessionId && response.sessionId !== sessionId) {
         setSessionId(response.sessionId);
       }
-      
+
       setIsLoading(false);
     },
     onError: (error: Error) => {
-      console.error("------------- Conversation API Error:------------", error);
-      
-      // Process the error response
+      console.error('------------- Conversation API Error:------------', error);
+
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         text: `❌ ${error.message || 'Sorry, I encountered an error. Please try again.'}`,
-        sender: "bot",
-        timestamp: new Date()
+        sender: 'bot',
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMsg]);
+      setMessages((prev) => [...prev, errorMsg]);
       setIsLoading(false);
     },
   });
-  // --------------------------------- Conversation Code End Here ----------------------------
 
   const handleSend = async (): Promise<void> => {
-    if (input.trim() === "" || isLoading || isPending) return;
+    if (input.trim() === '' || isLoading || isPending) return;
 
     const userMessage = input.trim();
     const userMsgObj: Message = {
       id: Date.now().toString(),
       text: userMessage,
-      sender: "user",
-      timestamp: new Date()
+      sender: 'user',
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMsgObj]);
-    setInput("");
+    setMessages((prev) => [...prev, userMsgObj]);
+    setInput('');
     setIsLoading(true);
 
-    // Call the mutation with the input message and current session ID
-    mutate({ 
-      message: userMessage, 
-      sessionId: sessionId 
+    mutate({
+      message: userMessage,
+      sessionId: sessionId,
     });
   };
 
@@ -390,7 +484,7 @@ const Chat: React.FC = () => {
     try {
       const response = await confirmShift(action);
 
-      let botMessage = "";
+      let botMessage = '';
       if (action === 'CONFIRM' && response.success) {
         botMessage = `✅ ${response.message}\n\nShift ID: ${response.shifts?.[0]?.id || 'N/A'}\n\nYou can continue creating more shifts or start a new conversation.`;
       } else if (action === 'CONFIRM' && !response.success) {
@@ -398,17 +492,17 @@ const Chat: React.FC = () => {
       } else if (action === 'EDIT') {
         botMessage = "✏️ Please tell me what you'd like to change (e.g., 'change time to 2 PM' or 'change client to John')";
       } else {
-        botMessage = "❌ Shift creation cancelled. How can I help you with another shift?";
+        botMessage = '❌ Shift creation cancelled. How can I help you with another shift?';
       }
 
       const botMsgObj: Message = {
         id: (Date.now() + 1).toString(),
         text: botMessage,
-        sender: "bot",
-        timestamp: new Date()
+        sender: 'bot',
+        timestamp: new Date(),
       };
 
-      setMessages(prev => [...prev, botMsgObj]);
+      setMessages((prev) => [...prev, botMsgObj]);
 
       if (action === 'CONFIRM' && response.success) {
         setTimeout(() => startNewConversation(), 2000);
@@ -418,10 +512,10 @@ const Chat: React.FC = () => {
       const errorMsg: Message = {
         id: (Date.now() + 1).toString(),
         text: `❌ ${error instanceof Error ? error.message : 'Sorry, there was an error.'}`,
-        sender: "bot",
-        timestamp: new Date()
+        sender: 'bot',
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMsg]);
+      setMessages((prev) => [...prev, errorMsg]);
     } finally {
       setIsLoading(false);
     }
@@ -448,11 +542,14 @@ const Chat: React.FC = () => {
   };
 
   const quickActions = [
-    { label: "📝 New Shift", message: "Create shift for client " },
-    { label: "🔓 Open Shift", message: "Create open shift for client " },
-    { label: "📦 Pickup Job", message: "Create pickup job for client " },
-    { label: "❓ Help", message: "Help" }
+    { label: '📝 New Shift', message: 'Create shift for client ' },
+    { label: '🔓 Open Shift', message: 'Create open shift for client ' },
+    { label: '📦 Pickup Job', message: 'Create pickup job for client ' },
+    { label: '❓ Help', message: 'Help' },
   ];
+
+  // No-op function for desktop sidebar close button (unused)
+  const noop = () => {};
 
   return (
     <ThemeProvider theme={lightTheme}>
@@ -460,14 +557,61 @@ const Chat: React.FC = () => {
       <AnimatedBox sx={{ height: '100vh', overflow: 'hidden', position: 'relative' }}>
         {/* Animated Background - Light theme only */}
         <Box sx={{ position: 'absolute', inset: 0, overflow: 'hidden', transition: 'all 0.7s' }}>
-          <Box sx={{ position: 'absolute', top: 20, left: 10, width: 300, height: 300, bgcolor: '#ce93d8', borderRadius: '50%', filter: 'blur(80px)', opacity: 0.2, className: 'animate-float' }} />
-          <Box sx={{ position: 'absolute', bottom: 20, right: 10, width: 400, height: 400, bgcolor: '#f48fb1', borderRadius: '50%', filter: 'blur(80px)', opacity: 0.2, className: 'animate-float-delayed' }} />
-          <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 350, height: 350, bgcolor: '#ffcc80', borderRadius: '50%', filter: 'blur(80px)', opacity: 0.15, className: 'animate-float-slow' }} />
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 20,
+              left: 10,
+              width: 300,
+              height: 300,
+              bgcolor: '#ce93d8',
+              borderRadius: '50%',
+              filter: 'blur(80px)',
+              opacity: 0.2,
+              className: 'animate-float',
+            }}
+          />
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 20,
+              right: 10,
+              width: 400,
+              height: 400,
+              bgcolor: '#f48fb1',
+              borderRadius: '50%',
+              filter: 'blur(80px)',
+              opacity: 0.2,
+              className: 'animate-float-delayed',
+            }}
+          />
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 350,
+              height: 350,
+              bgcolor: '#ffcc80',
+              borderRadius: '50%',
+              filter: 'blur(80px)',
+              opacity: 0.15,
+              className: 'animate-float-slow',
+            }}
+          />
         </Box>
 
         {/* Main Container */}
-        <Box sx={{ position: 'relative', height: '100%', display: 'flex', backdropFilter: 'blur(20px)', bgcolor: 'rgba(255,255,255,0.5)' }}>
-
+        <Box
+          sx={{
+            position: 'relative',
+            height: '100%',
+            display: 'flex',
+            backdropFilter: 'blur(20px)',
+            bgcolor: 'rgba(255,255,255,0.5)',
+          }}
+        >
           {/* Sidebar Drawer for Mobile */}
           <Hidden lgUp>
             <Drawer
@@ -479,7 +623,7 @@ const Chat: React.FC = () => {
                   width: 320,
                   bgcolor: 'rgba(255,255,255,0.9)',
                   backdropFilter: 'blur(10px)',
-                }
+                },
               }}
             >
               <SidebarContent
@@ -495,14 +639,25 @@ const Chat: React.FC = () => {
 
           {/* Sidebar for Desktop */}
           <Hidden lgDown>
-            <Box sx={{ width: 320, height: '100%', borderRight: 1, borderColor: 'divider', bgcolor: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(10px)', display: 'flex', flexDirection: 'column' }}>
+            <Box
+              sx={{
+                width: 320,
+                height: '100%',
+                borderRight: 1,
+                borderColor: 'divider',
+                bgcolor: 'rgba(255,255,255,0.6)',
+                backdropFilter: 'blur(10px)',
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
               <SidebarContent
                 chatSessions={chatSessions}
                 sessionId={sessionId}
                 onNewConversation={startNewConversation}
                 onLoadConversation={loadConversation}
                 onDeleteConversation={deleteConversation}
-                onClose={() => { }}
+                onClose={noop}
               />
             </Box>
           </Hidden>
@@ -510,7 +665,11 @@ const Chat: React.FC = () => {
           {/* Main Chat Area */}
           <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Header */}
-            <AppBar position="static" elevation={0} sx={{ bgcolor: 'transparent', borderBottom: 1, borderColor: 'divider', backdropFilter: 'blur(10px)' }}>
+            <AppBar
+              position="static"
+              elevation={0}
+              sx={{ bgcolor: 'transparent', borderBottom: 1, borderColor: 'divider', backdropFilter: 'blur(10px)' }}
+            >
               <Toolbar>
                 <IconButton
                   edge="start"
@@ -531,7 +690,16 @@ const Chat: React.FC = () => {
             </AppBar>
 
             {/* Quick Actions */}
-            <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider', display: 'flex', gap: 1, overflowX: 'auto' }}>
+            <Box
+              sx={{
+                p: 2,
+                borderBottom: 1,
+                borderColor: 'divider',
+                display: 'flex',
+                gap: 1,
+                overflowX: 'auto',
+              }}
+            >
               {quickActions.map((action, idx) => (
                 <Chip
                   key={idx}
@@ -547,7 +715,10 @@ const Chat: React.FC = () => {
             <Box sx={{ flex: 1, overflowY: 'auto', p: { xs: 2, lg: 3 } }}>
               <Box sx={{ maxWidth: '900px', mx: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {messages.map((msg, index) => (
-                  <Box key={msg.id} sx={{ display: 'flex', justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start' }}>
+                  <Box
+                    key={msg.id}
+                    sx={{ display: 'flex', justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start' }}
+                  >
                     <MessageBubble $isUser={msg.sender === 'user'}>
                       <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
                         {msg.text}
@@ -557,8 +728,13 @@ const Chat: React.FC = () => {
                       {msg.followUpQuestions && msg.followUpQuestions.length > 0 && (
                         <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
                           {msg.followUpQuestions.map((q, idx) => (
-                            <Paper key={idx} sx={{ p: 1.5, bgcolor: alpha(theme.palette.common.white, 0.1), borderRadius: 2 }}>
-                              <Typography variant="body2" fontWeight="bold">{q.question}</Typography>
+                            <Paper
+                              key={idx}
+                              sx={{ p: 1.5, bgcolor: alpha(theme.palette.common.white, 0.1), borderRadius: 2 }}
+                            >
+                              <Typography variant="body2" fontWeight="bold">
+                                {q.question}
+                              </Typography>
                               {q.example && (
                                 <Typography variant="caption" color="text.secondary">
                                   💡 Example: {q.example}
@@ -588,24 +764,35 @@ const Chat: React.FC = () => {
                           <CardContent>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                               <WorkOutlineIcon color="primary" fontSize="small" />
-                              <Typography variant="subtitle2" fontWeight="bold">Shift Details</Typography>
+                              <Typography variant="subtitle2" fontWeight="bold">
+                                Shift Details
+                              </Typography>
                             </Box>
                             <Stack spacing={0.5}>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <PersonOutlineIcon fontSize="small" color="action" />
-                                <Typography variant="caption">Client ID: {msg.proposedShift.clientIds?.[0] || 'N/A'}</Typography>
+                                <Typography variant="caption">
+                                  Client ID: {msg.proposedShift.clientIds?.[0] || 'N/A'}
+                                </Typography>
                               </Box>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <PersonOutlineIcon fontSize="small" color="action" />
-                                <Typography variant="caption">Employee ID: {msg.proposedShift.employeeIds?.[0] || 'N/A'}</Typography>
+                                <Typography variant="caption">
+                                  Employee ID: {msg.proposedShift.employeeIds?.[0] || 'N/A'}
+                                </Typography>
                               </Box>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <CalendarTodayIcon fontSize="small" color="action" />
-                                <Typography variant="caption">Date: {formatShiftDate(msg.proposedShift.startDate)}</Typography>
+                                <Typography variant="caption">
+                                  Date: {formatShiftDate(msg.proposedShift.startDate)}
+                                </Typography>
                               </Box>
                               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                 <AccessTimeIcon fontSize="small" color="action" />
-                                <Typography variant="caption">Time: {formatShiftTime(msg.proposedShift.startTime)} - {formatShiftTime(msg.proposedShift.endTime)}</Typography>
+                                <Typography variant="caption">
+                                  Time: {formatShiftTime(msg.proposedShift.startTime)} -{' '}
+                                  {formatShiftTime(msg.proposedShift.endTime)}
+                                </Typography>
                               </Box>
                               {msg.proposedShift.shiftHours && msg.proposedShift.shiftHours > 0 && (
                                 <Typography variant="caption">⏱️ Hours: {msg.proposedShift.shiftHours}</Typography>
@@ -664,7 +851,9 @@ const Chat: React.FC = () => {
                   <Box sx={{ display: 'flex', justifyContent: 'flex-start' }}>
                     <Paper sx={{ p: 1.5, borderRadius: 3, bgcolor: 'rgba(255,255,255,0.6)' }}>
                       <TypingIndicator>
-                        <span /><span /><span />
+                        <span />
+                        <span />
+                        <span />
                       </TypingIndicator>
                     </Paper>
                   </Box>
@@ -690,7 +879,7 @@ const Chat: React.FC = () => {
                     '& .MuiOutlinedInput-root': {
                       borderRadius: 28,
                       bgcolor: 'rgba(255,255,255,0.6)',
-                    }
+                    },
                   }}
                 />
                 <IconButton
@@ -702,7 +891,7 @@ const Chat: React.FC = () => {
                 </IconButton>
               </Box>
               <Typography variant="caption" color="text.secondary" sx={{ display: 'block', textAlign: 'center', mt: 1 }}>
-                💡 Try: "Jane khan Doe on 2026-06-15 starting time 9:00 AM ending time 5:00 PM with fareed"
+                💡 Try: &quot;Jane khan Doe on 2026-06-15 starting time 9:00 AM ending time 5:00 PM with fareed&quot;
               </Typography>
             </Box>
           </Box>
@@ -711,86 +900,5 @@ const Chat: React.FC = () => {
     </ThemeProvider>
   );
 };
-
-// Sidebar Content Component
-interface SidebarContentProps {
-  chatSessions: ChatHistory[];
-  sessionId: string;
-  onNewConversation: () => void;
-  onLoadConversation: (chat: ChatHistory) => void;
-  onDeleteConversation: (id: string, e: React.MouseEvent) => void;
-  onClose: () => void;
-}
-
-const SidebarContent: React.FC<SidebarContentProps> = ({
-  chatSessions,
-  sessionId,
-  onNewConversation,
-  onLoadConversation,
-  onDeleteConversation,
-  onClose
-}) => (
-  <>
-    <Box sx={{ p: 3, borderBottom: 1, borderColor: 'divider', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <Box>
-        <Typography variant="h6" fontWeight="bold">Shift AI</Typography>
-        <Typography variant="caption" color="text.secondary">Shift Creation Assistant</Typography>
-      </Box>
-      <IconButton onClick={onClose} sx={{ display: { lg: 'none' } }}>
-        <CloseIcon />
-      </IconButton>
-    </Box>
-
-    <Box sx={{ p: 2 }}>
-      <Button
-        fullWidth
-        variant="outlined"
-        startIcon={<AddIcon />}
-        onClick={onNewConversation}
-        sx={{ borderRadius: 2 }}
-      >
-        New Conversation
-      </Button>
-    </Box>
-
-    <Typography variant="caption" sx={{ px: 2, pb: 1, color: 'text.secondary' }}>
-      Recent Conversations
-    </Typography>
-
-    <List sx={{ flex: 1, overflowY: 'auto', px: 1 }}>
-      {chatSessions.map((chat) => (
-        <ListItem key={chat.id} disablePadding sx={{ position: 'relative', '&:hover .delete-btn': { opacity: 1 } }}>
-          <ListItemButton
-            selected={chat.sessionId === sessionId}
-            onClick={() => onLoadConversation(chat)}
-            sx={{ borderRadius: 2, mb: 0.5 }}
-          >
-            <ListItemIcon><HistoryIcon fontSize="small" /></ListItemIcon>
-            <ListItemText primary={chat.title} primaryTypographyProps={{ variant: 'body2', noWrap: true }} />
-          </ListItemButton>
-          <IconButton
-            className="delete-btn"
-            size="small"
-            onClick={(e) => onDeleteConversation(chat.id, e)}
-            sx={{ position: 'absolute', right: 8, opacity: { xs: 1, sm: 0 }, transition: 'opacity 0.2s' }}
-          >
-            <DeleteOutlineIcon fontSize="small" />
-          </IconButton>
-        </ListItem>
-      ))}
-      {chatSessions.length === 0 && (
-        <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
-          No conversations yet
-        </Typography>
-      )}
-    </List>
-
-    <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
-      <Button fullWidth startIcon={<SettingsIcon />} sx={{ justifyContent: 'flex-start', borderRadius: 2 }}>
-        Settings
-      </Button>
-    </Box>
-  </>
-);
 
 export default Chat;
