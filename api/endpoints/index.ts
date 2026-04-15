@@ -24,6 +24,10 @@ export const endpoints = {
   admin: {
     admin_dashboard: (date: string) => `/admin/dashboard?month=${date}`,
   },
+    chat: {
+    chat_conversation: '/chatbot/conversation',
+    chat_confirm: '/chatbot/confirm',
+  },
   cms: {
     about: "/aboutpolicy/details",
     faq: "/faq/all"

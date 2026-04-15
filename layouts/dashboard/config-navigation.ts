@@ -428,6 +428,13 @@ const navConfig: NavItem[] = (() => {
         icon: MenuBookIcon,
         children: [],
         hasChild: false
+      },
+      {
+        title: "Chat_Bot",
+        path: "/Chatui/Chat",
+        icon: MenuBookIcon,
+        children: [],
+        hasChild: false
       }
       // {
       //   title: "Guidance",
