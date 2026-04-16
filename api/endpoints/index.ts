@@ -27,7 +27,7 @@ export const endpoints = {
     chat: {
     chat_conversation: '/chatbot/conversation',
     chat_confirm: '/chatbot/confirm',
-    chat_history:''
+    chat_history: (sessionID: string) => `/chatbot/history/${sessionID}`,
   },
   cms: {
     about: "/aboutpolicy/details",

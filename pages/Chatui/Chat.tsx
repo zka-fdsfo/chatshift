@@ -53,8 +53,8 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { conversation } from '@/api/functions/chat.api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { conversation, getChatHistory } from '@/api/functions/chat.api';
 
 // Types (defined before usage)
 interface ShiftDto {
@@ -352,7 +352,8 @@ const Chat: React.FC = () => {
     };
     setChatSessions((prev) => [newHistory, ...prev]);
   }, [chatSessions.length]);
-
+  // console.log("chatsessions lenght",chatSessions.length);
+  
   // Load conversation
   const loadConversation = useCallback((history: ChatHistory) => {
     setSessionId(history.sessionId);
@@ -388,7 +389,7 @@ const Chat: React.FC = () => {
   }, [messages, scrollToBottom]);
 
   // Confirm shift API call
-  const confirmShift = async (action: 'CONFIRM' | 'EDIT' | 'CANCEL'): Promise<any> => {
+  const confirmShift = async (action: 'CONFIRM' | 'EDIT' ): Promise<any> => {
     const token = getAuthToken();
     if (!token) throw new Error('No authentication token found');
 
@@ -557,6 +558,12 @@ const Chat: React.FC = () => {
 
   // No-op function for desktop sidebar close button (unused)
   const noop = () => { '' };
+
+  // let sessionIdd='1';
+  const { data, isLoading:isLoadinghistory } = useQuery({
+  queryKey: ["chat-history", sessionId],
+  queryFn: () => getChatHistory(sessionId as string)
+});
 
   return (
     <ThemeProvider theme={lightTheme}>
@@ -834,17 +841,7 @@ const Chat: React.FC = () => {
                               >
                                 Edit
                               </Button>
-                              <Button
-                                size="small"
-                                variant="contained"
-                                color="error"
-                                startIcon={<CancelIcon />}
-                                onClick={() => handleConfirmShift('CANCEL')}
-                                fullWidth
-                                disabled={isPending}
-                              >
-                                Cancel
-                              </Button>
+                         
                               {/* <Button
                                 size="small"
                                 variant="contained"

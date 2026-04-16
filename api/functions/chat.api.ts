@@ -17,3 +17,8 @@ export const confirm = async (body: ChatConfirm) => {
   const res = await axiosInstance.post(endpoints.chat.chat_conversation, body);
   return res.data;
 };
+
+export const getChatHistory = async (sessionId: string) => {
+  const res = await axiosInstance.get(endpoints.chat.chat_history(sessionId));
+  return res.data;
+};
