@@ -26,6 +26,7 @@ import MenuBookIcon from "@mui/icons-material/MenuBook";
 import NoteAltIcon from "@mui/icons-material/NoteAlt";
 import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import { useEffect, useState } from "react";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 
@@ -430,9 +431,9 @@ const navConfig: NavItem[] = (() => {
         hasChild: false
       },
       {
-        title: "Chat_Bot",
-        path: "/Chatui/Chat",
-        icon: MenuBookIcon,
+        title: "Chat Bot",
+        path: "/Chatui/ChatBot",
+        icon: ChatBubbleOutlineIcon,
         children: [],
         hasChild: false
       }

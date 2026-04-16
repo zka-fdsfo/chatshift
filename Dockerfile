@@ -49,7 +49,7 @@ ENV NODE_ENV=production
 RUN npm install --only=production
 
 # Expose the application port
-EXPOSE 14001
+EXPOSE 14009
 
 # Start the application
 CMD ["npm", "start"]

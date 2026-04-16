@@ -7,7 +7,7 @@ on:
 
 env:
   REGISTRY: dockerhub.io
-  IMAGE_NAME: mdsalimjrtechnologies/shift-care-jr:latest
+  IMAGE_NAME: mullickzaidkhanjb/chatn8n:latest
 
 jobs:
   build-and-publish:

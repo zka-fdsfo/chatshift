@@ -27,6 +27,7 @@ export const endpoints = {
     chat: {
     chat_conversation: '/chatbot/conversation',
     chat_confirm: '/chatbot/confirm',
+    chat_history:''
   },
   cms: {
     about: "/aboutpolicy/details",

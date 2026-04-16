@@ -8,20 +8,20 @@
 #       context: .
 #       dockerfile: Dockerfile
 #     ports:
-#       - "14001:14001"
+#       - "14009:14009"
 #     restart: always
 
 version: "3.8"
 
 services:
   web:
-    image: mdsalimjrtechnologies/shift-care-jr:latest
+    image: mullickzaidkhanjb/chatn8n:latest
     platform: linux/amd64
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "14001:14001"
+      - "14009:14009"
     environment:
       - NODE_ENV=production
     restart: always

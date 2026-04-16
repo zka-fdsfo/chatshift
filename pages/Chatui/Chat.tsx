@@ -53,7 +53,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
 
-import { useMutation , useQueryClient} from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { conversation } from '@/api/functions/chat.api';
 
 // Types (defined before usage)
@@ -196,7 +196,7 @@ const lightTheme = createTheme({
   palette: {
     mode: 'light',
     primary: { main: '#9c27b0' },
-    secondary: { main: '#e91e63' },
+    secondary: { main: '#2196f3' },
     background: {
       default: '#f5f5f5',
       paper: 'rgba(255, 255, 255, 0.6)',
@@ -253,7 +253,7 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
         variant="outlined"
         startIcon={<AddIcon />}
         onClick={onNewConversation}
-        sx={{ borderRadius: 2 }}
+        sx={{ borderRadius: 2, color: `#1d2a33`, borderBlockColor: `#1d2a33` }}
       >
         New Conversation
       </Button>
@@ -294,9 +294,9 @@ const SidebarContent: React.FC<SidebarContentProps> = ({
     </List>
 
     <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
-      <Button fullWidth startIcon={<SettingsIcon />} sx={{ justifyContent: 'flex-start', borderRadius: 2 }}>
+      {/* <Button fullWidth startIcon={<SettingsIcon />} sx={{ justifyContent: 'flex-start', borderRadius: 2 }}>
         Settings
-      </Button>
+      </Button> */}
     </Box>
   </>
 );
@@ -478,48 +478,55 @@ const Chat: React.FC = () => {
     });
   };
 
-  const handleConfirmShift = async (action: 'CONFIRM' | 'EDIT' | 'CANCEL') => {
-    setIsLoading(true);
-
-    try {
-      const response = await confirmShift(action);
-
-      let botMessage = '';
-      if (action === 'CONFIRM' && response.success) {
-        botMessage = `✅ ${response.message}\n\nShift ID: ${response.shifts?.[0]?.id || 'N/A'}\n\nYou can continue creating more shifts or start a new conversation.`;
-      } else if (action === 'CONFIRM' && !response.success) {
-        botMessage = `❌ ${response.message}`;
-      } else if (action === 'EDIT') {
-        botMessage = "✏️ Please tell me what you'd like to change (e.g., 'change time to 2 PM' or 'change client to John')";
-      } else {
-        botMessage = '❌ Shift creation cancelled. How can I help you with another shift?';
-      }
-
-      const botMsgObj: Message = {
-        id: (Date.now() + 1).toString(),
-        text: botMessage,
-        sender: 'bot',
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, botMsgObj]);
-
-      if (action === 'CONFIRM' && response.success) {
-        setTimeout(() => startNewConversation(), 2000);
-      }
-    } catch (error) {
-      console.error('Error confirming shift:', error);
-      const errorMsg: Message = {
-        id: (Date.now() + 1).toString(),
-        text: `❌ ${error instanceof Error ? error.message : 'Sorry, there was an error.'}`,
-        sender: 'bot',
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMsg]);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleConfirmShift = (action: 'CONFIRM' | 'EDIT' | 'CANCEL') => {
+    // Send the action as a message to the chatbot
+    mutate({
+      message: action,
+      sessionId: sessionId,
+    });
   };
+  // const handleConfirmShift = async (action: 'CONFIRM' | 'EDIT' | 'CANCEL') => {
+  //   setIsLoading(true);
+
+  //   try {
+  //     const response = await confirmShift(action);
+
+  //     let botMessage = '';
+  //     if (action === 'CONFIRM' && response.success) {
+  //       botMessage = `✅ ${response.message}\n\nShift ID: ${response.shifts?.[0]?.id || 'N/A'}\n\nYou can continue creating more shifts or start a new conversation.`;
+  //     } else if (action === 'CONFIRM' && !response.success) {
+  //       botMessage = `❌ ${response.message}`;
+  //     } else if (action === 'EDIT') {
+  //       botMessage = "✏️ Please tell me what you'd like to change (e.g., 'change time to 2 PM' or 'change client to John')";
+  //     } else {
+  //       botMessage = '❌ Shift creation cancelled. How can I help you with another shift?';
+  //     }
+
+  //     const botMsgObj: Message = {
+  //       id: (Date.now() + 1).toString(),
+  //       text: botMessage,
+  //       sender: 'bot',
+  //       timestamp: new Date(),
+  //     };
+
+  //     setMessages((prev) => [...prev, botMsgObj]);
+
+  //     if (action === 'CONFIRM' && response.success) {
+  //       setTimeout(() => startNewConversation(), 2000);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error confirming shift:', error);
+  //     const errorMsg: Message = {
+  //       id: (Date.now() + 1).toString(),
+  //       text: `❌ ${error instanceof Error ? error.message : 'Sorry, there was an error.'}`,
+  //       sender: 'bot',
+  //       timestamp: new Date(),
+  //     };
+  //     setMessages((prev) => [...prev, errorMsg]);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -549,7 +556,7 @@ const Chat: React.FC = () => {
   ];
 
   // No-op function for desktop sidebar close button (unused)
-  const noop = () => {''};
+  const noop = () => { '' };
 
   return (
     <ThemeProvider theme={lightTheme}>
@@ -564,7 +571,7 @@ const Chat: React.FC = () => {
               left: 10,
               width: 300,
               height: 300,
-              bgcolor: '#ce93d8',
+              bgcolor: '#2196f3',
               borderRadius: '50%',
               filter: 'blur(80px)',
               opacity: 0.2,
@@ -679,7 +686,7 @@ const Chat: React.FC = () => {
                   <MenuIcon />
                 </IconButton>
                 <Box sx={{ flex: 1 }}>
-                  <Typography variant="h6" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+                  <Typography variant="h6" color="#2196f3" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                     Shift Creation Assistant
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
@@ -812,6 +819,39 @@ const Chat: React.FC = () => {
                                 startIcon={<CheckCircleIcon />}
                                 onClick={() => handleConfirmShift('CONFIRM')}
                                 fullWidth
+                                disabled={isPending}
+                              >
+                                Confirm
+                              </Button>
+                              <Button
+                                size="small"
+                                variant="contained"
+                                color="warning"
+                                startIcon={<EditIcon />}
+                                onClick={() => handleConfirmShift('EDIT')}
+                                fullWidth
+                                disabled={isPending}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                size="small"
+                                variant="contained"
+                                color="error"
+                                startIcon={<CancelIcon />}
+                                onClick={() => handleConfirmShift('CANCEL')}
+                                fullWidth
+                                disabled={isPending}
+                              >
+                                Cancel
+                              </Button>
+                              {/* <Button
+                                size="small"
+                                variant="contained"
+                                color="success"
+                                startIcon={<CheckCircleIcon />}
+                                onClick={() => handleConfirmShift('CONFIRM')}
+                                fullWidth
                               >
                                 Confirm
                               </Button>
@@ -834,7 +874,7 @@ const Chat: React.FC = () => {
                                 fullWidth
                               >
                                 Cancel
-                              </Button>
+                              </Button> */}
                             </Box>
                           </CardContent>
                         </Card>
