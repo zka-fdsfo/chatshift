@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  alpha,
   AppBar,
   Avatar,
   Box,
@@ -9,7 +8,6 @@ import {
   CardContent,
   Chip,
   Container,
-  createTheme,
   CssBaseline,
   Divider,
   Drawer,
@@ -28,10 +26,12 @@ import {
   Toolbar,
   Tooltip,
   Typography,
+  alpha,
+  createTheme,
   useTheme,
 } from '@mui/material';
 import { keyframes, styled } from '@mui/material/styles';
-
+//icons2
 // Icons
 import AddIcon from '@mui/icons-material/Add';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -53,7 +53,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import SendOutlinedIcon from '@mui/icons-material/SendOutlined';
 
-import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { useMutation , useQueryClient} from '@tanstack/react-query';
 import { conversation } from '@/api/functions/chat.api';
 
 // Types (defined before usage)
@@ -549,7 +549,7 @@ const Chat: React.FC = () => {
   ];
 
   // No-op function for desktop sidebar close button (unused)
-  const noop = () => {};
+  const noop = () => {''};
 
   return (
     <ThemeProvider theme={lightTheme}>
